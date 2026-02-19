@@ -89,10 +89,28 @@ def get_dashboard_data():
         except: continue
     return results
 
+# --- NEW SMART SENTIMENT FUNCTION ---
+def get_smart_sentiment(ticker_symbol):
+    """Calculates sentiment based on 14-day momentum"""
+    try:
+        stock = yf.Ticker(ticker_symbol)
+        hist = stock.history(period="14d") 
+        if len(hist) < 14:
+            return "Neutral 😐"
+        start_price = hist['Close'].iloc[0]
+        end_price = hist['Close'].iloc[-1]
+        change = ((end_price - start_price) / start_price) * 100
+        if change > 5: return "Strong Buy 🚀"
+        elif change > 1: return "Bullish 📈"
+        elif change < -5: return "Strong Sell 🔻"
+        elif change < -1: return "Bearish 📉"
+        else: return "Neutral ⚖️"
+    except Exception:
+        return "Neutral ⚖️"
+
 # ================= 3. SIDEBAR =================
 with st.sidebar:
     # --- LOGO ---
-    import base64
     logo_file = "logo.gif" if os.path.exists("logo.gif") else "logo.png" if os.path.exists("logo.png") else None
     
     if logo_file:
@@ -106,37 +124,36 @@ with st.sidebar:
 
     st.markdown('<div style="text-align:center;margin-bottom:20px;"><p style="font-size:10px;color:#888;">TRADING INTELLIGENCE REDEFINED</p></div><hr style="border-top:1px solid #333;">', unsafe_allow_html=True)
 
-    # --- MEDIA ---
+    # --- MEDIA (UPDATED WITH RADIO OPTIONS) ---
     with st.expander("🔴 LIVE MEDIA", expanded=True):
-        st.subheader("📺 BLOOMBERG TV")
-        components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/iEpJwprxDdk" frameborder="0" allowfullscreen></iframe>', height=160)
-        st.subheader("🎵 TRADING MUSIC")
-        st.caption("NYC Power 105.1")
-        components.html('<iframe src="https://onlineradiobox.com/us/wwpr/player/?cs=us.wwpr" width="100%" height="140" frameborder="0"></iframe>', height=150)
+        st.subheader("📺 TRADING STATION")
+        station = st.radio("Select Channel:", ["Bloomberg TV", "Lofi Beats", "Chillout Jazz"], label_visibility="collapsed")
+        
+        if station == "Bloomberg TV":
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/dp8PhLsUcFE?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
+        elif station == "Lofi Beats":
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
+        else:
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
 
-    # --- 💎 EXNESS PARTNER CARD (NATIVE STREAMLIT VERSION) ---
+    # --- 💎 EXNESS PARTNER CARD ---
     st.markdown("---")
     st.caption("🏆 ELITE TRADING PARTNER")
     
-    # Paths to files in your 'static' folder
     p_logo = "static/exness_logo.png"
     p_video = "static/exness.mp4"
     p_link = "https://one.exnessonelink.com/a/9wwklqzfxb"
 
-    # 1. DISPLAY LOGO (SAFE METHOD)
     if os.path.exists(p_logo):
         st.image(p_logo, use_container_width=True)
     else:
         st.error("⚠️ 'exness_logo.png' not found in 'static' folder")
 
-    # 2. DISPLAY VIDEO (SAFE METHOD)
     if os.path.exists(p_video):
-        # We use st.video which handles memory perfectly
         st.video(p_video, start_time=0)
     else:
         st.info("⚠️ 'exness.mp4' not found in 'static' folder")
 
-    # 3. CLICKABLE BUTTON
     st.markdown(f"""
     <a href="{p_link}" target="_blank">
         <button style="
@@ -180,7 +197,17 @@ with tab_dash:
 
     st.markdown(f"""<table class="heatmap-table"><thead><tr><th>SYMBOL</th><th>BIAS</th><th>SCORE</th><th>TREND</th><th>TECH</th><th>PRICE</th><th>SOURCE</th><th>NOTES</th></tr></thead><tbody>{rows_html}</tbody></table>""", unsafe_allow_html=True)
 
-    st.subheader(f"📈 LIVE CHART: {focus_ticker}")
+    st.markdown("---")
+    
+    # --- SMART SENTIMENT INJECTED HERE ---
+    col_title, col_metric = st.columns([3, 1])
+    with col_title:
+        st.subheader(f"📈 LIVE CHART: {focus_ticker}")
+    with col_metric:
+        y_sym = TICKER_MAP.get(focus_ticker, "EURUSD=X")
+        current_sentiment = get_smart_sentiment(y_sym)
+        st.metric(label="AI Momentum Sentiment", value=current_sentiment)
+
     tv_symbol = TV_MAP.get(focus_ticker, "FX:EURUSD")
     components.html(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize": true, "symbol": "{tv_symbol}", "interval": "H1", "theme": "dark", "style": "1", "locale": "en", "toolbar_bg": "#f1f3f6", "enable_publishing": false, "hide_side_toolbar": false, "allow_symbol_change": true, "container_id": "tv_chart_main"}});</script>""", height=610)
 
@@ -205,7 +232,6 @@ with tab_cot:
 
     if os.path.exists("cot_live.json"):
         with open("cot_live.json", "r") as f: data = json.load(f)
-        # STANDARD LOOP FIX
         rows_list = []
         for sym, vals in data.items():
             vals['Symbol'] = sym
