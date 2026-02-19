@@ -24,14 +24,15 @@ TICKER_MAP = {
     "BITCOIN": "BTC-USD", "ETHEREUM": "ETH-USD", "SOLANA": "SOL-USD"
 }
 
-# --- TRADINGVIEW SYMBOL MAPPING ---
+# --- TRADINGVIEW SYMBOL MAPPING (FIXED FOR EMBEDS) ---
 TV_MAP = {
     "EUR/USD": "FX:EURUSD", "GBP/USD": "FX:GBPUSD", "USD/JPY": "FX:USDJPY",
     "USD/CHF": "FX:USDCHF", "AUD/USD": "FX:AUDUSD", "USD/CAD": "FX:USDCAD",
     "NZD/USD": "FX:NZDUSD", "USD/ZAR": "FX:USDZAR", "GBP/ZAR": "FX:GBPZAR",
-    "S&P 500": "FOREXCOM:SPXUSD", "NASDAQ 100": "FOREXCOM:NSXUSD", "US 30": "FOREXCOM:DJI",
+    # Fixed Indices to use CME Futures (100% supported by Sentiment Widget)
+    "S&P 500": "CME_MINI:ES1!", "NASDAQ 100": "CME_MINI:NQ1!", "US 30": "CBOT_MINI:YM1!",
     "VIX": "TVC:VIX", "DAX 40": "INDEX:DE40",
-    "GOLD": "OANDA:XAUUSD", "SILVER": "OANDA:XAGUSD", "OIL (WTI)": "TVC:USOIL",
+    "GOLD": "OANDA:XAUUSD", "SILVER": "TVC:SILVER", "OIL (WTI)": "NYMEX:CL1!",
     "BITCOIN": "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT", "SOLANA": "BINANCE:SOLUSDT"
 }
 
@@ -124,41 +125,63 @@ with st.sidebar:
 
     st.markdown('<div style="text-align:center;margin-bottom:20px;"><p style="font-size:10px;color:#888;">TRADING INTELLIGENCE REDEFINED</p></div><hr style="border-top:1px solid #333;">', unsafe_allow_html=True)
 
-    # --- MEDIA (UPDATED WITH RADIO OPTIONS) ---
+    # --- MEDIA ---
     with st.expander("🔴 LIVE MEDIA", expanded=True):
-        st.subheader("📺 TRADING STATION")
-        station = st.radio("Select Channel:", ["Bloomberg TV", "Lofi Beats", "Chillout Jazz"], label_visibility="collapsed")
+        st.subheader("📺 BLOOMBERG TV")
+        # Fixed: Permanent Live Channel Feed without auto-mute so audio works on click
+        components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg" frameborder="0" allowfullscreen></iframe>', height=160)
         
-        if station == "Bloomberg TV":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/dp8PhLsUcFE?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
-        elif station == "Lofi Beats":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
-        else:
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>', height=160)
+        st.subheader("🎵 TRADING STATION")
+        # Fixed: Radio Selector is BACK
+        station = st.selectbox("Select Audio:", ["NYC Power 105.1", "Lofi Trading Beats", "Chillout Jazz"], label_visibility="collapsed")
+        
+        if station == "NYC Power 105.1":
+            # Fixed iHeart widget (No pop-ups)
+            components.html('<iframe allow="autoplay" width="100%" height="150" src="https://www.iheart.com/live/power-1051-1473/?embed=true" frameborder="0"></iframe>', height=160)
+        elif station == "Lofi Trading Beats":
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+        elif station == "Chillout Jazz":
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
 
-    # --- 💎 EXNESS PARTNER CARD ---
+    # --- 💎 ROTATING AFFILIATE PARTNERS ---
     st.markdown("---")
-    st.caption("🏆 ELITE TRADING PARTNER")
+    st.caption("🏆 FEATURED PARTNER")
     
-    p_logo = "static/exness_logo.png"
-    p_video = "static/exness.mp4"
-    p_link = "https://one.exnessonelink.com/a/9wwklqzfxb"
+    # Get the current minute to alternate ads seamlessly
+    current_minute = int(time.time() / 60)
+    
+    # Toggle between Exness and Goat Funded Trader based on the minute
+    if current_minute % 2 == 0:
+        # --- EXNESS ---
+        p_logo = "static/exness_logo.png"
+        p_video = "static/exness.mp4"
+        p_link = "https://one.exnessonelink.com/a/9wwklqzfxb"
+        p_color = "#D4AF37" # Gold
+        p_text = "🚀 TRADE WITH 0 SPREADS ➤"
+    else:
+        # --- GOAT FUNDED TRADER ---
+        p_logo = "static/goat_logo.png"
+        p_video = "static/goat.mp4"
+        p_link = "https://checkout.goatfundedtrader.com/aff/Sherwet/"
+        p_color = "#00E676" # Green to stand out differently
+        p_text = "🐐 GET FUNDED TODAY ➤"
 
     if os.path.exists(p_logo):
         st.image(p_logo, use_container_width=True)
     else:
-        st.error("⚠️ 'exness_logo.png' not found in 'static' folder")
+        st.error(f"⚠️ '{p_logo}' not found in 'static' folder")
 
     if os.path.exists(p_video):
         st.video(p_video, start_time=0)
     else:
-        st.info("⚠️ 'exness.mp4' not found in 'static' folder")
+        st.info(f"⚠️ '{p_video}' not found in 'static' folder")
 
+    # The Clickable Button
     st.markdown(f"""
     <a href="{p_link}" target="_blank">
         <button style="
             width: 100%; 
-            background-color: #D4AF37; 
+            background-color: {p_color}; 
             color: black; 
             border: none; 
             padding: 12px; 
@@ -167,7 +190,7 @@ with st.sidebar:
             cursor: pointer;
             margin-top: 10px;
         ">
-            🚀 TRADE WITH 0 SPREADS ➤
+            {p_text}
         </button>
     </a>
     """, unsafe_allow_html=True)
