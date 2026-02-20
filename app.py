@@ -109,6 +109,56 @@ def get_smart_sentiment(ticker_symbol):
     except Exception:
         return "Neutral ⚖️"
 
+# --- TRADINGVIEW AFFILIATE POP-UP DIALOG ---
+@st.dialog("📈 ADVANCED TRADINGVIEW CHART", width="large")
+def show_popup_chart(ticker):
+    tv_link = "https://www.tradingview.com/?aff_id=163585"
+    
+    # 1. Clickable Affiliate Banner
+    banner_path = "static/tv_banner.jpg"
+    if os.path.exists(banner_path):
+        try:
+            # We encode the local image so it loads flawlessly inside the pop-up link
+            encoded_img = base64.b64encode(open(banner_path, "rb").read()).decode()
+            st.markdown(f"""
+            <a href="{tv_link}" target="_blank">
+                <img src="data:image/jpeg;base64,{encoded_img}" width="100%" style="border-radius:10px; margin-bottom:15px;">
+            </a>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            pass
+    else:
+        st.info("⚠️ 'tv_banner.jpg' not found in 'static' folder.")
+
+    # 2. Main Affiliate Button
+    st.markdown(f"""
+    <a href="{tv_link}" target="_blank">
+        <button style="width: 100%; background-color: #2962FF; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
+            🚀 UPGRADE TO TRADINGVIEW PRO ➤
+        </button>
+    </a>
+    """, unsafe_allow_html=True)
+
+    # 3. The Live Chart
+    tv_symbol = TV_MAP.get(ticker, "FX:EURUSD")
+    components.html(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize": true, "symbol": "{tv_symbol}", "interval": "H1", "theme": "dark", "style": "1", "locale": "en", "toolbar_bg": "#f1f3f6", "enable_publishing": false, "hide_side_toolbar": false, "allow_symbol_change": true, "container_id": "tv_chart_popup"}});</script>""", height=510)
+
+    # 4. Promotional Videos (Side-by-Side)
+    st.markdown("---")
+    c1, c2 = st.columns(2)
+    video1_path = "static/tv_promo_1.mp4"
+    video2_path = "static/tv_promo_2.mp4"
+    
+    with c1:
+        if os.path.exists(video1_path):
+            st.caption("📺 Pro Features Overview")
+            st.video(video1_path, start_time=0)
+    with c2:
+        if os.path.exists(video2_path):
+            st.caption("📺 Advanced Charting Tools")
+            st.video(video2_path, start_time=0)
+
+
 # ================= 3. SIDEBAR =================
 with st.sidebar:
     # --- LOGO ---
@@ -197,6 +247,10 @@ with st.sidebar:
 
     st.divider()
     focus_ticker = st.selectbox("ACTIVE CHART ASSET:", list(TICKER_MAP.keys()), index=0)
+
+    # --- NEW: TRIGGER FOR TRADINGVIEW POP-UP ---
+    if st.button("GET YOUR TRADING VIEW ADVANCE CHART HERE", use_container_width=True):
+        show_popup_chart(focus_ticker)
 
 # ================= 4. MAIN NAVIGATION =================
 tab_dash, tab_cot, tab_sent, tab_ind, tab_fx, tab_news, tab_cal = st.tabs([
