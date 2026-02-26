@@ -59,29 +59,30 @@ PIP_MAP = {
 }
 
 # --- ALPHAEDGE CSS ---
-st.markdown("""
-    <style>
-    .stApp { background-color: #050505; color: #e0e0e0; }
-    section[data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #080808; padding: 10px; border-bottom: 2px solid #D4AF37; }
-    .stTabs [data-baseweb="tab"] { height: 50px; background-color: #111; color: #888; border: 1px solid #333; border-bottom: none; padding-left: 20px; padding-right: 20px; }
-    .stTabs [aria-selected="true"] { background-color: #D4AF37 !important; color: #000 !important; font-weight: bold; }
-    h1, h2, h3 { color: #D4AF37 !important; text-transform: uppercase; font-family: 'Helvetica Neue', sans-serif; }
-    .heatmap-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 13px; background-color: #080808; border: 1px solid #333; }
-    .heatmap-table th { background-color: #111; color: #D4AF37; padding: 12px; text-align: left; border-bottom: 2px solid #D4AF37; }
-    .heatmap-table td { padding: 10px; border-bottom: 1px solid #222; color: #ccc; }
-    .bullish { color: #00ff88 !important; font-weight: bold; }
-    .bearish { color: #ff4b4b !important; font-weight: bold; }
-    .live-tag { color: #00ff88; border: 1px solid #00ff88; padding: 2px 5px; font-size: 10px; border-radius: 3px; }
-    .ticker-footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 40px; background: #000; border-top: 1px solid #D4AF37; z-index: 999999; }
-    .main .block-container { padding-bottom: 60px; }
-    .symbol-col { background-color: #304FFE; color: white !important; font-weight: bold; }
-    .bull-strong { background-color: #2962FF; color: white; } 
-    .bull-med { background-color: #448AFF; color: white; }    
-    .bear-strong { background-color: #D50000; color: white; } 
-    .bear-med { background-color: #FF5252; color: white; }    
-    </style>
-""", unsafe_allow_html=True)
+_css = (
+    "<style>"
+    ".stApp { background-color: #050505; color: #e0e0e0; }"
+    "section[data-testid='stSidebar'] { background-color: #000000; border-right: 1px solid #222; }"
+    ".stTabs [data-baseweb='tab-list'] { gap: 8px; background-color: #080808; padding: 10px; border-bottom: 2px solid #D4AF37; }"
+    ".stTabs [data-baseweb='tab'] { height: 50px; background-color: #111; color: #888; border: 1px solid #333; border-bottom: none; padding-left: 20px; padding-right: 20px; }"
+    ".stTabs [aria-selected='true'] { background-color: #D4AF37 !important; color: #000 !important; font-weight: bold; }"
+    "h1, h2, h3 { color: #D4AF37 !important; text-transform: uppercase; font-family: 'Helvetica Neue', sans-serif; }"
+    ".heatmap-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 13px; background-color: #080808; border: 1px solid #333; }"
+    ".heatmap-table th { background-color: #111; color: #D4AF37; padding: 12px; text-align: left; border-bottom: 2px solid #D4AF37; }"
+    ".heatmap-table td { padding: 10px; border-bottom: 1px solid #222; color: #ccc; }"
+    ".bullish { color: #00ff88 !important; font-weight: bold; }"
+    ".bearish { color: #ff4b4b !important; font-weight: bold; }"
+    ".live-tag { color: #00ff88; border: 1px solid #00ff88; padding: 2px 5px; font-size: 10px; border-radius: 3px; }"
+    ".ticker-footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 40px; background: #000; border-top: 1px solid #D4AF37; z-index: 999999; }"
+    ".main .block-container { padding-bottom: 60px; }"
+    ".symbol-col { background-color: #304FFE; color: white !important; font-weight: bold; }"
+    ".bull-strong { background-color: #2962FF; color: white; }"
+    ".bull-med { background-color: #448AFF; color: white; }"
+    ".bear-strong { background-color: #D50000; color: white; }"
+    ".bear-med { background-color: #FF5252; color: white; }"
+    "</style>"
+)
+st.markdown(_css, unsafe_allow_html=True)
 
 # ================= 2. CACHED DATA FUNCTIONS =================
 @st.cache_data(ttl=60, show_spinner=False)
