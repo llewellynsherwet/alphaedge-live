@@ -108,7 +108,7 @@ _FH_MAP = {
 }
 
 
-def _fh_candles(display_name: str, resolution: str, bars: int) -> pd.DataFrame | None:
+def _fh_candles(display_name: str, resolution: str, bars: int) -> "pd.DataFrame | None":
     """
     Fetch real-time OHLCV from Finnhub. Free tier: 60 req/min.
     resolution: '5'=5min, '15'=15min, '60'=1H, 'D'=daily
@@ -143,7 +143,7 @@ def _fh_candles(display_name: str, resolution: str, bars: int) -> pd.DataFrame |
         return None
 
 
-def _fh_4h(display_name: str, bars: int = 60) -> pd.DataFrame | None:
+def _fh_4h(display_name: str, bars: int = 60) -> "pd.DataFrame | None":
     """Build 4H bars by resampling 1H data."""
     df = _fh_candles(display_name, "60", bars * 4 + 20)
     if df is None or len(df) < 8:
