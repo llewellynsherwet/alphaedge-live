@@ -606,12 +606,40 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
 
 def _monitor_loop():
     global _last_signals, _last_session_kz
+    first_run = True
     while True:
         try:
             in_kz, session_name = get_session_info()
 
-            # Session OPEN alert
-            if in_kz and _last_session_kz == False:
+            # On first boot — send startup status so you know bot is alive
+            if first_run:
+                first_run = False
+                if in_kz:
+                    _send_telegram(
+                        f"✅ <b>ALPHAEDGE BOT STARTED</b>\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🟢 Started DURING kill zone: {session_name}\n"
+                        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+                        f"📡 Scanning 20 markets now\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
+                        f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
+                    )
+                else:
+                    nxt_name, nxt_time = _next_session()
+                    _send_telegram(
+                        f"✅ <b>ALPHAEDGE BOT STARTED</b>\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🔴 Off session: {session_name}\n"
+                        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+                        f"⏭️ <b>Next kill zone:</b> {nxt_name} at {nxt_time}\n"
+                        f"😴 No signals until kill zone opens\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
+                        f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
+                    )
+                _last_session_kz = in_kz
+
+            # Session OPEN — fired when kill zone transitions off → on
+            elif in_kz and _last_session_kz is False:
                 _send_telegram(
                     f"🟢 <b>KILL ZONE OPEN — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
@@ -620,24 +648,27 @@ def _monitor_loop():
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
                 )
+                _last_session_kz = in_kz
 
-            # Session CLOSE alert
-            elif not in_kz and _last_session_kz == True:
+            # Session CLOSE — fired when kill zone transitions on → off
+            elif not in_kz and _last_session_kz is True:
                 nxt_name, nxt_time = _next_session()
                 _send_telegram(
                     f"🔴 <b>SESSION CLOSED — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"😴 Low-volume period — no new signals\n"
+                    f"😴 Low-volume period — no new signals until next kill zone\n"
                     f"⏭️ <b>Next:</b> {nxt_name} at {nxt_time}\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
                 )
-                _last_signals = {}   # fresh slate each session
+                _last_signals  = {}   # fresh slate for next session
+                _last_session_kz = in_kz
 
-            _last_session_kz = in_kz
+            else:
+                _last_session_kz = in_kz
 
-            # Signal scan — Finnhub, kill zones only
+            # Signal scan — Finnhub real-time, kill zones ONLY
             if in_kz:
                 for display_name in TICKER_MAP.keys():
                     try:
@@ -652,6 +683,9 @@ def _monitor_loop():
                         time.sleep(1)
                     except Exception:
                         continue
+            # Off session — sleep longer, no scanning
+            else:
+                time.sleep(60)
 
         except Exception:
             pass
@@ -737,9 +771,7 @@ with st.sidebar:
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
         if tv_channel == "Bloomberg Markets":
-            # Bloomberg Markets & Finance — direct video ID embed
-            components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/dp8PhLsUcFE?rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
-            st.markdown('<p style="font-size:10px;color:#555;margin-top:2px;">If unavailable: <a href="https://www.youtube.com/@BloombergMarkets/streams" target="_blank" style="color:#D4AF37;">watch live ↗</a></p>', unsafe_allow_html=True)
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg" frameborder="0" allowfullscreen></iframe>', height=160)
         elif tv_channel == "CNBC Live":
             components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCrp_UI8XtuAWcp6g7utDLKQ&rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
             st.markdown('<p style="font-size:10px;color:#555;margin-top:2px;">If unavailable: <a href="https://www.youtube.com/@CNBCtelevision/streams" target="_blank" style="color:#D4AF37;">watch live ↗</a></p>', unsafe_allow_html=True)
