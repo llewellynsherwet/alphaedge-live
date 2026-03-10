@@ -294,98 +294,236 @@ def _check_entry(df, direction):
 
 def _finnhub_signal(display_name: str) -> tuple:
     """
-    Full 4-layer Finnhub signal. Returns (signal, entry, tp, sl, reason).
-    Called ONLY by the background Telegram monitor — never by the platform UI.
+    HYBRID SIGNAL ENGINE — London Breakout + EMA 50 Pullback on 15m
+    All data via Finnhub real-time. Called ONLY by background Telegram monitor.
+
+    LONDON SESSION (07:00-10:00 UTC):
+      — London Breakout strategy on Forex + Gold
+      — Asian box = high/low of 06:00-07:00 UTC 15m candles
+      — Signal fires on RETEST of broken box level (not initial break)
+      — SL: opposite side of Asian box. TP: 1.5× box size
+
+    NY SESSION (12:00-16:00 UTC):
+      — EMA 50 Pullback on 15m for all assets
+      — 1H trend filter: price above/below 1H EMA 50
+      — Entry: price touches 15m EMA 50 + rejection candle (body > 50% range)
+      — RSI 40-60 + ATR active required
+      — SL: below/above rejection candle wick. TP: 2× risk minimum
     """
     try:
-        df_1d = _fh_candles(display_name, "D",  90)
-        df_4h = _fh_4h(display_name, 60)
-        df_1h = _fh_candles(display_name, "60", 80)
-        df_5m = _fh_candles(display_name, "5",  100)
+        now_utc = datetime.now(timezone.utc)
+        h       = now_utc.hour + now_utc.minute / 60.0
+        in_london = 7.0 <= h < 10.0
+        in_ny     = 12.0 <= h < 16.0
 
-        if df_1d is None or df_4h is None or df_1h is None or df_5m is None:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: data not available from Finnhub"
+        # Forex + Gold assets — eligible for London Breakout
+        LONDON_ASSETS = {
+            "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF",
+            "AUD/USD", "USD/CAD", "NZD/USD", "USD/ZAR", "GBP/ZAR", "GOLD"
+        }
 
-        # Daily bias
-        d_close  = df_1d["Close"]
-        d_ema20  = d_close.ewm(span=20, adjust=False).mean().iloc[-1]
-        d_ema50  = d_close.ewm(span=50, adjust=False).mean().iloc[-1]
-        d_price  = d_close.iloc[-1]
-        daily_bull = d_price > d_ema50 and d_ema20 > d_ema50
-        daily_bear = d_price < d_ema50 and d_ema20 < d_ema50
+        # ── LONDON BREAKOUT (07:00-10:00 UTC, Forex + Gold only) ──────────────
+        if in_london and display_name in LONDON_ASSETS:
+            df_15m = _fh_candles(display_name, "15", 120)
+            if df_15m is None or len(df_15m) < 20:
+                return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: insufficient 15m data"
 
-        if not daily_bull and not daily_bear:
-            return "⚪ WAITING", d_price, 0.0, 0.0, "Daily trend unclear — EMA 20/50 tangled"
+            # Build Asian box: 06:00-07:00 UTC candles only
+            asian = df_15m[
+                (df_15m.index.hour == 6) |
+                ((df_15m.index.hour == 5) & (df_15m.index.minute >= 45))
+            ]
+            if len(asian) < 2:
+                return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: Asian box not yet formed (need 06:00-07:00 UTC candles)"
 
-        direction = "bull" if daily_bull else "bear"
+            box_high = asian["High"].max()
+            box_low  = asian["Low"].min()
+            box_size = box_high - box_low
 
-        # 4H structure
-        h4_close = df_4h["Close"]
-        h4_e21   = h4_close.ewm(span=21, adjust=False).mean().iloc[-1]
-        h4_e50   = h4_close.ewm(span=50, adjust=False).mean().iloc[-1]
-        h4_price = h4_close.iloc[-1]
-        struct_bull = h4_price > h4_e21 and h4_e21 > h4_e50
-        struct_bear = h4_price < h4_e21 and h4_e21 < h4_e50
+            if box_size <= 0:
+                return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: Asian box too tight"
 
-        if direction == "bull" and not struct_bull:
-            return "⚪ WAITING", h4_price, 0.0, 0.0, "Daily BULLISH but 4H structure not aligned yet"
-        if direction == "bear" and not struct_bear:
-            return "⚪ WAITING", h4_price, 0.0, 0.0, "Daily BEARISH but 4H structure not aligned yet"
+            # Last 3 candles after 07:00 UTC
+            post_london = df_15m[df_15m.index.hour >= 7].tail(3)
+            if len(post_london) < 2:
+                return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: London open candles not yet formed"
 
-        swing_low  = df_4h["Low"].iloc[-8:].min()
-        swing_high = df_4h["High"].iloc[-8:].max()
+            c_price   = post_london["Close"].iloc[-1]
+            c_high    = post_london["High"].iloc[-1]
+            c_low     = post_london["Low"].iloc[-1]
+            c_open    = post_london["Open"].iloc[-1]
+            prev_close = post_london["Close"].iloc[-2]
 
-        # 1H + 5m entry checks
-        h1 = _check_entry(df_1h, direction)
-        m5 = _check_entry(df_5m, direction)
+            # Breakout candle: previous bar closed outside the box
+            bullish_break = prev_close > box_high
+            bearish_break = prev_close < box_low
 
-        c_price = df_5m["Close"].iloc[-1]
-        atr_1h  = h1["atr"]
+            # Retest: current price pulling back toward broken level
+            retest_bull = bullish_break and c_low <= box_high * 1.0005 and c_price > box_high * 0.999
+            retest_bear = bearish_break and c_high >= box_low * 0.9995 and c_price < box_low * 1.001
 
-        if not h1["ok"] or not m5["ok"]:
-            missing = []
-            if not h1["ok"]:
-                if not h1["ema_ok"]:  missing.append(f"1H EMA not crossed ({h1['pb_pct']:.2f}% from EMA 21)")
-                if not h1["rsi_ok"]:  missing.append(f"1H RSI {h1['rsi']:.1f} outside zone")
-                if not h1["macd_ok"]: missing.append("1H MACD not confirming")
-                if not h1["atr_active"]: missing.append("1H ATR flat")
-            if not m5["ok"]:
-                if not m5["ema_ok"]:  missing.append(f"5m EMA not crossed ({m5['pb_pct']:.2f}% from EMA 21)")
-                if not m5["rsi_ok"]:  missing.append(f"5m RSI {m5['rsi']:.1f} outside zone")
-                if not m5["macd_ok"]: missing.append("5m MACD not confirming")
-            return "⚪ WAITING", c_price, 0.0, 0.0, "Waiting:\n" + "\n".join(f"⏳ {m}" for m in missing)
+            # Rejection candle: body > 40% of candle range, closing away from level
+            candle_range = c_high - c_low
+            body         = abs(c_price - c_open)
+            rejection    = candle_range > 0 and body / candle_range > 0.40
 
-        # TP / SL
-        if direction == "bull":
-            sl       = swing_low - (atr_1h * 0.3)
-            raw_risk = c_price - sl
-            if raw_risk <= 0 or raw_risk > c_price * 0.06:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping"
-            tp  = c_price + max(raw_risk * 2.0, atr_1h * 2.0)
-            rr  = (tp - c_price) / raw_risk
-            reason = (
-                f"Daily: BULLISH — EMA 20 above EMA 50\n"
-                f"4H: Price above EMA 21 + 50, structure up\n"
-                f"1H: {h1['etype']} | RSI {h1['rsi']:.1f}\n"
-                f"5m: {m5['etype']} | RSI {m5['rsi']:.1f} — confirms 1H\n"
-                f"SL below 4H swing low | R:R 1:{rr:.1f}"
-            )
-            return "🟢 BUY", c_price, tp, sl, reason
+            # RSI filter — not extended
+            rsi_s   = _calc_rsi(df_15m["Close"])
+            c_rsi   = rsi_s.iloc[-1]
+            rsi_ok  = 35 <= c_rsi <= 65
+
+            # ATR active
+            atr_s   = _calc_atr(df_15m)
+            c_atr   = atr_s.iloc[-1]
+            atr_avg = atr_s.rolling(10).mean().iloc[-1]
+            atr_ok  = c_atr > atr_avg * 0.85
+
+            if retest_bull and rejection and c_price > c_open and rsi_ok and atr_ok:
+                tp = c_price + (box_size * 1.5)
+                sl = box_low - (box_size * 0.1)
+                rr = (tp - c_price) / (c_price - sl) if (c_price - sl) > 0 else 0
+                reason = (
+                    f"📦 London Breakout — BULLISH\n"
+                    f"Asian box: {box_low:.5f} — {box_high:.5f} (size: {box_size:.5f})\n"
+                    f"✅ Previous candle closed ABOVE box high\n"
+                    f"✅ Retest of broken level — price held above box\n"
+                    f"✅ Rejection candle ({body/candle_range*100:.0f}% body) closing bullish\n"
+                    f"✅ RSI: {c_rsi:.1f} — neutral zone\n"
+                    f"SL below Asian box low | TP: 1.5× box size | R:R 1:{rr:.1f}"
+                )
+                return "🟢 BUY", c_price, tp, sl, reason
+
+            elif retest_bear and rejection and c_price < c_open and rsi_ok and atr_ok:
+                tp = c_price - (box_size * 1.5)
+                sl = box_high + (box_size * 0.1)
+                rr = (c_price - tp) / (sl - c_price) if (sl - c_price) > 0 else 0
+                reason = (
+                    f"📦 London Breakout — BEARISH\n"
+                    f"Asian box: {box_low:.5f} — {box_high:.5f} (size: {box_size:.5f})\n"
+                    f"✅ Previous candle closed BELOW box low\n"
+                    f"✅ Retest of broken level — price held below box\n"
+                    f"✅ Rejection candle ({body/candle_range*100:.0f}% body) closing bearish\n"
+                    f"✅ RSI: {c_rsi:.1f} — neutral zone\n"
+                    f"SL above Asian box high | TP: 1.5× box size | R:R 1:{rr:.1f}"
+                )
+                return "🔴 SELL", c_price, tp, sl, reason
+
+            else:
+                missing = []
+                if not bullish_break and not bearish_break:
+                    missing.append(f"no breakout yet — price inside box ({box_low:.5f}—{box_high:.5f})")
+                elif bullish_break and not retest_bull:
+                    missing.append("waiting for retest of broken box high")
+                elif bearish_break and not retest_bear:
+                    missing.append("waiting for retest of broken box low")
+                if not rejection: missing.append(f"weak candle — body only {body/candle_range*100:.0f}% of range")
+                if not rsi_ok:    missing.append(f"RSI {c_rsi:.1f} extended")
+                if not atr_ok:    missing.append("ATR flat — low volatility")
+                return "⚪ WAITING", c_price, 0.0, 0.0, "London Breakout:\n" + "\n".join(f"⏳ {m}" for m in missing)
+
+        # ── EMA 50 PULLBACK ON 15m (NY SESSION 12:00-16:00 UTC, all assets) ──
+        elif in_ny:
+            df_15m = _fh_candles(display_name, "15", 120)
+            df_1h  = _fh_candles(display_name, "60", 80)
+            if df_15m is None or df_1h is None or len(df_15m) < 55 or len(df_1h) < 55:
+                return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: insufficient data"
+
+            # 1H trend filter — must be in a clear trend
+            h1_close  = df_1h["Close"]
+            h1_ema50  = h1_close.ewm(span=50, adjust=False).mean()
+            h1_price  = h1_close.iloc[-1]
+            h1_e50    = h1_ema50.iloc[-1]
+            h1_slope  = h1_e50 - h1_ema50.iloc[-5]   # slope over last 5 bars
+            trend_bull = h1_price > h1_e50 and h1_slope > 0
+            trend_bear = h1_price < h1_e50 and h1_slope < 0
+
+            if not trend_bull and not trend_bear:
+                return "⚪ WAITING", h1_price, 0.0, 0.0, "No clear 1H trend — EMA 50 flat or price too far"
+
+            # 15m EMA 50 — wait for price to touch it
+            m15_close = df_15m["Close"]
+            m15_ema50 = m15_close.ewm(span=50, adjust=False).mean()
+            c_price   = m15_close.iloc[-1]
+            c_open    = df_15m["Open"].iloc[-1]
+            c_high    = df_15m["High"].iloc[-1]
+            c_low     = df_15m["Low"].iloc[-1]
+            e50       = m15_ema50.iloc[-1]
+
+            # Price touched the 15m EMA 50 (wick within 0.1% of EMA)
+            touch_bull = trend_bull and c_low <= e50 * 1.001 and c_price > e50 * 0.999
+            touch_bear = trend_bear and c_high >= e50 * 0.999 and c_price < e50 * 1.001
+
+            # Rejection candle: body > 50% of range, closing AWAY from EMA
+            candle_range = c_high - c_low
+            body         = abs(c_price - c_open)
+            rejection_bull = candle_range > 0 and body / candle_range > 0.50 and c_price > c_open
+            rejection_bear = candle_range > 0 and body / candle_range > 0.50 and c_price < c_open
+
+            # RSI 40-60 — not extended at the EMA touch
+            rsi_s  = _calc_rsi(m15_close)
+            c_rsi  = rsi_s.iloc[-1]
+            rsi_ok = 38 <= c_rsi <= 62
+
+            # ATR active — market must be moving
+            atr_s   = _calc_atr(df_15m)
+            c_atr   = atr_s.iloc[-1]
+            atr_avg = atr_s.rolling(10).mean().iloc[-1]
+            atr_ok  = c_atr > atr_avg * 0.9
+
+            if touch_bull and rejection_bull and rsi_ok and atr_ok:
+                sl = c_low - (c_atr * 0.5)
+                raw_risk = c_price - sl
+                if raw_risk <= 0 or raw_risk > c_price * 0.05:
+                    return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping"
+                tp = c_price + max(raw_risk * 2.0, c_atr * 2.0)
+                rr = (tp - c_price) / raw_risk
+                reason = (
+                    f"📈 EMA 50 Pullback — BULLISH\n"
+                    f"✅ 1H trend: Price above 1H EMA 50, slope rising\n"
+                    f"✅ 15m: Price touched EMA 50 ({e50:.5f}) — classic pullback entry\n"
+                    f"✅ Rejection candle ({body/candle_range*100:.0f}% body) closing bullish\n"
+                    f"✅ RSI: {c_rsi:.1f} — mid zone, not extended\n"
+                    f"✅ ATR active — market trending not ranging\n"
+                    f"SL below candle wick | TP: 2× risk | R:R 1:{rr:.1f}"
+                )
+                return "🟢 BUY", c_price, tp, sl, reason
+
+            elif touch_bear and rejection_bear and rsi_ok and atr_ok:
+                sl = c_high + (c_atr * 0.5)
+                raw_risk = sl - c_price
+                if raw_risk <= 0 or raw_risk > c_price * 0.05:
+                    return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping"
+                tp = c_price - max(raw_risk * 2.0, c_atr * 2.0)
+                rr = raw_risk / (c_price - tp) if (c_price - tp) > 0 else 0
+                reason = (
+                    f"📉 EMA 50 Pullback — BEARISH\n"
+                    f"✅ 1H trend: Price below 1H EMA 50, slope falling\n"
+                    f"✅ 15m: Price touched EMA 50 ({e50:.5f}) — classic pullback entry\n"
+                    f"✅ Rejection candle ({body/candle_range*100:.0f}% body) closing bearish\n"
+                    f"✅ RSI: {c_rsi:.1f} — mid zone, not extended\n"
+                    f"✅ ATR active — market trending not ranging\n"
+                    f"SL above candle wick | TP: 2× risk | R:R 1:{rr:.1f}"
+                )
+                return "🔴 SELL", c_price, tp, sl, reason
+
+            else:
+                missing = []
+                if not trend_bull and not trend_bear:
+                    missing.append("1H trend unclear")
+                if trend_bull and not touch_bull:
+                    missing.append(f"price not yet at 15m EMA 50 ({e50:.5f}) — waiting for pullback")
+                if trend_bear and not touch_bear:
+                    missing.append(f"price not yet at 15m EMA 50 ({e50:.5f}) — waiting for pullback")
+                if not rsi_ok: missing.append(f"RSI {c_rsi:.1f} outside 38-62 zone")
+                if not atr_ok: missing.append("ATR flat — market ranging")
+                bpct = f"{body/candle_range*100:.0f}%" if candle_range > 0 else "n/a"
+                if not (rejection_bull or rejection_bear):
+                    missing.append(f"no rejection candle yet (body {bpct} of range, need >50%)")
+                return "⚪ WAITING", c_price, 0.0, 0.0, "EMA 50 Pullback:\n" + "\n".join(f"⏳ {m}" for m in missing)
+
+        # Outside both sessions
         else:
-            sl       = swing_high + (atr_1h * 0.3)
-            raw_risk = sl - c_price
-            if raw_risk <= 0 or raw_risk > c_price * 0.06:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping"
-            tp  = c_price - max(raw_risk * 2.0, atr_1h * 2.0)
-            rr  = raw_risk / (c_price - tp) if (c_price - tp) > 0 else 0
-            reason = (
-                f"Daily: BEARISH — EMA 20 below EMA 50\n"
-                f"4H: Price below EMA 21 + 50, structure down\n"
-                f"1H: {h1['etype']} | RSI {h1['rsi']:.1f}\n"
-                f"5m: {m5['etype']} | RSI {m5['rsi']:.1f} — confirms 1H\n"
-                f"SL above 4H swing high | R:R 1:{rr:.1f}"
-            )
-            return "🔴 SELL", c_price, tp, sl, reason
+            return "⚪ WAITING", 0.0, 0.0, 0.0, "Outside London/NY session — no signals"
 
     except Exception as e:
         return "⚪ WAITING", 0.0, 0.0, 0.0, f"Error: {str(e)}"
@@ -606,39 +744,18 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
 
 def _monitor_loop():
     global _last_signals, _last_session_kz
-    first_run = True
+    # _last_session_kz is module-level (None on fresh process start)
+    # On first iteration None means "unknown" — we set it but don't alert
+    # Alerts ONLY fire on genuine transitions: False→True or True→False
     while True:
         try:
             in_kz, session_name = get_session_info()
 
-            # On first boot — send startup status so you know bot is alive
-            if first_run:
-                first_run = False
-                if in_kz:
-                    _send_telegram(
-                        f"✅ <b>ALPHAEDGE BOT STARTED</b>\n"
-                        f"━━━━━━━━━━━━━━━━━━━━\n"
-                        f"🟢 Started DURING kill zone: {session_name}\n"
-                        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                        f"📡 Scanning 20 markets now\n"
-                        f"━━━━━━━━━━━━━━━━━━━━\n"
-                        f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
-                    )
-                else:
-                    nxt_name, nxt_time = _next_session()
-                    _send_telegram(
-                        f"✅ <b>ALPHAEDGE BOT STARTED</b>\n"
-                        f"━━━━━━━━━━━━━━━━━━━━\n"
-                        f"🔴 Off session: {session_name}\n"
-                        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                        f"⏭️ <b>Next kill zone:</b> {nxt_name} at {nxt_time}\n"
-                        f"😴 No signals until kill zone opens\n"
-                        f"━━━━━━━━━━━━━━━━━━━━\n"
-                        f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
-                    )
+            if _last_session_kz is None:
+                # First loop ever — just record state silently, no message
                 _last_session_kz = in_kz
 
-            # Session OPEN — fired when kill zone transitions off → on
+            # Session OPEN — fired ONCE when kill zone transitions off → on
             elif in_kz and _last_session_kz is False:
                 _send_telegram(
                     f"🟢 <b>KILL ZONE OPEN — {session_name}</b>\n"
@@ -780,13 +897,11 @@ with st.sidebar:
             st.markdown('<p style="font-size:10px;color:#555;margin-top:2px;">If unavailable: <a href="https://www.youtube.com/@Reuters/streams" target="_blank" style="color:#D4AF37;">watch live ↗</a></p>', unsafe_allow_html=True)
 
         st.subheader("🎵 TRADING STATION")
-        station = st.selectbox("Select Audio:", ["NYC Power 105.1", "Lofi Trading Beats", "Chillout Jazz"], label_visibility="collapsed")
-        if station == "NYC Power 105.1":
-            components.html('<iframe allow="autoplay" width="100%" height="150" src="https://www.iheart.com/live/power-1051-1473/?embed=true" frameborder="0"></iframe>', height=160)
-        elif station == "Lofi Trading Beats":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
+        station = st.selectbox("Select Audio:", ["Lofi Trading Beats", "Chillout Jazz"], label_visibility="collapsed")
+        if station == "Lofi Trading Beats":
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
         elif station == "Chillout Jazz":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/Dx5qFachd3A?autoplay=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
+            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
 
     st.markdown("---")
     st.markdown('<p style="text-align:center;color:#D4AF37;font-size:11px;font-weight:bold;letter-spacing:2px;">🏆 FEATURED PARTNERS</p>', unsafe_allow_html=True)
