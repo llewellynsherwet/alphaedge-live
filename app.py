@@ -81,6 +81,27 @@ _css = (
 )
 st.markdown(_css, unsafe_allow_html=True)
 
+# ================= PWA — makes app installable on phones =================
+st.markdown("""
+    <link rel="manifest" href="app/static/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AlphaEdge">
+    <meta name="theme-color" content="#D4AF37">
+    <link rel="apple-touch-icon" href="app/static/icon-192.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('app/static/sw.js')
+                    .then(r => console.log('AlphaEdge SW registered'))
+                    .catch(e => console.log('SW error:', e));
+            });
+        }
+    </script>
+""", unsafe_allow_html=True)
+
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CREDENTIALS — EDIT THESE LINES ONLY
@@ -716,8 +737,27 @@ def get_scalp_signal(ticker_symbol):
 # Uses Finnhub real-time data. Runs every 5 min. Silent — no UI.
 # Sends session open/close alerts + signals when all 4 layers align.
 # ══════════════════════════════════════════════════════════════════════════════
-_last_signals:      dict = {}
-_last_session_kz:   bool = None
+_last_signals: dict = {}
+
+# ── STATE FILE — persists across Streamlit reruns and page visits ────────────
+# Module-level variables reset every time Streamlit reruns the script.
+# We write session state to a file so the monitor thread reads/writes disk,
+# not memory — this guarantees ONE open alert and ONE close alert only.
+_STATE_FILE = "monitor_state.json"
+
+def _read_state() -> dict:
+    try:
+        with open(_STATE_FILE, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {"in_kz": None, "last_signals": {}}
+
+def _write_state(in_kz: bool, last_signals: dict):
+    try:
+        with open(_STATE_FILE, "w") as f:
+            json.dump({"in_kz": in_kz, "last_signals": last_signals}, f)
+    except Exception:
+        pass
 
 
 def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
@@ -743,66 +783,70 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
 
 
 def _monitor_loop():
-    global _last_signals, _last_session_kz
-    # _last_session_kz is module-level (None on fresh process start)
-    # On first iteration None means "unknown" — we set it but don't alert
-    # Alerts ONLY fire on genuine transitions: False→True or True→False
+    """
+    Background thread — runs once per process lifetime.
+    State is stored in monitor_state.json so it survives Streamlit reruns.
+    ONE open message, ONE close message — nothing else fires repeatedly.
+    """
     while True:
         try:
-            in_kz, session_name = get_session_info()
+            in_kz, session_name  = get_session_info()
+            state                = _read_state()
+            prev_kz              = state.get("in_kz", None)   # None = first ever run
+            last_signals         = state.get("last_signals", {})
 
-            if _last_session_kz is None:
-                # First loop ever — just record state silently, no message
-                _last_session_kz = in_kz
+            # First ever run — record state silently, no message sent
+            if prev_kz is None:
+                _write_state(in_kz, last_signals)
 
-            # Session OPEN — fired ONCE when kill zone transitions off → on
-            elif in_kz and _last_session_kz is False:
+            # Kill zone just OPENED (False → True) — send ONE open message
+            elif in_kz and prev_kz is False:
                 _send_telegram(
                     f"🟢 <b>KILL ZONE OPEN — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"📡 Scanning 20 markets — Daily + 4H + 1H + 5m must ALL agree\n"
+                    f"📡 Scanning 20 markets\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
                 )
-                _last_session_kz = in_kz
+                _write_state(in_kz, last_signals)
 
-            # Session CLOSE — fired when kill zone transitions on → off
-            elif not in_kz and _last_session_kz is True:
+            # Kill zone just CLOSED (True → False) — send ONE close message
+            elif not in_kz and prev_kz is True:
                 nxt_name, nxt_time = _next_session()
                 _send_telegram(
                     f"🔴 <b>SESSION CLOSED — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"😴 Low-volume period — no new signals until next kill zone\n"
+                    f"😴 No signals until next kill zone\n"
                     f"⏭️ <b>Next:</b> {nxt_name} at {nxt_time}\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
                 )
-                _last_signals  = {}   # fresh slate for next session
-                _last_session_kz = in_kz
+                last_signals = {}   # fresh slate for next session
+                _write_state(in_kz, last_signals)
 
+            # No transition — just update in_kz in case it drifted
             else:
-                _last_session_kz = in_kz
+                _write_state(in_kz, last_signals)
 
             # Signal scan — Finnhub real-time, kill zones ONLY
             if in_kz:
                 for display_name in TICKER_MAP.keys():
                     try:
                         sig, entry, tp, sl, reason = _finnhub_signal(display_name)
-                        prev = _last_signals.get(display_name, "⚪ WAITING")
-                        if sig != "⚪ WAITING" and sig != prev:
+                        prev_sig = last_signals.get(display_name, "⚪ WAITING")
+                        if sig != "⚪ WAITING" and sig != prev_sig:
                             msg = _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name)
                             _send_telegram(msg)
-                            _last_signals[display_name] = sig
-                        elif sig == "⚪ WAITING" and prev != "⚪ WAITING":
-                            _last_signals[display_name] = "⚪ WAITING"
+                            last_signals[display_name] = sig
+                            _write_state(in_kz, last_signals)
+                        elif sig == "⚪ WAITING" and prev_sig != "⚪ WAITING":
+                            last_signals[display_name] = "⚪ WAITING"
+                            _write_state(in_kz, last_signals)
                         time.sleep(1)
                     except Exception:
                         continue
-            # Off session — sleep longer, no scanning
-            else:
-                time.sleep(60)
 
         except Exception:
             pass
@@ -810,10 +854,16 @@ def _monitor_loop():
 
 
 def start_monitor():
-    if not st.session_state.get("monitor_started", False):
-        t = threading.Thread(target=_monitor_loop, daemon=True)
-        t.start()
-        st.session_state["monitor_started"] = True
+    """Start background thread ONCE per process — guarded by a file lock."""
+    lock_file = "monitor.lock"
+    if not os.path.exists(lock_file):
+        try:
+            with open(lock_file, "w") as f:
+                f.write(str(os.getpid()))
+            t = threading.Thread(target=_monitor_loop, daemon=True)
+            t.start()
+        except Exception:
+            pass
 
 start_monitor()
 
