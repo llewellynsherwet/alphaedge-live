@@ -938,13 +938,11 @@ with st.sidebar:
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
         if tv_channel == "Bloomberg Markets":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg" frameborder="0" allowfullscreen></iframe>', height=160)
+            st.video("https://www.youtube.com/live/iEpJwprxDdk")
         elif tv_channel == "CNBC Live":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCrp_UI8XtuAWcp6g7utDLKQ&rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
-            st.markdown('<p style="font-size:10px;color:#555;margin-top:2px;">If unavailable: <a href="https://www.youtube.com/@CNBCtelevision/streams" target="_blank" style="color:#D4AF37;">watch live ↗</a></p>', unsafe_allow_html=True)
+            st.video("https://www.youtube.com/watch?v=9NyxcX3rhQs")
         elif tv_channel == "Reuters TV":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCwBOEANMhgSVTSGSAfS61Lg&rel=0&modestbranding=1" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>', height=160)
-            st.markdown('<p style="font-size:10px;color:#555;margin-top:2px;">If unavailable: <a href="https://www.youtube.com/@Reuters/streams" target="_blank" style="color:#D4AF37;">watch live ↗</a></p>', unsafe_allow_html=True)
+            st.video("https://www.youtube.com/watch?v=H6hY8Y9n4c0")
 
         st.subheader("🎵 TRADING STATION")
         station = st.selectbox("Select Audio:", ["Lofi Trading Beats", "Chillout Jazz"], label_visibility="collapsed")
