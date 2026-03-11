@@ -106,9 +106,11 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 # CREDENTIALS — EDIT THESE LINES ONLY
 # ══════════════════════════════════════════════════════════════════════════════
-_TG_TOKEN    = "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE"      # from @BotFather
-_TG_CHAT_ID  = "5689404731"        # your personal Telegram chat ID
-_FINNHUB_KEY = "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk5vlu3g"    # free at finnhub.io — 60 req/min
+# Credentials — set these as Environment Variables on Render
+# OR replace the empty strings below with your actual values
+_TG_TOKEN    = os.environ.get("TG_TOKEN",    "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE")
+_TG_CHAT_ID  = os.environ.get("TG_CHAT_ID",  "5689404731")
+_FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk5vlu3g")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -788,17 +790,20 @@ def _monitor_loop():
         time.sleep(300)
 
 
+_monitor_started = False  # module-level flag — True for lifetime of this process
+
 def start_monitor():
-    """Start background thread ONCE per process — guarded by a file lock."""
-    lock_file = "monitor.lock"
-    if not os.path.exists(lock_file):
-        try:
-            with open(lock_file, "w") as f:
-                f.write(str(os.getpid()))
-            t = threading.Thread(target=_monitor_loop, daemon=True)
-            t.start()
-        except Exception:
-            pass
+    """
+    Start background monitor thread ONCE per process lifetime.
+    Uses a module-level flag (not a file) so it survives Streamlit reruns
+    but resets correctly when Render restarts the process.
+    """
+    global _monitor_started
+    if not _monitor_started:
+        _monitor_started = True
+        t = threading.Thread(target=_monitor_loop, daemon=True)
+        t.daemon = True
+        t.start()
 
 start_monitor()
 
