@@ -106,9 +106,9 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 # CREDENTIALS — EDIT THESE LINES ONLY
 # ══════════════════════════════════════════════════════════════════════════════
-_TG_TOKEN    = "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE"      # from @BotFather
-_TG_CHAT_ID  = "5689404731"        # your personal Telegram chat ID
-_FINNHUB_KEY = "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk5vlu3g"    # free at finnhub.io — 60 req/min
+_TG_TOKEN    = "YOUR_BOT_TOKEN_HERE"      # from @BotFather
+_TG_CHAT_ID  = "YOUR_CHAT_ID_HERE"        # your personal Telegram chat ID
+_FINNHUB_KEY = "YOUR_FINNHUB_KEY_HERE"    # free at finnhub.io — 60 req/min
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -938,7 +938,7 @@ with st.sidebar:
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
         if tv_channel == "Bloomberg Markets":
-            st.video("https://www.youtube.com/live/iEpJwprxDdk")
+            st.video("https://www.youtube.com/@BloombergTV/live")
         elif tv_channel == "CNBC Live":
             st.video("https://www.youtube.com/watch?v=9NyxcX3rhQs")
         elif tv_channel == "Reuters TV":
