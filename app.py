@@ -506,8 +506,6 @@ def _forex_signal(ticker_symbol):
         low5   = df5['Low']
 
         in_kz, session_name = get_session_info()
-        if not in_kz:
-            return "⚪ WAITING", close5.iloc[-1], 0.0, 0.0, f"Outside kill zone — {session_name}."
 
         daily_ema20   = df1d['Close'].ewm(span=20, adjust=False).mean()
         daily_bullish = df1d['Close'].iloc[-1] > daily_ema20.iloc[-1]
@@ -739,7 +737,7 @@ def _monitor_loop():
             # Kill zone just OPENED (False → True) — send ONE open message
             elif in_kz and prev_kz is False:
                 _send_telegram(
-                    f"🟢 <b>KILL ZONE OPEN — {session_name}</b>\n"
+                    f"🟢 <b>SESSION OPEN — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
                     f"📡 Scanning 20 markets\n"
@@ -755,7 +753,7 @@ def _monitor_loop():
                     f"🔴 <b>SESSION CLOSED — {session_name}</b>\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"😴 No signals until next kill zone\n"
+                    f"😴 No signals until next session\n"
                     f"⏭️ <b>Next:</b> {nxt_name} at {nxt_time}\n"
                     f"━━━━━━━━━━━━━━━━━━━━\n"
                     f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
@@ -767,7 +765,7 @@ def _monitor_loop():
             else:
                 _write_state(in_kz, last_signals)
 
-            # Signal scan — Finnhub real-time, kill zones ONLY
+            # Signal scan — Finnhub real-time, London + NY sessions
             if in_kz:
                 for display_name in TICKER_MAP.keys():
                     try:
@@ -921,9 +919,9 @@ with tab_dash:
     st.title("📊 ALPHAEDGE COMMAND CENTRE")
 
     if in_kz:
-        st.markdown(f'<div style="background:#0a1a0a;border:1px solid #00ff88;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#00ff88;font-weight:bold;font-size:13px;">🟢 ACTIVE KILL ZONE</span><span class="kill-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background:#0a1a0a;border:1px solid #00ff88;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#00ff88;font-weight:bold;font-size:13px;">🟢 ACTIVE SESSION</span><span class="kill-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div style="background:#1a0a0a;border:1px solid #ff4b4b;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#ff4b4b;font-weight:bold;font-size:13px;">🔴 OFF SESSION</span><span class="dead-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background:#1a0a0a;border:1px solid #ff4b4b;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#888;font-weight:bold;font-size:13px;">⏸️ OFF SESSION</span><span class="dead-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
 
     st.write("⏳ *Analyzing Live Market Structure...*")
     data = get_dashboard_data()
@@ -947,8 +945,8 @@ with tab_dash:
 
     st.markdown("""
     <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
-        <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">🤖 AI EMA SCALPER SIGNALS</h3>
-        <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Veteran-grade confluence system • Kill zone filter • Daily bias • 4H structure • Pullback entry • ATR targets</p>
+        <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
+        <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Triple confluence engine • 4H trend • 1H EMA cross • RSI + MACD • London &amp; NY sessions • 2.5R minimum</p>
     </div>
     """, unsafe_allow_html=True)
 
