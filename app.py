@@ -117,19 +117,19 @@ _FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk
 # FINNHUB SYMBOL MAP — real-time data for Telegram signals only
 # ══════════════════════════════════════════════════════════════════════════════
 _FH_MAP = {
-    # Forex — IC Markets format works on Finnhub free tier
-    "EUR/USD": "IC MARKETS:1", "GBP/USD": "IC MARKETS:2",
-    "USD/JPY": "IC MARKETS:3", "USD/CHF": "IC MARKETS:4",
-    "AUD/USD": "IC MARKETS:5", "USD/CAD": "IC MARKETS:6",
-    "NZD/USD": "IC MARKETS:7", "USD/ZAR": "OANDA:USD_ZAR",
+    # Forex — correct Finnhub free tier symbols
+    "EUR/USD": "OANDA:EUR_USD",  "GBP/USD": "OANDA:GBP_USD",
+    "USD/JPY": "OANDA:USD_JPY",  "USD/CHF": "OANDA:USD_CHF",
+    "AUD/USD": "OANDA:AUD_USD",  "USD/CAD": "OANDA:USD_CAD",
+    "NZD/USD": "OANDA:NZD_USD",  "USD/ZAR": "OANDA:USD_ZAR",
     "GBP/ZAR": "OANDA:GBP_ZAR",
-    # Indices — OANDA format
-    "S&P 500": "OANDA:SPX500_USD", "NASDAQ 100": "OANDA:NAS100_USD",
-    "US 30":   "OANDA:US30_USD",   "VIX": "CBOE:VIX",
+    # Indices
+    "S&P 500":    "OANDA:SPX500_USD", "NASDAQ 100": "OANDA:NAS100_USD",
+    "US 30":      "OANDA:US30_USD",   "VIX":        "CBOE:VIX",
     # Commodities
-    "GOLD":      "OANDA:XAU_USD",  "SILVER":   "OANDA:XAG_USD",
-    "OIL (WTI)": "OANDA:BCO_USD",  "NAT GAS":  "OANDA:NATGAS_USD",
-    # Crypto — Binance works reliably on free tier
+    "GOLD":      "OANDA:XAU_USD",   "SILVER":   "OANDA:XAG_USD",
+    "OIL (WTI)": "OANDA:BCO_USD",   "NAT GAS":  "OANDA:NATGAS_USD",
+    # Crypto — Binance works on free tier
     "BITCOIN":  "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT",
     "SOLANA":   "BINANCE:SOLUSDT",
 }
@@ -196,18 +196,17 @@ def _send_telegram(message: str):
         pass
 
 
-# ================= SESSION / KILL ZONE FILTER =================
+# ================= SESSION FILTER =================
 def get_session_info():
     now = datetime.now(timezone.utc)
     h   = now.hour + now.minute / 60.0
+    # Straight through London + NY — no gaps, no dead zones
+    # 07:00-17:00 UTC = 09:00-19:00 SAST
     if   7.0  <= h < 10.0: return True,  "🇬🇧 LONDON OPEN"
+    elif 10.0 <= h < 12.0: return True,  "🇬🇧🇺🇸 LONDON CONTINUATION"
     elif 12.0 <= h < 16.0: return True,  "🇺🇸 NY / LONDON OVERLAP"
-    elif 0.0  <= h <  3.0: return True,  "🌏 TOKYO OPEN"
-    elif 18.0 <= h < 20.0: return False, "🌙 SYDNEY OPEN (low volume)"
-    elif 10.0 <= h < 12.0: return False, "😴 LONDON DEAD ZONE"
-    elif 16.0 <= h < 18.0: return False, "😴 NY AFTERNOON (fading)"
-    else:                   return False, "🔴 OFF-SESSION (avoid)"
-
+    elif 16.0 <= h < 17.0: return True,  "🇺🇸 NEW YORK CLOSE"
+    else:                   return False, "🔴 OFF-SESSION (avoid)" 
 
 def _next_session():
     h = datetime.now(timezone.utc).hour + datetime.now(timezone.utc).minute / 60.0
@@ -689,9 +688,12 @@ _STATE_FILE = "monitor_state.json"
 def _read_state() -> dict:
     try:
         with open(_STATE_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            # Ensure scan_count key always exists
+            data.setdefault("scan_count", 0)
+            return data
     except Exception:
-        return {"in_kz": None, "last_signals": {}}
+        return {"in_kz": None, "last_signals": {}, "scan_count": 0}
 
 def _write_state(in_kz: bool, last_signals: dict):
     try:
@@ -792,13 +794,20 @@ def _monitor_loop():
                         continue
                 # Send scan summary every 30 min (6 loops × 5 min) so you know bot is alive
                 scan_count = state.get("scan_count", 0) + 1
-                _write_state(in_kz, {**last_signals, "_scan_count": scan_count})
+                # Write scan_count separately — don't mix into last_signals
+                try:
+                    sc_data = {"in_kz": in_kz, "last_signals": last_signals, "scan_count": scan_count}
+                    with open(_STATE_FILE, "w") as _f:
+                        json.dump(sc_data, _f)
+                except Exception:
+                    pass
                 if scan_count % 6 == 0:
+                    status = "✅ " + ", ".join(signals_found) if signals_found else "⏳ No setups yet — watching"
                     _send_telegram(
                         f"🔍 <b>SCAN UPDATE</b> — {session_name}\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
                         f"📊 Scanned 20 markets\n"
-                        f"{'✅ Signals: ' + ', '.join(signals_found) if signals_found else '⏳ No setups yet — watching'}\n"
+                        f"{status}\n"
                         f"<i>Next scan in 5 min</i>"
                     )
 
@@ -807,22 +816,41 @@ def _monitor_loop():
         time.sleep(300)
 
 
-_monitor_started = False  # module-level flag — True for lifetime of this process
+# ── MONITOR SINGLETON — survives Streamlit reruns on Render ─────────────────
+# threading.enumerate() checks if our named thread is already alive.
+# This works across all Streamlit reruns because threads live at the OS level,
+# not the Python module level. No file locks, no race conditions.
 
 def start_monitor():
-    """
-    Start background monitor thread ONCE per process lifetime.
-    Uses a module-level flag (not a file) so it survives Streamlit reruns
-    but resets correctly when Render restarts the process.
-    """
-    global _monitor_started
-    if not _monitor_started:
-        _monitor_started = True
-        t = threading.Thread(target=_monitor_loop, daemon=True)
-        t.daemon = True
-        t.start()
+    # Check if monitor thread is already running by name
+    for thread in threading.enumerate():
+        if thread.name == "alphaedge_monitor":
+            return  # Already running — do nothing
+    # Not running — start it
+    t = threading.Thread(target=_monitor_loop, name="alphaedge_monitor", daemon=True)
+    t.start()
 
 start_monitor()
+
+# ── STARTUP PING — fires once when Render starts the app ─────────────────────
+# Sends one message to Telegram so you know the bot is live and credentials work
+_STARTUP_FLAG = "startup_ping.flag"
+if not os.path.exists(_STARTUP_FLAG):
+    try:
+        with open(_STARTUP_FLAG, "w") as _f:
+            _f.write("1")
+        _send_telegram(
+            f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+            f"✅ Credentials loaded\n"
+            f"✅ Monitor thread started\n"
+            f"✅ Scanning: London 07-17 UTC\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"<i>Bot will scan every 5 min during sessions</i>"
+        )
+    except Exception:
+        pass
 
 
 # --- TRADINGVIEW POP-UP ---
