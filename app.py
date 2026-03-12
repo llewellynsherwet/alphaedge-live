@@ -117,17 +117,21 @@ _FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk
 # FINNHUB SYMBOL MAP — real-time data for Telegram signals only
 # ══════════════════════════════════════════════════════════════════════════════
 _FH_MAP = {
-    "EUR/USD": "OANDA:EUR_USD", "GBP/USD": "OANDA:GBP_USD",
-    "USD/JPY": "OANDA:USD_JPY", "USD/CHF": "OANDA:USD_CHF",
-    "AUD/USD": "OANDA:AUD_USD", "USD/CAD": "OANDA:USD_CAD",
-    "NZD/USD": "OANDA:NZD_USD", "USD/ZAR": "OANDA:USD_ZAR",
+    # Forex — IC Markets format works on Finnhub free tier
+    "EUR/USD": "IC MARKETS:1", "GBP/USD": "IC MARKETS:2",
+    "USD/JPY": "IC MARKETS:3", "USD/CHF": "IC MARKETS:4",
+    "AUD/USD": "IC MARKETS:5", "USD/CAD": "IC MARKETS:6",
+    "NZD/USD": "IC MARKETS:7", "USD/ZAR": "OANDA:USD_ZAR",
     "GBP/ZAR": "OANDA:GBP_ZAR",
+    # Indices — OANDA format
     "S&P 500": "OANDA:SPX500_USD", "NASDAQ 100": "OANDA:NAS100_USD",
     "US 30":   "OANDA:US30_USD",   "VIX": "CBOE:VIX",
-    "GOLD":    "OANDA:XAU_USD",    "SILVER":    "OANDA:XAG_USD",
-    "OIL (WTI)": "OANDA:BCO_USD",  "NAT GAS":   "OANDA:NATGAS_USD",
-    "BITCOIN":   "BINANCE:BTCUSDT","ETHEREUM":  "BINANCE:ETHUSDT",
-    "SOLANA":    "BINANCE:SOLUSDT",
+    # Commodities
+    "GOLD":      "OANDA:XAU_USD",  "SILVER":   "OANDA:XAG_USD",
+    "OIL (WTI)": "OANDA:BCO_USD",  "NAT GAS":  "OANDA:NATGAS_USD",
+    # Crypto — Binance works reliably on free tier
+    "BITCOIN":  "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT",
+    "SOLANA":   "BINANCE:SOLUSDT",
 }
 
 
@@ -769,6 +773,7 @@ def _monitor_loop():
 
             # Signal scan — Finnhub real-time, London + NY sessions
             if in_kz:
+                signals_found = []
                 for display_name in TICKER_MAP.keys():
                     try:
                         sig, entry, tp, sl, reason = _finnhub_signal(display_name)
@@ -777,6 +782,7 @@ def _monitor_loop():
                             msg = _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name)
                             _send_telegram(msg)
                             last_signals[display_name] = sig
+                            signals_found.append(f"{display_name}: {sig}")
                             _write_state(in_kz, last_signals)
                         elif sig == "⚪ WAITING" and prev_sig != "⚪ WAITING":
                             last_signals[display_name] = "⚪ WAITING"
@@ -784,6 +790,17 @@ def _monitor_loop():
                         time.sleep(1)
                     except Exception:
                         continue
+                # Send scan summary every 30 min (6 loops × 5 min) so you know bot is alive
+                scan_count = state.get("scan_count", 0) + 1
+                _write_state(in_kz, {**last_signals, "_scan_count": scan_count})
+                if scan_count % 6 == 0:
+                    _send_telegram(
+                        f"🔍 <b>SCAN UPDATE</b> — {session_name}\n"
+                        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+                        f"📊 Scanned 20 markets\n"
+                        f"{'✅ Signals: ' + ', '.join(signals_found) if signals_found else '⏳ No setups yet — watching'}\n"
+                        f"<i>Next scan in 5 min</i>"
+                    )
 
         except Exception:
             pass
