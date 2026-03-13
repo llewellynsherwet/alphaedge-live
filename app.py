@@ -318,178 +318,204 @@ def _check_entry(df, direction):
             "atr_active": atr_active, "rsi": r, "atr": a, "etype": etype, "pb_pct": pb_pct * 100}
 
 
-def _finnhub_signal(display_name: str) -> tuple:
+def _smc_5m_signal(display_name: str) -> tuple:
     """
-    TRIPLE CONFLUENCE ENGINE — London + NY Sessions
-    Rebuilt from scratch. Uses 1H + 4H only (no timezone-sensitive filters).
-    Fires frequently during both sessions. Minimum 2R enforced.
-
-    STRATEGY — 3-layer confluence:
-      1. 4H TREND  : EMA 21 direction (above = bull, below = bear)
-      2. 1H ENTRY  : EMA 9 crosses EMA 21 in trend direction
-                     OR price pulls back to 1H EMA 21 and holds
-      3. MOMENTUM  : RSI not extended (35-65) + MACD histogram confirms
-
-    SESSIONS COVERED:
-      London : 07:00-10:00 UTC  — all forex pairs + Gold
-      NY     : 12:00-17:00 UTC  — all 20 assets
-      London+NY overlap: 12:00-16:00 UTC — highest priority, all assets
-
-    SL: below/above 1H swing low/high (last 5 bars) + 0.2×ATR buffer
-    TP: 2.5×ATR minimum, always at least 2R
+    SMART MONEY CONCEPT — 5M CHART
+    Trend from 1H EMA 21. Entry on 5m Break of Structure + Order Block.
+    Fires more frequently than 1H engine. Minimum 1.5R enforced.
     """
     try:
-        now_utc   = datetime.now(timezone.utc)
-        h         = now_utc.hour + now_utc.minute / 60.0
-        in_london = 7.0  <= h < 10.0
-        in_ny     = 12.0 <= h < 17.0
-        in_session = in_london or in_ny
+        df_1h = _fh_candles(display_name, "60", 50)
+        df_5m = _fh_candles(display_name, "5",  60)
 
-        if not in_session:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "Outside London/NY session"
+        if df_1h is None or df_5m is None or len(df_1h) < 20 or len(df_5m) < 20:
+            return "⚪ WAITING", 0.0, 0.0, 0.0, "SMC: data unavailable"
 
-        # ── FETCH 4H + 1H DATA (no timezone filters — works everywhere) ────────
-        df_4h = _fh_4h(display_name, 60)
-        df_1h = _fh_candles(display_name, "60", 80)
+        # ── 1H TREND BIAS ──────────────────────────────────────────────────────
+        h1_ema21  = df_1h["Close"].ewm(span=21, adjust=False).mean()
+        h1_price  = df_1h["Close"].iloc[-1]
+        trend     = "bull" if h1_price > h1_ema21.iloc[-1] else "bear"
 
-        if df_4h is None or df_1h is None:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: Finnhub data unavailable"
-        if len(df_4h) < 10 or len(df_1h) < 30:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "Waiting: insufficient bars"
+        # ── 5M STRUCTURE — last 20 bars ────────────────────────────────────────
+        recent    = df_5m.iloc[-20:]
+        highs     = recent["High"].values
+        lows      = recent["Low"].values
+        closes    = recent["Close"].values
+        opens     = recent["Open"].values
 
-        # ── LAYER 1: 4H TREND (EMA 21) ─────────────────────────────────────────
-        h4_close  = df_4h["Close"]
-        h4_ema21  = h4_close.ewm(span=21, adjust=False).mean()
-        h4_ema50  = h4_close.ewm(span=50, adjust=False).mean()
-        h4_price  = h4_close.iloc[-1]
-        h4_e21    = h4_ema21.iloc[-1]
-        h4_e50    = h4_ema50.iloc[-1]
+        c_price   = df_5m["Close"].iloc[-1]
+        c_high    = df_5m["High"].iloc[-1]
+        c_low     = df_5m["Low"].iloc[-1]
+        prev_high = df_5m["High"].iloc[-2]
+        prev_low  = df_5m["Low"].iloc[-2]
 
-        # 4H trend: price AND ema21 relationship to ema50
-        trend_bull_4h = h4_price > h4_e21 and h4_e21 > h4_e50
-        trend_bear_4h = h4_price < h4_e21 and h4_e21 < h4_e50
+        # Break of Structure: current close breaks above recent swing high (bull)
+        # or below recent swing low (bear)
+        swing_high = max(highs[:-2])   # highest of last 20 bars excluding last 2
+        swing_low  = min(lows[:-2])    # lowest  of last 20 bars excluding last 2
 
-        # Relaxed: accept if price just above/below ema21 (catches early moves)
-        if not trend_bull_4h and not trend_bear_4h:
-            trend_bull_4h = h4_price > h4_e21
-            trend_bear_4h = h4_price < h4_e21
+        bos_bull   = trend == "bull" and closes[-1] > swing_high
+        bos_bear   = trend == "bear" and closes[-1] < swing_low
 
-        if not trend_bull_4h and not trend_bear_4h:
-            return "⚪ WAITING", h4_price, 0.0, 0.0, "4H trend unclear — price too close to EMA 21"
-
-        direction = "bull" if trend_bull_4h else "bear"
-
-        # ── LAYER 2: 1H ENTRY — EMA 9/21 CROSS or PULLBACK ────────────────────
-        h1_close = df_1h["Close"]
-        h1_high  = df_1h["High"]
-        h1_low   = df_1h["Low"]
-        h1_open  = df_1h["Open"]
-
-        h1_ema9  = h1_close.ewm(span=9,  adjust=False).mean()
-        h1_ema21 = h1_close.ewm(span=21, adjust=False).mean()
-
-        c_price  = h1_close.iloc[-1]
-        c_open   = h1_open.iloc[-1]
-        c_high   = h1_high.iloc[-1]
-        c_low    = h1_low.iloc[-1]
-
-        e9_now   = h1_ema9.iloc[-1];  e9_prev  = h1_ema9.iloc[-2]
-        e21_now  = h1_ema21.iloc[-1]; e21_prev = h1_ema21.iloc[-2]
-
-        # Fresh EMA cross on 1H
-        fresh_bull = e9_prev <= e21_prev and e9_now > e21_now
-        fresh_bear = e9_prev >= e21_prev and e9_now < e21_now
-
-        # Pullback to 1H EMA 21 (within 0.3% — generous tolerance)
-        pb_pct     = abs(c_price - e21_now) / e21_now if e21_now != 0 else 1
-        pb_bull    = direction == "bull" and e9_now > e21_now and pb_pct < 0.003
-        pb_bear    = direction == "bear" and e9_now < e21_now and pb_pct < 0.003
-
-        entry_bull = direction == "bull" and (fresh_bull or pb_bull)
-        entry_bear = direction == "bear" and (fresh_bear or pb_bear)
-
-        if not entry_bull and not entry_bear:
-            etype = "fresh cross" if (fresh_bull or fresh_bear) else f"pullback ({pb_pct*100:.2f}% from EMA21, need <0.3%)"
-            cross_dir = "above" if direction == "bull" else "below"
+        if not bos_bull and not bos_bear:
             return "⚪ WAITING", c_price, 0.0, 0.0, (
-                f"4H trend: {'BULLISH' if direction=='bull' else 'BEARISH'} ✅\n"
-                f"⏳ 1H waiting: EMA 9 not yet {cross_dir} EMA 21 | {etype}"
+                f"SMC 5M: 1H trend {'BULL' if trend=='bull' else 'BEAR'} | "
+                f"Waiting for 5M BoS (need close {'above' if trend=='bull' else 'below'} "
+                f"{'swing high' if trend=='bull' else 'swing low'})"
             )
 
-        # ── LAYER 3: MOMENTUM — RSI + MACD ────────────────────────────────────
-        rsi_s    = _calc_rsi(h1_close)
-        c_rsi    = rsi_s.iloc[-1]
-        macd_h   = _calc_macd_hist(h1_close)
-        mh_now   = macd_h.iloc[-1]
-        mh_prev  = macd_h.iloc[-2]
+        # ── ORDER BLOCK — last bearish candle before bull BoS (or bull before bear) ──
+        atr_5m  = _calc_atr(df_5m, 14).iloc[-1]
+        rsi_5m  = _calc_rsi(df_5m["Close"]).iloc[-1]
 
-        if direction == "bull":
-            rsi_ok  = 35 <= c_rsi <= 70
-            macd_ok = mh_now > mh_prev or mh_now > 0
-        else:
-            rsi_ok  = 30 <= c_rsi <= 65
-            macd_ok = mh_now < mh_prev or mh_now < 0
+        # RSI filter — not overbought/oversold
+        if trend == "bull" and rsi_5m > 75:
+            return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BoS confirmed but RSI overbought"
+        if trend == "bear" and rsi_5m < 25:
+            return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BoS confirmed but RSI oversold"
 
-        if not rsi_ok:
-            return "⚪ WAITING", c_price, 0.0, 0.0, (
-                f"4H {'BULL' if direction=='bull' else 'BEAR'} ✅ | 1H entry ✅\n"
-                f"⏳ RSI {c_rsi:.1f} outside zone ({'need <70' if direction=='bull' else 'need >30'})"
-            )
-
-        if not macd_ok:
-            return "⚪ WAITING", c_price, 0.0, 0.0, (
-                f"4H {'BULL' if direction=='bull' else 'BEAR'} ✅ | 1H entry ✅ | RSI ✅\n"
-                f"⏳ MACD histogram not confirming direction yet"
-            )
-
-        # ── ATR for SL/TP ──────────────────────────────────────────────────────
-        atr_1h  = _calc_atr(df_1h)
-        c_atr   = atr_1h.iloc[-1]
-
-        # Swing SL: low/high of last 5 1H bars + ATR buffer
-        swing_low  = h1_low.iloc[-5:].min()
-        swing_high = h1_high.iloc[-5:].max()
-
-        # ── BUILD SIGNAL ───────────────────────────────────────────────────────
-        session = "🇬🇧 London" if in_london else "🇺🇸 New York"
-        etype_str = "EMA 9/21 Cross" if (fresh_bull or fresh_bear) else "Pullback to EMA 21"
-
-        if entry_bull:
-            sl       = swing_low - (c_atr * 0.2)
-            raw_risk = c_price - sl
-            if raw_risk <= 0 or raw_risk > c_price * 0.06:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping (choppy 1H)"
-            tp  = c_price + max(raw_risk * 2.5, c_atr * 2.5)
-            rr  = (tp - c_price) / raw_risk
+        if bos_bull:
+            # Order block = body of last bearish candle (open > close) before breakout
+            sl     = swing_low - atr_5m * 0.3
+            risk   = c_price - sl
+            if risk <= 0 or risk > c_price * 0.04:
+                return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BUY BoS valid but SL too wide"
+            tp     = c_price + max(risk * 2.0, atr_5m * 2.0)
+            rr     = (tp - c_price) / risk
             reason = (
-                f"📊 Session: {session}\n"
-                f"✅ 4H Trend: BULLISH — price above EMA 21/50\n"
-                f"✅ 1H Entry: {etype_str} — EMA 9 above EMA 21\n"
-                f"✅ RSI: {c_rsi:.1f} — momentum zone\n"
-                f"✅ MACD: histogram {'rising' if mh_now > mh_prev else 'positive'}\n"
-                f"SL below 1H swing low | TP: 2.5× risk | R:R 1:{rr:.1f}"
+                f"📊 SMC 5M Strategy\n"
+                f"✅ 1H Trend: BULLISH (above EMA 21)\n"
+                f"✅ 5M Break of Structure: closed above swing high\n"
+                f"✅ RSI: {rsi_5m:.1f}\n"
+                f"✅ Order Block entry | SL below swing low\n"
+                f"TP: 2× risk | R:R 1:{rr:.1f}"
             )
             return "🟢 BUY", c_price, tp, sl, reason
 
         else:
-            sl       = swing_high + (c_atr * 0.2)
-            raw_risk = sl - c_price
-            if raw_risk <= 0 or raw_risk > c_price * 0.06:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SL too wide — skipping (choppy 1H)"
-            tp  = c_price - max(raw_risk * 2.5, c_atr * 2.5)
-            rr  = raw_risk / (c_price - tp) if (c_price - tp) > 0 else 0
+            sl     = swing_high + atr_5m * 0.3
+            risk   = sl - c_price
+            if risk <= 0 or risk > c_price * 0.04:
+                return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: SELL BoS valid but SL too wide"
+            tp     = c_price - max(risk * 2.0, atr_5m * 2.0)
+            rr     = risk / (c_price - tp) if (c_price - tp) > 0 else 0
             reason = (
-                f"📊 Session: {session}\n"
-                f"✅ 4H Trend: BEARISH — price below EMA 21/50\n"
-                f"✅ 1H Entry: {etype_str} — EMA 9 below EMA 21\n"
-                f"✅ RSI: {c_rsi:.1f} — momentum zone\n"
-                f"✅ MACD: histogram {'falling' if mh_now < mh_prev else 'negative'}\n"
-                f"SL above 1H swing high | TP: 2.5× risk | R:R 1:{rr:.1f}"
+                f"📊 SMC 5M Strategy\n"
+                f"✅ 1H Trend: BEARISH (below EMA 21)\n"
+                f"✅ 5M Break of Structure: closed below swing low\n"
+                f"✅ RSI: {rsi_5m:.1f}\n"
+                f"✅ Order Block entry | SL above swing high\n"
+                f"TP: 2× risk | R:R 1:{rr:.1f}"
             )
             return "🔴 SELL", c_price, tp, sl, reason
 
     except Exception as e:
-        return "⚪ WAITING", 0.0, 0.0, 0.0, f"Error: {str(e)}"
+        return "⚪ WAITING", 0.0, 0.0, 0.0, f"SMC error: {str(e)}"
+
+
+def _finnhub_signal(display_name: str) -> tuple:
+    """
+    DUAL STRATEGY ENGINE
+    Strategy A: Triple Confluence — 4H trend + 1H EMA cross + RSI/MACD (slower, higher RR)
+    Strategy B: SMC 5M          — 1H trend + 5M Break of Structure + Order Block (faster, more signals)
+    Whichever fires first wins. Both use Finnhub real-time data.
+    """
+    try:
+        now_utc    = datetime.now(timezone.utc)
+        h          = now_utc.hour + now_utc.minute / 60.0
+        in_session = 7.0 <= h < 17.0   # full London + NY straight through
+
+        if not in_session:
+            return "⚪ WAITING", 0.0, 0.0, 0.0, "Outside session (07-17 UTC)"
+
+        # ── STRATEGY A: TRIPLE CONFLUENCE 4H+1H ────────────────────────────────
+        df_4h = _fh_4h(display_name, 60)
+        df_1h = _fh_candles(display_name, "60", 80)
+
+        sig_a = "⚪ WAITING"
+        if df_4h is not None and df_1h is not None and len(df_4h) >= 10 and len(df_1h) >= 30:
+            h4_close  = df_4h["Close"]
+            h4_ema21  = h4_close.ewm(span=21, adjust=False).mean()
+            h4_price  = h4_close.iloc[-1]
+            h4_e21    = h4_ema21.iloc[-1]
+            h4_e50    = h4_close.ewm(span=50, adjust=False).mean().iloc[-1]
+
+            trend_bull = h4_price > h4_e21
+            trend_bear = h4_price < h4_e21
+            direction  = "bull" if trend_bull else "bear"
+
+            h1_close = df_1h["Close"]
+            h1_high  = df_1h["High"]
+            h1_low   = df_1h["Low"]
+            h1_ema9  = h1_close.ewm(span=9,  adjust=False).mean()
+            h1_ema21 = h1_close.ewm(span=21, adjust=False).mean()
+
+            c_price  = h1_close.iloc[-1]
+            e9_now   = h1_ema9.iloc[-1];  e9_prev  = h1_ema9.iloc[-2]
+            e21_now  = h1_ema21.iloc[-1]; e21_prev = h1_ema21.iloc[-2]
+
+            fresh_bull = e9_prev <= e21_prev and e9_now > e21_now
+            fresh_bear = e9_prev >= e21_prev and e9_now < e21_now
+            pb_pct     = abs(c_price - e21_now) / e21_now if e21_now != 0 else 1
+            pb_bull    = direction == "bull" and e9_now > e21_now and pb_pct < 0.003
+            pb_bear    = direction == "bear" and e9_now < e21_now and pb_pct < 0.003
+
+            entry_bull = direction == "bull" and (fresh_bull or pb_bull)
+            entry_bear = direction == "bear" and (fresh_bear or pb_bear)
+
+            if entry_bull or entry_bear:
+                rsi_v  = _calc_rsi(h1_close).iloc[-1]
+                macd_h = _calc_macd_hist(h1_close)
+                mh_now = macd_h.iloc[-1]; mh_prev = macd_h.iloc[-2]
+                rsi_ok = (35 <= rsi_v <= 70) if direction == "bull" else (30 <= rsi_v <= 65)
+                macd_ok = (mh_now > mh_prev or mh_now > 0) if direction == "bull" else (mh_now < mh_prev or mh_now < 0)
+
+                if rsi_ok and macd_ok:
+                    atr_1h     = _calc_atr(df_1h).iloc[-1]
+                    swing_low  = h1_low.iloc[-5:].min()
+                    swing_high = h1_high.iloc[-5:].max()
+                    session    = "🇬🇧 London" if h < 12.0 else "🇺🇸 New York"
+                    etype_str  = "EMA 9/21 Cross" if (fresh_bull or fresh_bear) else "Pullback to EMA 21"
+
+                    if entry_bull:
+                        sl = swing_low - atr_1h * 0.2
+                        raw_risk = c_price - sl
+                        if 0 < raw_risk <= c_price * 0.06:
+                            tp = c_price + max(raw_risk * 2.5, atr_1h * 2.5)
+                            rr = (tp - c_price) / raw_risk
+                            reason = (
+                                f"📊 Strategy A — Triple Confluence\n"
+                                f"📍 Session: {session}\n"
+                                f"✅ 4H Trend: BULLISH | ✅ 1H: {etype_str}\n"
+                                f"✅ RSI: {rsi_v:.1f} | ✅ MACD: confirming\n"
+                                f"SL: below 1H swing low | R:R 1:{rr:.1f}"
+                            )
+                            sig_a = "🟢 BUY"
+                            entry_a, tp_a, sl_a, reason_a = c_price, tp, sl, reason
+                    else:
+                        sl = swing_high + atr_1h * 0.2
+                        raw_risk = sl - c_price
+                        if 0 < raw_risk <= c_price * 0.06:
+                            tp = c_price - max(raw_risk * 2.5, atr_1h * 2.5)
+                            rr = raw_risk / (c_price - tp) if (c_price - tp) > 0 else 0
+                            reason = (
+                                f"📊 Strategy A — Triple Confluence\n"
+                                f"📍 Session: {session}\n"
+                                f"✅ 4H Trend: BEARISH | ✅ 1H: {etype_str}\n"
+                                f"✅ RSI: {rsi_v:.1f} | ✅ MACD: confirming\n"
+                                f"SL: above 1H swing high | R:R 1:{rr:.1f}"
+                            )
+                            sig_a = "🔴 SELL"
+                            entry_a, tp_a, sl_a, reason_a = c_price, tp, sl, reason
+
+        if sig_a != "⚪ WAITING":
+            return sig_a, entry_a, tp_a, sl_a, reason_a
+
+        # ── STRATEGY B: SMC 5M ─────────────────────────────────────────────────
+        return _smc_5m_signal(display_name)
+
+    except Exception as e:
+        return "⚪ WAITING", 0.0, 0.0, 0.0, f"Engine error: {str(e)}"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
