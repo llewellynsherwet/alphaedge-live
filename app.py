@@ -106,85 +106,22 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 # CREDENTIALS — EDIT THESE LINES ONLY
 # ══════════════════════════════════════════════════════════════════════════════
-# Credentials — set these as Environment Variables on Render
-# OR replace the empty strings below with your actual values
-_TG_TOKEN    = os.environ.get("TG_TOKEN",    "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE")
-_TG_CHAT_ID  = os.environ.get("TG_CHAT_ID",  "5689404731")
-_FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "d6ng6v9r01qodk5vlu30d6ng6v9r01qodk5vlu3g")
-
-
+# CREDENTIALS — Telegram only (no other API keys needed)
+# Set these as Environment Variables on Render dashboard
+# OR replace the placeholder strings below with your actual values
 # ══════════════════════════════════════════════════════════════════════════════
-# FINNHUB SYMBOL MAP — real-time data for Telegram signals only
-# ══════════════════════════════════════════════════════════════════════════════
-_FH_MAP = {
-    # Forex — correct Finnhub free tier symbols
-    "EUR/USD": "OANDA:EUR_USD",  "GBP/USD": "OANDA:GBP_USD",
-    "USD/JPY": "OANDA:USD_JPY",  "USD/CHF": "OANDA:USD_CHF",
-    "AUD/USD": "OANDA:AUD_USD",  "USD/CAD": "OANDA:USD_CAD",
-    "NZD/USD": "OANDA:NZD_USD",  "USD/ZAR": "OANDA:USD_ZAR",
-    "GBP/ZAR": "OANDA:GBP_ZAR",
-    # Indices
-    "S&P 500":    "OANDA:SPX500_USD", "NASDAQ 100": "OANDA:NAS100_USD",
-    "US 30":      "OANDA:US30_USD",   "VIX":        "CBOE:VIX",
-    # Commodities
-    "GOLD":      "OANDA:XAU_USD",   "SILVER":   "OANDA:XAG_USD",
-    "OIL (WTI)": "OANDA:BCO_USD",   "NAT GAS":  "OANDA:NATGAS_USD",
-    # Crypto — Binance works on free tier
-    "BITCOIN":  "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT",
-    "SOLANA":   "BINANCE:SOLUSDT",
-}
+_TG_TOKEN   = os.environ.get("TG_TOKEN",   "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE")   # from @BotFather
+_TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "5689404731")     # your Telegram chat ID
+
+# NOTE: No Finnhub key needed. No other API keys needed.
+# Signal engine uses yfinance — free, no key, works on Render.
 
 
-def _fh_candles(display_name: str, resolution: str, bars: int) -> "pd.DataFrame | None":
-    """
-    Fetch real-time OHLCV from Finnhub. Free tier: 60 req/min.
-    resolution: '5'=5min, '15'=15min, '60'=1H, 'D'=daily
-    """
-    if not _FINNHUB_KEY or "YOUR_" in _FINNHUB_KEY:
-        return None
-    fh_sym = _FH_MAP.get(display_name)
-    if not fh_sym:
-        return None
-    secs = {"5": 300, "15": 900, "60": 3600, "D": 86400}
-    now  = int(time.time())
-    frm  = now - secs.get(resolution, 3600) * bars * 2
-    try:
-        r    = requests.get(
-            "https://finnhub.io/api/v1/stock/candle",
-            params={"symbol": fh_sym, "resolution": resolution,
-                    "from": frm, "to": now, "token": _FINNHUB_KEY},
-            timeout=12
-        )
-        d = r.json()
-        if d.get("s") != "ok" or "c" not in d:
-            return None
-        df = pd.DataFrame({
-            "Open": d["o"], "High": d["h"], "Low": d["l"],
-            "Close": d["c"], "Volume": d.get("v", [0]*len(d["c"]))
-        }, index=pd.to_datetime(d["t"], unit="s", utc=True))
-        df.sort_index(inplace=True)
-        df = df.tail(bars)
-        df.dropna(inplace=True)
-        return df if len(df) >= 15 else None
-    except Exception:
-        return None
-
-
-def _fh_4h(display_name: str, bars: int = 60) -> "pd.DataFrame | None":
-    """Build 4H bars by resampling 1H data."""
-    df = _fh_candles(display_name, "60", bars * 4 + 20)
-    if df is None or len(df) < 8:
-        return None
-    df4 = df.resample("4h").agg({
-        "Open": "first", "High": "max", "Low": "min",
-        "Close": "last", "Volume": "sum"
-    }).dropna()
-    return df4 if len(df4) >= 8 else None
-
-
-# ================= TELEGRAM HELPERS =================
 def _send_telegram(message: str):
+    """Send a message to the Telegram bot. Silently skips if credentials not set."""
     if not _TG_TOKEN or "YOUR_" in _TG_TOKEN:
+        return
+    if not _TG_CHAT_ID or "YOUR_" in _TG_CHAT_ID:
         return
     try:
         requests.post(
@@ -196,332 +133,470 @@ def _send_telegram(message: str):
         pass
 
 
-# ================= SESSION FILTER =================
 def get_session_info():
+    """Returns (in_session, session_name) based on current UTC time."""
     now = datetime.now(timezone.utc)
     h   = now.hour + now.minute / 60.0
-    # Straight through London + NY — no gaps, no dead zones
-    # 07:00-17:00 UTC = 09:00-19:00 SAST
     if   7.0  <= h < 10.0: return True,  "🇬🇧 LONDON OPEN"
     elif 10.0 <= h < 12.0: return True,  "🇬🇧🇺🇸 LONDON CONTINUATION"
     elif 12.0 <= h < 16.0: return True,  "🇺🇸 NY / LONDON OVERLAP"
     elif 16.0 <= h < 17.0: return True,  "🇺🇸 NEW YORK CLOSE"
-    else:                   return False, "🔴 OFF-SESSION (avoid)" 
+    else:                   return False, "🔴 OFF-SESSION"
+
 
 def _next_session():
-    h = datetime.now(timezone.utc).hour + datetime.now(timezone.utc).minute / 60.0
-    if   h < 3.0:  return "Tokyo Open",        "00:00 UTC"
-    elif h < 7.0:  return "London Open",        "07:00 UTC"
-    elif h < 12.0: return "NY/London Overlap",  "12:00 UTC"
-    else:          return "Tokyo Open",          "00:00 UTC (tomorrow)"
+    """Returns (name, time_str) of the next upcoming session."""
+    now  = datetime.now(timezone.utc)
+    h    = now.hour + now.minute / 60.0
+    if h < 7.0:
+        mins = int((7.0 - h) * 60)
+        return "🇬🇧 London Open", f"{7 - (now.hour if now.hour > 7 else 0):02d}:00 UTC"
+    elif h < 12.0:
+        return "🇺🇸 NY / London Overlap", "12:00 UTC"
+    else:
+        return "🇬🇧 London Open (tomorrow)", "07:00 UTC"
 
-
-# ================= DASHBOARD DATA (yfinance — free, unlimited) =================
-@st.cache_data(ttl=60, show_spinner=False)
-def get_dashboard_data():
-    results = []
-    for symbol, y_sym in TICKER_MAP.items():
-        try:
-            ticker = yf.Ticker(y_sym)
-            df = ticker.history(period="2d", interval="5m")
-            if df.empty: df = ticker.history(period="5d", interval="1h")
-            if not df.empty and len(df) >= 20:
-                current_price = df['Close'].iloc[-1]
-                sma_20 = df['Close'].rolling(window=20).mean().iloc[-1]
-                if pd.isna(sma_20): continue
-                bias = "BULLISH" if current_price > sma_20 else "BEARISH"
-                open_price = df['Open'].iloc[0]
-                if open_price == 0 or pd.isna(open_price): open_price = current_price
-                pct_change = ((current_price - open_price) / open_price) * 100
-                score = int(min(max(abs(pct_change) * 50, 1), 10))
-                if bias == "BEARISH": score = -score
-                tech = "Overbought" if score >= 8 else "Oversold" if score <= -8 else "Neutral"
-                results.append({"Symbol": symbol, "Bias": bias, "Score": score,
-                    "Trend": "Upward" if bias=="BULLISH" else "Downward", "Tech": tech, "Price": current_price})
-        except Exception as e:
-            st.session_state.setdefault("data_errors", []).append(f"{symbol}: {str(e)}")
-    return results
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# FINNHUB SIGNAL ENGINE — used ONLY by Telegram background monitor
-# Platform display signals still use yfinance (free, no API limits)
-#
-# 4-layer confluence:
-#   Daily  — EMA 20 + EMA 50 direction (macro bias)
-#   4H     — EMA 21 + EMA 50 structure
-#   1H     — EMA 9/21 cross + RSI + MACD (intermediate entry)
-#   5m     — EMA 9/21 cross + RSI + MACD (precision entry)
-#
-# ALL FOUR must agree — if any layer disagrees, no signal fires.
-# SL: below/above 4H swing low/high + ATR buffer
-# TP: minimum 2R enforced
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _calc_rsi(series, period=14):
     delta = series.diff()
-    gain  = delta.clip(lower=0).ewm(com=period-1, adjust=False).mean()
-    loss  = (-delta.clip(upper=0)).ewm(com=period-1, adjust=False).mean()
-    return 100 - (100 / (1 + gain / loss.replace(0, 1e-9)))
+    gain  = delta.where(delta > 0, 0.0).ewm(alpha=1/period, adjust=False).mean()
+    loss  = (-delta.where(delta < 0, 0.0)).ewm(alpha=1/period, adjust=False).mean()
+    rs    = gain / loss.replace(0, float("nan"))
+    return 100 - (100 / (1 + rs))
+
 
 def _calc_atr(df, period=14):
-    tr = pd.concat([
-        df["High"] - df["Low"],
-        (df["High"] - df["Close"].shift()).abs(),
-        (df["Low"]  - df["Close"].shift()).abs()
-    ], axis=1).max(axis=1)
+    hl  = df["High"] - df["Low"]
+    hc  = (df["High"] - df["Close"].shift()).abs()
+    lc  = (df["Low"]  - df["Close"].shift()).abs()
+    tr  = pd.concat([hl, hc, lc], axis=1).max(axis=1)
     return tr.ewm(span=period, adjust=False).mean()
 
-def _calc_macd_hist(series):
-    macd = series.ewm(span=12, adjust=False).mean() - series.ewm(span=26, adjust=False).mean()
-    return macd - macd.ewm(span=9, adjust=False).mean()
+
+def _calc_macd_hist(series, fast=12, slow=26, signal=9):
+    ema_fast = series.ewm(span=fast, adjust=False).mean()
+    ema_slow = series.ewm(span=slow, adjust=False).mean()
+    macd     = ema_fast - ema_slow
+    sig_line = macd.ewm(span=signal, adjust=False).mean()
+    return macd - sig_line
+
 
 def _check_entry(df, direction):
-    """Check one timeframe for entry signal. Returns dict with details."""
-    if df is None or len(df) < 30:
-        return {"ok": False, "reason": "insufficient data"}
-    close  = df["Close"]
-    ema9   = close.ewm(span=9,  adjust=False).mean()
-    ema21  = close.ewm(span=21, adjust=False).mean()
-    rsi    = _calc_rsi(close)
-    atr    = _calc_atr(df)
-    macd_h = _calc_macd_hist(close)
-
-    c = close.iloc[-1];   p_c = close.iloc[-2]
-    e9  = ema9.iloc[-1];  pe9  = ema9.iloc[-2]
-    e21 = ema21.iloc[-1]; pe21 = ema21.iloc[-2]
-    r   = rsi.iloc[-1]
-    a   = atr.iloc[-1]
-    mh  = macd_h.iloc[-1]; pmh = macd_h.iloc[-2]
-    atr_avg = atr.rolling(10).mean().iloc[-1]
-
-    pb_pct     = abs(c - e21) / e21 if e21 != 0 else 1
-    fresh_bull = pe9 <= pe21 and e9 > e21
-    fresh_bear = pe9 >= pe21 and e9 < e21
-    cont_bull  = e9 > e21 and pb_pct < 0.003
-    cont_bear  = e9 < e21 and pb_pct < 0.003
-    atr_active = a > atr_avg * 0.9
-
+    """Simple entry check — EMA9 cross of EMA21."""
+    c      = df["Close"]
+    e9     = c.ewm(span=9,  adjust=False).mean()
+    e21    = c.ewm(span=21, adjust=False).mean()
     if direction == "bull":
-        ema_ok  = fresh_bull or cont_bull
-        rsi_ok  = 38 <= r <= 68
-        macd_ok = mh > 0 or mh > pmh
-        etype   = "Fresh EMA cross ↑" if fresh_bull else "Pullback to EMA 21"
-    else:
-        ema_ok  = fresh_bear or cont_bear
-        rsi_ok  = 32 <= r <= 62
-        macd_ok = mh < 0 or mh < pmh
-        etype   = "Fresh EMA cross ↓" if fresh_bear else "Pullback to EMA 21"
-
-    ok = ema_ok and rsi_ok and macd_ok and atr_active
-    return {"ok": ok, "ema_ok": ema_ok, "rsi_ok": rsi_ok, "macd_ok": macd_ok,
-            "atr_active": atr_active, "rsi": r, "atr": a, "etype": etype, "pb_pct": pb_pct * 100}
+        return e9.iloc[-1] > e21.iloc[-1]
+    return e9.iloc[-1] < e21.iloc[-1]
 
 
-def _smc_5m_signal(display_name: str) -> tuple:
+@st.cache_data(ttl=60, show_spinner=False)
+def get_dashboard_data():
+    """Fetch dashboard heatmap data for all 20 assets via yfinance."""
+    results = {}
+    for name, sym in TICKER_MAP.items():
+        try:
+            df = yf.Ticker(sym).history(period="5d", interval="1h")
+            if df is None or len(df) < 10:
+                results[name] = {"price": 0, "bias": "—", "score": 0,
+                                 "trend": "—", "tech": "—", "source": "yf"}
+                continue
+            df   = df[["Open","High","Low","Close","Volume"]].dropna()
+            c    = df["Close"]
+            sma  = c.rolling(20).mean()
+            rsi  = _calc_rsi(c)
+            e9   = c.ewm(span=9,  adjust=False).mean()
+            e21  = c.ewm(span=21, adjust=False).mean()
+            price = c.iloc[-1]
+            r     = rsi.iloc[-1]
+            bull  = price > sma.iloc[-1] and e9.iloc[-1] > e21.iloc[-1]
+            bear  = price < sma.iloc[-1] and e9.iloc[-1] < e21.iloc[-1]
+            bias  = "🟢 BULL" if bull else "🔴 BEAR" if bear else "⚪ NEUTRAL"
+            score = round(r, 1)
+            trend = "↑ ABOVE SMA20" if price > sma.iloc[-1] else "↓ BELOW SMA20"
+            tech  = f"RSI {r:.1f}"
+            results[name] = {"price": price, "bias": bias, "score": score,
+                             "trend": trend, "tech": tech, "source": "yf"}
+        except Exception:
+            results[name] = {"price": 0, "bias": "—", "score": 0,
+                             "trend": "—", "tech": "—", "source": "yf"}
+    return results
+
+
+def _yf_candles(ticker_symbol: str, interval: str, bars: int):
     """
-    SMART MONEY CONCEPT — 5M CHART
-    Trend from 1H EMA 21. Entry on 5m Break of Structure + Order Block.
-    Fires more frequently than 1H engine. Minimum 1.5R enforced.
+    Fetch OHLCV via yfinance.
+    interval: '1m','5m','15m','1h','4h','1d'
+    Returns DataFrame or None. Logs failures to Telegram once per session.
     """
     try:
-        df_1h = _fh_candles(display_name, "60", 50)
-        df_5m = _fh_candles(display_name, "5",  60)
+        import yfinance as yf
+        period_map = {
+            "1m":  "1d",
+            "5m":  "5d",
+            "15m": "5d",
+            "1h":  "30d",
+            "4h":  "60d",
+            "1d":  "180d",
+        }
+        period = period_map.get(interval, "30d")
+        ticker = yf.Ticker(ticker_symbol)
+        df     = ticker.history(period=period, interval=interval)
+        if df is None or len(df) < 5:
+            _log_data_error(ticker_symbol, interval, f"only {len(df) if df is not None else 0} bars returned")
+            return None
+        df = df[["Open","High","Low","Close","Volume"]].dropna()
+        if len(df) < 5:
+            _log_data_error(ticker_symbol, interval, "all NaN after dropna")
+            return None
+        return df.tail(bars)
+    except Exception as e:
+        _log_data_error(ticker_symbol, interval, str(e))
+        return None
 
-        if df_1h is None or df_5m is None or len(df_1h) < 20 or len(df_5m) < 20:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "SMC: data unavailable"
 
-        # ── 1H TREND BIAS ──────────────────────────────────────────────────────
-        h1_ema21  = df_1h["Close"].ewm(span=21, adjust=False).mean()
-        h1_price  = df_1h["Close"].iloc[-1]
-        trend     = "bull" if h1_price > h1_ema21.iloc[-1] else "bear"
+_data_errors: dict = {}   # track errors so we don't spam Telegram
 
-        # ── 5M STRUCTURE — last 20 bars ────────────────────────────────────────
-        recent    = df_5m.iloc[-20:]
-        highs     = recent["High"].values
-        lows      = recent["Low"].values
-        closes    = recent["Close"].values
-        opens     = recent["Open"].values
-
-        c_price   = df_5m["Close"].iloc[-1]
-        c_high    = df_5m["High"].iloc[-1]
-        c_low     = df_5m["Low"].iloc[-1]
-        prev_high = df_5m["High"].iloc[-2]
-        prev_low  = df_5m["Low"].iloc[-2]
-
-        # Break of Structure: current close breaks above recent swing high (bull)
-        # or below recent swing low (bear)
-        swing_high = max(highs[:-2])   # highest of last 20 bars excluding last 2
-        swing_low  = min(lows[:-2])    # lowest  of last 20 bars excluding last 2
-
-        bos_bull   = trend == "bull" and closes[-1] > swing_high
-        bos_bear   = trend == "bear" and closes[-1] < swing_low
-
-        if not bos_bull and not bos_bear:
-            return "⚪ WAITING", c_price, 0.0, 0.0, (
-                f"SMC 5M: 1H trend {'BULL' if trend=='bull' else 'BEAR'} | "
-                f"Waiting for 5M BoS (need close {'above' if trend=='bull' else 'below'} "
-                f"{'swing high' if trend=='bull' else 'swing low'})"
+def _log_data_error(symbol: str, interval: str, reason: str):
+    """Send ONE Telegram alert per symbol per session if data fails."""
+    key = f"{symbol}_{interval}"
+    if key not in _data_errors:
+        _data_errors[key] = True
+        try:
+            _send_telegram(
+                f"⚠️ <b>DATA ERROR</b>\n"
+                f"Symbol: {symbol} | Interval: {interval}\n"
+                f"Reason: {reason}\n"
+                f"<i>Check yfinance / network on Render</i>"
             )
+        except Exception:
+            pass
 
-        # ── ORDER BLOCK — last bearish candle before bull BoS (or bull before bear) ──
-        atr_5m  = _calc_atr(df_5m, 14).iloc[-1]
-        rsi_5m  = _calc_rsi(df_5m["Close"]).iloc[-1]
 
-        # RSI filter — not overbought/oversold
-        if trend == "bull" and rsi_5m > 75:
-            return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BoS confirmed but RSI overbought"
-        if trend == "bear" and rsi_5m < 25:
-            return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BoS confirmed but RSI oversold"
+def _us30_open_strategy(ticker_symbol):
+    try:
+        now_utc    = datetime.now(timezone.utc)
+        h          = now_utc.hour + now_utc.minute / 60.0
+        in_preopen = 13.0 <= h < 14.5
+        at_open    = 14.5 <= h < 15.5
+        if not (in_preopen or at_open):
+            return "WAIT", 0.0, 0.0, 0.0, "US30: waiting for pre-open window (13:00-15:30 UTC)"
 
-        if bos_bull:
-            # Order block = body of last bearish candle (open > close) before breakout
-            sl     = swing_low - atr_5m * 0.3
-            risk   = c_price - sl
-            if risk <= 0 or risk > c_price * 0.04:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: BUY BoS valid but SL too wide"
-            tp     = c_price + max(risk * 2.0, atr_5m * 2.0)
-            rr     = (tp - c_price) / risk
-            reason = (
-                f"📊 SMC 5M Strategy\n"
-                f"✅ 1H Trend: BULLISH (above EMA 21)\n"
-                f"✅ 5M Break of Structure: closed above swing high\n"
-                f"✅ RSI: {rsi_5m:.1f}\n"
-                f"✅ Order Block entry | SL below swing low\n"
-                f"TP: 2× risk | R:R 1:{rr:.1f}"
-            )
-            return "🟢 BUY", c_price, tp, sl, reason
+        score = 0
+        layers = []
+        box_bias = stock_bias = dxy_bias = pattern_bias = smc_bias = "neutral"
 
+        # L1: Pre-market box
+        df_5m = _yf_candles(ticker_symbol, "5m", 100)
+        box_high = box_low = 0.0
+        if df_5m is not None and len(df_5m) >= 20:
+            pm = df_5m.iloc[-20:-10]
+            box_high = pm["High"].max()
+            box_low  = pm["Low"].min()
+            px = df_5m["Close"].iloc[-1]
+            if px > box_high:
+                score += 1; box_bias = "bull"
+                layers.append("L1 PASS: Price ABOVE pre-market box -> BULLISH")
+            elif px < box_low:
+                score += 1; box_bias = "bear"
+                layers.append("L1 PASS: Price BELOW pre-market box -> BEARISH")
+            else:
+                layers.append("L1 WAIT: Price inside pre-market box")
         else:
-            sl     = swing_high + atr_5m * 0.3
-            risk   = sl - c_price
-            if risk <= 0 or risk > c_price * 0.04:
-                return "⚪ WAITING", c_price, 0.0, 0.0, "SMC 5M: SELL BoS valid but SL too wide"
-            tp     = c_price - max(risk * 2.0, atr_5m * 2.0)
-            rr     = risk / (c_price - tp) if (c_price - tp) > 0 else 0
-            reason = (
-                f"📊 SMC 5M Strategy\n"
-                f"✅ 1H Trend: BEARISH (below EMA 21)\n"
-                f"✅ 5M Break of Structure: closed below swing low\n"
-                f"✅ RSI: {rsi_5m:.1f}\n"
-                f"✅ Order Block entry | SL above swing high\n"
-                f"TP: 2× risk | R:R 1:{rr:.1f}"
+            layers.append("L1 SKIP: 5M data unavailable")
+
+        # L2: DOW component bias
+        dow = {"UNH":"UNH","GS":"GS","MSFT":"MSFT","HD":"HD","AMGN":"AMGN","MCD":"MCD","CAT":"CAT","V":"V"}
+        bc = nc = 0
+        for sym in dow.values():
+            try:
+                ds = _yf_candles(sym, "1h", 20)
+                if ds is not None and len(ds) >= 10:
+                    c = ds["Close"]
+                    if c.iloc[-1] > c.ewm(span=21, adjust=False).mean().iloc[-1]:
+                        bc += 1
+                    else:
+                        nc += 1
+            except Exception:
+                pass
+        tot = bc + nc
+        if tot > 0:
+            bp = bc / tot * 100
+            if bp >= 62:
+                score += 1; stock_bias = "bull"
+                layers.append("L2 PASS: " + str(bc) + "/" + str(tot) + " DOW stocks BULLISH")
+            elif bp <= 38:
+                score += 1; stock_bias = "bear"
+                layers.append("L2 PASS: " + str(nc) + "/" + str(tot) + " DOW stocks BEARISH")
+            else:
+                layers.append("L2 WAIT: DOW mixed " + str(bc) + " bull / " + str(nc) + " bear")
+        else:
+            layers.append("L2 SKIP: DOW data unavailable")
+
+        # L3: DXY inverse
+        df_dxy = _yf_candles("DX-Y.NYB", "1h", 20)
+        if df_dxy is not None and len(df_dxy) >= 10:
+            dc = df_dxy["Close"]
+            de9  = dc.ewm(span=9,  adjust=False).mean()
+            de21 = dc.ewm(span=21, adjust=False).mean()
+            if de9.iloc[-1] < de21.iloc[-1] and dc.iloc[-1] < dc.iloc[-3]:
+                score += 1; dxy_bias = "bull"
+                layers.append("L3 PASS: DXY FALLING -> US30 BULLISH pressure")
+            elif de9.iloc[-1] > de21.iloc[-1] and dc.iloc[-1] > dc.iloc[-3]:
+                score += 1; dxy_bias = "bear"
+                layers.append("L3 PASS: DXY RISING -> US30 BEARISH pressure")
+            else:
+                layers.append("L3 WAIT: DXY ranging")
+        else:
+            layers.append("L3 SKIP: DXY unavailable")
+
+        # L4: Double top / bottom on 30M
+        df_30m = _yf_candles(ticker_symbol, "30m", 20)
+        if df_30m is not None and len(df_30m) >= 10:
+            hh30 = df_30m["High"].values[-10:]
+            ll30 = df_30m["Low"].values[-10:]
+            h1i  = hh30.argmax(); tmp = hh30.copy(); tmp[h1i] = 0; h2i = tmp.argmax()
+            if h1i != h2i and abs(hh30[h1i] - hh30[h2i]) / hh30[h1i] < 0.0015:
+                score += 1; pattern_bias = "bear"
+                layers.append("L4 PASS: DOUBLE TOP on 30M -> BEARISH reversal")
+            else:
+                l1i = ll30.argmin(); tmp2 = ll30.copy(); tmp2[l1i] = 999999; l2i = tmp2.argmin()
+                if l1i != l2i and abs(ll30[l1i] - ll30[l2i]) / ll30[l1i] < 0.0015:
+                    score += 1; pattern_bias = "bull"
+                    layers.append("L4 PASS: DOUBLE BOTTOM on 30M -> BULLISH reversal")
+                else:
+                    layers.append("L4 WAIT: No double top/bottom detected")
+        else:
+            layers.append("L4 SKIP: 30M data unavailable")
+
+        # L5: SMC 4H structure
+        df_4h = _yf_candles(ticker_symbol, "4h", 20)
+        if df_4h is not None and len(df_4h) >= 8:
+            c4 = df_4h["Close"]; h4 = df_4h["High"]; l4 = df_4h["Low"]
+            e4 = c4.ewm(span=21, adjust=False).mean()
+            hh = h4.iloc[-1] > h4.iloc[-3]; hl = l4.iloc[-1] > l4.iloc[-3]
+            lh = h4.iloc[-1] < h4.iloc[-3]; ll = l4.iloc[-1] < l4.iloc[-3]
+            if (hh or hl) and c4.iloc[-1] > e4.iloc[-1]:
+                score += 1; smc_bias = "bull"
+                layers.append("L5 PASS: 4H BULLISH structure (HH/HL above EMA21)")
+            elif (lh or ll) and c4.iloc[-1] < e4.iloc[-1]:
+                score += 1; smc_bias = "bear"
+                layers.append("L5 PASS: 4H BEARISH structure (LH/LL below EMA21)")
+            else:
+                layers.append("L5 WAIT: 4H structure unclear")
+        else:
+            layers.append("L5 SKIP: 4H data unavailable")
+
+        biases   = [box_bias, stock_bias, dxy_bias, pattern_bias, smc_bias]
+        bull_pts = biases.count("bull")
+        bear_pts = biases.count("bear")
+        sep      = "-" * 24
+        hdr = (
+            "US30 OPEN STRATEGY " + str(score) + "/5\n" + sep + "\n"
+            + "\n".join(layers) + "\n" + sep + "\n"
+            + "Confluence: " + str(bull_pts) + " BULL / " + str(bear_pts) + " BEAR\n"
+        )
+
+        if bull_pts < 3 and bear_pts < 3:
+            return "WAIT", 0.0, 0.0, 0.0, hdr + "Need 3+ layers same direction"
+
+        direction = "bull" if bull_pts >= bear_pts else "bear"
+
+        if in_preopen:
+            bias_lbl = "BULLISH" if direction == "bull" else "BEARISH"
+            return "WAIT", 0.0, 0.0, 0.0, (
+                hdr + bias_lbl + " bias confirmed\n"
+                + "WAIT for 14:30 UTC open candle to close\n"
+                + "ENTRY: Pullback to first open 5M candle body"
             )
-            return "🔴 SELL", c_price, tp, sl, reason
+
+        if df_5m is not None and len(df_5m) >= 5:
+            atr5  = _calc_atr(df_5m).iloc[-1]
+            price = df_5m["Close"].iloc[-1]
+            if direction == "bull":
+                sl   = (box_low if box_low > 0 else price - atr5 * 3) - atr5 * 0.5
+                risk = price - sl
+                if risk <= 0 or risk > price * 0.05:
+                    sl = price - atr5 * 3; risk = price - sl
+                tp = price + max(risk * 2.5, atr5 * 5)
+                rr = (tp - price) / risk if risk > 0 else 0
+                return "BUY", price, tp, sl, (
+                    hdr + "BUY " + str(round(price, 1))
+                    + " | TP " + str(round(tp, 1))
+                    + " | SL " + str(round(sl, 1))
+                    + " | R:R 1:" + str(round(rr, 1))
+                )
+            else:
+                sl   = (box_high if box_high > 0 else price + atr5 * 3) + atr5 * 0.5
+                risk = sl - price
+                if risk <= 0 or risk > price * 0.05:
+                    sl = price + atr5 * 3; risk = sl - price
+                tp = price - max(risk * 2.5, atr5 * 5)
+                rr = risk / (price - tp) if (price - tp) > 0 else 0
+                return "SELL", price, tp, sl, (
+                    hdr + "SELL " + str(round(price, 1))
+                    + " | TP " + str(round(tp, 1))
+                    + " | SL " + str(round(sl, 1))
+                    + " | R:R 1:" + str(round(rr, 1))
+                )
+
+        return "WAIT", 0.0, 0.0, 0.0, hdr + "Insufficient price data"
 
     except Exception as e:
-        return "⚪ WAITING", 0.0, 0.0, 0.0, f"SMC error: {str(e)}"
+        return "WAIT", 0.0, 0.0, 0.0, "US30 error: " + str(e)
 
 
-def _finnhub_signal(display_name: str) -> tuple:
+def _smc_4h_strategy(display_name, ticker_symbol):
+    try:
+        df_4h = _yf_candles(ticker_symbol, "4h", 30)
+        df_1h = _yf_candles(ticker_symbol, "1h", 50)
+        if df_4h is None or df_1h is None:
+            return "WAIT", 0.0, 0.0, 0.0, "SMC 4H: data unavailable"
+        if len(df_4h) < 8 or len(df_1h) < 20:
+            return "WAIT", 0.0, 0.0, 0.0, "SMC 4H: insufficient bars"
+
+        score = 0; layers = []
+
+        # L1: 4H structure
+        h4h = df_4h["High"]; h4l = df_4h["Low"]; h4c = df_4h["Close"]
+        hh = h4h.iloc[-1] > h4h.iloc[-3]; hl = h4l.iloc[-1] > h4l.iloc[-3]
+        lh = h4h.iloc[-1] < h4h.iloc[-3]; ll = h4l.iloc[-1] < h4l.iloc[-3]
+        if hh and hl:
+            direction = "bull"; score += 1
+            layers.append("L1 PASS: 4H HH+HL -> BULLISH structure")
+        elif lh and ll:
+            direction = "bear"; score += 1
+            layers.append("L1 PASS: 4H LH+LL -> BEARISH structure")
+        elif hh or hl:
+            direction = "bull"; layers.append("L1 PARTIAL: Partial bullish")
+        elif lh or ll:
+            direction = "bear"; layers.append("L1 PARTIAL: Partial bearish")
+        else:
+            return "WAIT", h4c.iloc[-1], 0.0, 0.0, "SMC 4H: ranging market, no structure"
+
+        # L2: 4H Order block
+        ob_high = ob_low = 0.0
+        for i in range(len(df_4h) - 2, max(len(df_4h) - 8, 0), -1):
+            o = df_4h["Open"].iloc[i]; c = df_4h["Close"].iloc[i]
+            if direction == "bull" and c < o:
+                ob_high = df_4h["High"].iloc[i]; ob_low = df_4h["Low"].iloc[i]
+                score += 1
+                layers.append("L2 PASS: OB at " + str(round(ob_low, 4)) + "-" + str(round(ob_high, 4)))
+                break
+            elif direction == "bear" and c > o:
+                ob_high = df_4h["High"].iloc[i]; ob_low = df_4h["Low"].iloc[i]
+                score += 1
+                layers.append("L2 PASS: OB at " + str(round(ob_low, 4)) + "-" + str(round(ob_high, 4)))
+                break
+        if ob_high == 0.0:
+            layers.append("L2 WAIT: No clean order block found")
+
+        # L3: 1H EMA
+        h1c  = df_1h["Close"]
+        e9   = h1c.ewm(span=9,  adjust=False).mean()
+        e21  = h1c.ewm(span=21, adjust=False).mean()
+        price = h1c.iloc[-1]
+        ab = e9.iloc[-1] > e21.iloc[-1]
+        be = e9.iloc[-1] < e21.iloc[-1]
+        if direction == "bull" and ab:
+            score += 1; tag = "fresh" if e9.iloc[-2] <= e21.iloc[-2] else "aligned"
+            layers.append("L3 PASS: 1H EMA9 above EMA21 (" + tag + ")")
+        elif direction == "bear" and be:
+            score += 1; tag = "fresh" if e9.iloc[-2] >= e21.iloc[-2] else "aligned"
+            layers.append("L3 PASS: 1H EMA9 below EMA21 (" + tag + ")")
+        else:
+            layers.append("L3 WAIT: 1H EMA not confirmed")
+
+        # L4: RSI
+        rv = _calc_rsi(h1c).iloc[-1]
+        if direction == "bull" and 40 <= rv <= 65:
+            score += 1; layers.append("L4 PASS: RSI " + str(round(rv, 1)) + " in zone (40-65)")
+        elif direction == "bear" and 35 <= rv <= 60:
+            score += 1; layers.append("L4 PASS: RSI " + str(round(rv, 1)) + " in zone (35-60)")
+        else:
+            layers.append("L4 WAIT: RSI " + str(round(rv, 1)) + " outside zone")
+
+        # L5: MACD
+        mh = _calc_macd_hist(h1c)
+        mn = mh.iloc[-1]; mp = mh.iloc[-2]
+        if direction == "bull" and (mn > mp or mn > 0):
+            score += 1; layers.append("L5 PASS: MACD " + ("rising" if mn > mp else "positive"))
+        elif direction == "bear" and (mn < mp or mn < 0):
+            score += 1; layers.append("L5 PASS: MACD " + ("falling" if mn < mp else "negative"))
+        else:
+            layers.append("L5 WAIT: MACD not confirming")
+
+        sep = "-" * 24
+        hdr = (
+            "SMC 4H STRATEGY " + str(score) + "/5\n" + sep + "\n"
+            + "\n".join(layers) + "\n" + sep + "\n"
+        )
+
+        if score < 4:
+            return "WAIT", price, 0.0, 0.0, hdr + "Need 4/5 layers (currently " + str(score) + "/5)"
+
+        atr1h  = _calc_atr(df_1h).iloc[-1]
+        sw_low = df_1h["Low"].iloc[-6:].min()
+        sw_hi  = df_1h["High"].iloc[-6:].max()
+        sess   = "London" if datetime.now(timezone.utc).hour < 12 else "New York"
+
+        if direction == "bull":
+            sl_b = ob_low if ob_low > 0 else sw_low
+            sl   = sl_b - atr1h * 0.3
+            risk = price - sl
+            if risk <= 0 or risk > price * 0.07:
+                return "WAIT", price, 0.0, 0.0, hdr + "SL too wide, wait for better pullback"
+            tp = price + max(risk * 2.5, atr1h * 3)
+            rr = (tp - price) / risk
+            return "BUY", price, tp, sl, (
+                hdr + "Session: " + sess + "\n"
+                + "Entry: " + str(round(price, 5))
+                + " | TP: " + str(round(tp, 5))
+                + " | SL: " + str(round(sl, 5))
+                + " | R:R 1:" + str(round(rr, 1))
+            )
+        else:
+            sl_b = ob_high if ob_high > 0 else sw_hi
+            sl   = sl_b + atr1h * 0.3
+            risk = sl - price
+            if risk <= 0 or risk > price * 0.07:
+                return "WAIT", price, 0.0, 0.0, hdr + "SL too wide, wait for better pullback"
+            tp = price - max(risk * 2.5, atr1h * 3)
+            rr = risk / (price - tp) if (price - tp) > 0 else 0
+            return "SELL", price, tp, sl, (
+                hdr + "Session: " + sess + "\n"
+                + "Entry: " + str(round(price, 5))
+                + " | TP: " + str(round(tp, 5))
+                + " | SL: " + str(round(sl, 5))
+                + " | R:R 1:" + str(round(rr, 1))
+            )
+
+    except Exception as e:
+        return "WAIT", 0.0, 0.0, 0.0, "SMC 4H error: " + str(e)
+
+
+def _signal_engine(display_name):
     """
-    DUAL STRATEGY ENGINE
-    Strategy A: Triple Confluence — 4H trend + 1H EMA cross + RSI/MACD (slower, higher RR)
-    Strategy B: SMC 5M          — 1H trend + 5M Break of Structure + Order Block (faster, more signals)
-    Whichever fires first wins. Both use Finnhub real-time data.
+    ALPHAEDGE SIGNAL ENGINE
+    US30  -> US30 Open Strategy (5 layers: pre-market box, DOW stocks, DXY, double top/bottom, 4H SMC)
+    Other -> SMC 4H Strategy   (5 layers: structure, order block, 1H EMA, RSI, MACD)
     """
     try:
         now_utc    = datetime.now(timezone.utc)
         h          = now_utc.hour + now_utc.minute / 60.0
-        in_session = 7.0 <= h < 17.0   # full London + NY straight through
-
-        if not in_session:
-            return "⚪ WAITING", 0.0, 0.0, 0.0, "Outside session (07-17 UTC)"
-
-        # ── STRATEGY A: TRIPLE CONFLUENCE 4H+1H ────────────────────────────────
-        df_4h = _fh_4h(display_name, 60)
-        df_1h = _fh_candles(display_name, "60", 80)
-
-        sig_a = "⚪ WAITING"
-        if df_4h is not None and df_1h is not None and len(df_4h) >= 10 and len(df_1h) >= 30:
-            h4_close  = df_4h["Close"]
-            h4_ema21  = h4_close.ewm(span=21, adjust=False).mean()
-            h4_price  = h4_close.iloc[-1]
-            h4_e21    = h4_ema21.iloc[-1]
-            h4_e50    = h4_close.ewm(span=50, adjust=False).mean().iloc[-1]
-
-            trend_bull = h4_price > h4_e21
-            trend_bear = h4_price < h4_e21
-            direction  = "bull" if trend_bull else "bear"
-
-            h1_close = df_1h["Close"]
-            h1_high  = df_1h["High"]
-            h1_low   = df_1h["Low"]
-            h1_ema9  = h1_close.ewm(span=9,  adjust=False).mean()
-            h1_ema21 = h1_close.ewm(span=21, adjust=False).mean()
-
-            c_price  = h1_close.iloc[-1]
-            e9_now   = h1_ema9.iloc[-1];  e9_prev  = h1_ema9.iloc[-2]
-            e21_now  = h1_ema21.iloc[-1]; e21_prev = h1_ema21.iloc[-2]
-
-            fresh_bull = e9_prev <= e21_prev and e9_now > e21_now
-            fresh_bear = e9_prev >= e21_prev and e9_now < e21_now
-            pb_pct     = abs(c_price - e21_now) / e21_now if e21_now != 0 else 1
-            pb_bull    = direction == "bull" and e9_now > e21_now and pb_pct < 0.003
-            pb_bear    = direction == "bear" and e9_now < e21_now and pb_pct < 0.003
-
-            entry_bull = direction == "bull" and (fresh_bull or pb_bull)
-            entry_bear = direction == "bear" and (fresh_bear or pb_bear)
-
-            if entry_bull or entry_bear:
-                rsi_v  = _calc_rsi(h1_close).iloc[-1]
-                macd_h = _calc_macd_hist(h1_close)
-                mh_now = macd_h.iloc[-1]; mh_prev = macd_h.iloc[-2]
-                rsi_ok = (35 <= rsi_v <= 70) if direction == "bull" else (30 <= rsi_v <= 65)
-                macd_ok = (mh_now > mh_prev or mh_now > 0) if direction == "bull" else (mh_now < mh_prev or mh_now < 0)
-
-                if rsi_ok and macd_ok:
-                    atr_1h     = _calc_atr(df_1h).iloc[-1]
-                    swing_low  = h1_low.iloc[-5:].min()
-                    swing_high = h1_high.iloc[-5:].max()
-                    session    = "🇬🇧 London" if h < 12.0 else "🇺🇸 New York"
-                    etype_str  = "EMA 9/21 Cross" if (fresh_bull or fresh_bear) else "Pullback to EMA 21"
-
-                    if entry_bull:
-                        sl = swing_low - atr_1h * 0.2
-                        raw_risk = c_price - sl
-                        if 0 < raw_risk <= c_price * 0.06:
-                            tp = c_price + max(raw_risk * 2.5, atr_1h * 2.5)
-                            rr = (tp - c_price) / raw_risk
-                            reason = (
-                                f"📊 Strategy A — Triple Confluence\n"
-                                f"📍 Session: {session}\n"
-                                f"✅ 4H Trend: BULLISH | ✅ 1H: {etype_str}\n"
-                                f"✅ RSI: {rsi_v:.1f} | ✅ MACD: confirming\n"
-                                f"SL: below 1H swing low | R:R 1:{rr:.1f}"
-                            )
-                            sig_a = "🟢 BUY"
-                            entry_a, tp_a, sl_a, reason_a = c_price, tp, sl, reason
-                    else:
-                        sl = swing_high + atr_1h * 0.2
-                        raw_risk = sl - c_price
-                        if 0 < raw_risk <= c_price * 0.06:
-                            tp = c_price - max(raw_risk * 2.5, atr_1h * 2.5)
-                            rr = raw_risk / (c_price - tp) if (c_price - tp) > 0 else 0
-                            reason = (
-                                f"📊 Strategy A — Triple Confluence\n"
-                                f"📍 Session: {session}\n"
-                                f"✅ 4H Trend: BEARISH | ✅ 1H: {etype_str}\n"
-                                f"✅ RSI: {rsi_v:.1f} | ✅ MACD: confirming\n"
-                                f"SL: above 1H swing high | R:R 1:{rr:.1f}"
-                            )
-                            sig_a = "🔴 SELL"
-                            entry_a, tp_a, sl_a, reason_a = c_price, tp, sl, reason
-
-        if sig_a != "⚪ WAITING":
-            return sig_a, entry_a, tp_a, sl_a, reason_a
-
-        # ── STRATEGY B: SMC 5M ─────────────────────────────────────────────────
-        return _smc_5m_signal(display_name)
-
+        if not (7.0 <= h < 17.0):
+            return "WAIT", 0.0, 0.0, 0.0, "Outside session (07-17 UTC)"
+        ticker_symbol = TICKER_MAP.get(display_name)
+        if not ticker_symbol:
+            return "WAIT", 0.0, 0.0, 0.0, "Unknown asset"
+        if display_name == "US 30":
+            return _us30_open_strategy(ticker_symbol)
+        return _smc_4h_strategy(display_name, ticker_symbol)
     except Exception as e:
-        return "⚪ WAITING", 0.0, 0.0, 0.0, f"Engine error: {str(e)}"
+        return "WAIT", 0.0, 0.0, 0.0, "Engine error: " + str(e)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PLATFORM DISPLAY SIGNALS — yfinance (free, unlimited, for UI only)
-# ══════════════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=30, show_spinner=False)
 def _forex_signal(ticker_symbol):
     try:
         stock = yf.Ticker(ticker_symbol)
@@ -804,15 +879,15 @@ def _monitor_loop():
                 signals_found = []
                 for display_name in TICKER_MAP.keys():
                     try:
-                        sig, entry, tp, sl, reason = _finnhub_signal(display_name)
+                        sig, entry, tp, sl, reason = _signal_engine(display_name)
                         prev_sig = last_signals.get(display_name, "⚪ WAITING")
-                        if sig != "⚪ WAITING" and sig != prev_sig:
+                        if sig not in ("⚪ WAITING", "WAIT", "WAITING") and sig != prev_sig:
                             msg = _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name)
                             _send_telegram(msg)
                             last_signals[display_name] = sig
                             signals_found.append(f"{display_name}: {sig}")
                             _write_state(in_kz, last_signals)
-                        elif sig == "⚪ WAITING" and prev_sig != "⚪ WAITING":
+                        elif sig in ("⚪ WAITING","WAIT","WAITING") and prev_sig not in ("⚪ WAITING","WAIT","WAITING"):
                             last_signals[display_name] = "⚪ WAITING"
                             _write_state(in_kz, last_signals)
                         time.sleep(1)
@@ -852,6 +927,12 @@ def start_monitor():
     for thread in threading.enumerate():
         if thread.name == "alphaedge_monitor":
             return  # Already running — do nothing
+    # Fresh start — wipe stale state so old last_signals don't block new signals
+    try:
+        if os.path.exists(_STATE_FILE):
+            os.remove(_STATE_FILE)
+    except Exception:
+        pass
     # Not running — start it
     t = threading.Thread(target=_monitor_loop, name="alphaedge_monitor", daemon=True)
     t.start()
@@ -949,18 +1030,24 @@ with st.sidebar:
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
         if tv_channel == "Bloomberg Markets":
-            st.video("https://www.youtube.com/@BloombergTV/live")
+            components.html('<iframe width="100%" height="200" src="https://www.youtube.com/embed/iEpJwprxDdk?autoplay=1&mute=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>', height=210)
         elif tv_channel == "CNBC Live":
             st.video("https://www.youtube.com/watch?v=9NyxcX3rhQs")
         elif tv_channel == "Reuters TV":
             st.video("https://www.youtube.com/watch?v=H6hY8Y9n4c0")
 
         st.subheader("🎵 TRADING STATION")
-        station = st.selectbox("Select Audio:", ["Lofi Trading Beats", "Chillout Jazz"], label_visibility="collapsed")
+        station = st.selectbox("Select Audio:", [
+            "Lofi Trading Beats", "Chillout Jazz", "Pop Radio", "Hip Hop Radio"
+        ], label_visibility="collapsed")
         if station == "Lofi Trading Beats":
             components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
         elif station == "Chillout Jazz":
             components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+        elif station == "Pop Radio":
+            st.audio("https://listen.181fm.com/181-themix_128k.mp3")
+        elif station == "Hip Hop Radio":
+            st.audio("https://pureplay.cdnstream1.com/6045_128.mp3")
 
     st.markdown("---")
     st.markdown('<p style="text-align:center;color:#D4AF37;font-size:11px;font-weight:bold;letter-spacing:2px;">🏆 FEATURED PARTNERS</p>', unsafe_allow_html=True)
@@ -1010,9 +1097,25 @@ with tab_dash:
 
     rows_html = ""
     if data:
-        for row in data:
-            css = "bullish" if row['Bias'] == "BULLISH" else "bearish"
-            rows_html += f'<tr><td><b>{row["Symbol"]}</b></td><td class="{css}">{row["Bias"]}</td><td class="{css}">{row["Score"]:+}</td><td>{row["Trend"]}</td><td>{row["Tech"]}</td><td style="color:#D4AF37;font-weight:bold;">{row["Price"]:,.4f}</td><td><span class="live-tag">⚡ LIVE</span></td></tr>'
+        for name, row in data.items():
+            bias  = row.get("bias",  "—")
+            price = row.get("price", 0)
+            score = row.get("score", 0)
+            trend = row.get("trend", "—")
+            tech  = row.get("tech",  "—")
+            css   = "bullish" if "BULL" in str(bias) else "bearish" if "BEAR" in str(bias) else ""
+            try:
+                price_str = f"{price:,.4f}" if price else "—"
+            except Exception:
+                price_str = str(price)
+            rows_html += (
+                f'<tr><td><b>{name}</b></td>'
+                f'<td class="{css}">{bias}</td>'
+                f'<td class="{css}">{score}</td>'
+                f'<td>{trend}</td><td>{tech}</td>'
+                f'<td style="color:#D4AF37;font-weight:bold;">{price_str}</td>'
+                f'<td><span class="live-tag">⚡ LIVE</span></td></tr>'
+            )
     else:
         rows_html = "<tr><td colspan='7'>Loading Data...</td></tr>"
 
@@ -1038,14 +1141,13 @@ with tab_dash:
     </div>
     """, unsafe_allow_html=True)
 
-    y_sym = TICKER_MAP.get(focus_ticker, "EURUSD=X")
-    sig, ent, tp, sl, reason = get_scalp_signal(y_sym)
+    sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
 
     c1, c2, c3 = st.columns(3)
     c1.metric("📐 EMA SIGNAL", sig)
     st.caption(f"📌 Analysing: **{focus_ticker}**")
 
-    if sig != "⚪ WAITING":
+    if sig not in ("⚪ WAITING", "WAIT", "WAITING"):
         c2.metric("⚡ LIVE ENTRY", f"{ent:.4f}")
         c3.metric("🎯 TARGETS",    f"TP: {tp:.4f} | SL: {sl:.4f}")
         box_class    = "reason-box" if "BUY" in sig else "reason-box-sell"
@@ -1060,6 +1162,123 @@ with tab_dash:
 
     tv_symbol = TV_MAP.get(focus_ticker, "FX:EURUSD")
     components.html(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
+
+
+    # ── AMAZON AFFILIATE SCROLLER — below live chart ──────────────────────────
+    # ══════════════════════════════════════════════════════════════════════
+    # AFFILIATE PRODUCTS — update URLs with your real Amazon affiliate links
+    # Get your links at: affiliate-program.amazon.com → search product → Get Link
+    # Format: {"name": "Product Name", "tag": "Short description",
+    #           "url": "https://amzn.to/YOURCODE", "emoji": "🖥️"}
+    # ══════════════════════════════════════════════════════════════════════
+    amazon_products = [
+        {"name": "Logitech MX Master 3 Mouse",         "tag": "Best for multi-screen trading setups",         "url": "https://amzn.to/3trading1",  "emoji": "🖱️"},
+        {"name": "Dell 27-inch 4K Monitor",                "tag": "Ultra-sharp charting display",                 "url": "https://amzn.to/3trading2",  "emoji": "🖥️"},
+        {"name": "Autonomous SmartDesk Pro",            "tag": "Stand-up trading desk",                        "url": "https://amzn.to/3trading3",  "emoji": "🪑"},
+        {"name": "Blue Yeti USB Microphone",            "tag": "For trading livestreams & YouTube",            "url": "https://amzn.to/3trading4",  "emoji": "🎙️"},
+        {"name": "Elgato Stream Deck",                  "tag": "One-click order shortcuts for traders",        "url": "https://amzn.to/3trading5",  "emoji": "⌨️"},
+        {"name": "Trading in the Zone — Mark Douglas",  "tag": "The #1 trading psychology book",               "url": "https://amzn.to/3trading6",  "emoji": "📘"},
+        {"name": "Reminiscences of a Stock Operator",   "tag": "Jesse Livermore — timeless trading bible",     "url": "https://amzn.to/3trading7",  "emoji": "📗"},
+        {"name": "Bose QuietComfort 45 Headphones",     "tag": "Stay focused during volatile sessions",        "url": "https://amzn.to/3trading8",  "emoji": "🎧"},
+        {"name": "LG 34-inch UltraWide Monitor",           "tag": "See more charts on one screen",                "url": "https://amzn.to/3trading9",  "emoji": "🖥️"},
+        {"name": "Ergonomic Lumbar Support Chair",      "tag": "Long session comfort essential",               "url": "https://amzn.to/3trading10", "emoji": "💺"},
+        {"name": "Mechanical Trading Journal Notebook", "tag": "Track every trade by hand",                    "url": "https://amzn.to/3trading11", "emoji": "📓"},
+        {"name": "Ring Light 18-inch for Traders",         "tag": "Look professional on video calls & streams",   "url": "https://amzn.to/3trading12", "emoji": "💡"},
+    ]
+
+    cards_html = "".join([
+        f'''<a href="{p["url"]}" target="_blank" style="text-decoration:none;">
+        <div class="amz-card">
+            <span style="font-size:28px;">{p["emoji"]}</span>
+            <div style="margin-top:6px;font-weight:bold;color:#D4AF37;font-size:12px;">{p["name"]}</div>
+            <div style="color:#aaa;font-size:10px;margin-top:3px;">{p["tag"]}</div>
+            <div style="margin-top:6px;background:#FF9900;color:#000;border-radius:3px;
+                        padding:3px 8px;font-size:10px;font-weight:bold;display:inline-block;">
+                🛒 View on Amazon
+            </div>
+        </div></a>'''
+        for p in amazon_products
+    ])
+
+    components.html(f"""
+    <style>
+    .amz-track {{
+        display: flex;
+        gap: 16px;
+        width: max-content;
+    }}
+    .amz-card {{
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 12px;
+        width: 160px;
+        text-align: center;
+        flex-shrink: 0;
+        transition: border-color 0.3s;
+        cursor: pointer;
+    }}
+    .amz-card:hover {{ border-color: #FF9900; }}
+    #amz-wrapper {{
+        overflow: hidden;
+        width: 100%;
+        background: #0a0a0a;
+        border-top: 1px solid #D4AF37;
+        border-bottom: 1px solid #D4AF37;
+        padding: 12px 0;
+        position: relative;
+    }}
+    #amz-label {{
+        color: #FF9900;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        padding: 0 0 6px 4px;
+        font-family: monospace;
+    }}
+    </style>
+    <div id="amz-label">🛒 RECOMMENDED TRADING GEAR — AMAZON</div>
+    <div id="amz-wrapper">
+        <div class="amz-track" id="amz-track">
+            {cards_html}
+            {cards_html}
+        </div>
+    </div>
+    <script>
+    (function() {{
+        const track   = document.getElementById('amz-track');
+        const wrapper = document.getElementById('amz-wrapper');
+        let pos       = 0;
+        let paused    = false;
+        let pauseTimer = null;
+        const speed   = 0.6;  // px per frame — adjust for faster/slower
+
+        function getHalfWidth() {{
+            return track.scrollWidth / 2;
+        }}
+
+        function step() {{
+            if (!paused) {{
+                pos += speed;
+                // No auto-pause — scrolls continuously unless hovered
+                // Reset when one full copy has scrolled past
+                if (pos >= getHalfWidth()) {{
+                    pos = 0;
+                    track.dataset.paused = "";
+                }}
+                track.style.transform = 'translateX(-' + pos + 'px)';
+            }}
+            requestAnimationFrame(step);
+        }}
+        requestAnimationFrame(step);
+
+        // Pause on hover only — resume immediately when cursor leaves
+        wrapper.addEventListener('mouseenter', function() {{ paused = true; }});
+        wrapper.addEventListener('mouseleave', function() {{ paused = false; }});
+    }})();
+    </script>
+    """, height=220)
+
 
 
 # ================= TAB 2: COT DATA =================
