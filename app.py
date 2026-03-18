@@ -278,10 +278,10 @@ def _us30_open_strategy(ticker_symbol):
     try:
         now_utc    = datetime.now(timezone.utc)
         h          = now_utc.hour + now_utc.minute / 60.0
-        in_preopen = 13.0 <= h < 14.5
-        at_open    = 14.5 <= h < 15.5
+        in_preopen = 11.5 <= h < 13.5
+        at_open    = 13.5 <= h < 14.5
         if not (in_preopen or at_open):
-            return "WAIT", 0.0, 0.0, 0.0, "US30: waiting for pre-open window (13:00-15:30 UTC)"
+            return "WAIT", 0.0, 0.0, 0.0, "US30: waiting for pre-open window (11:30-14:30 UTC / 13:30-16:30 SAST)"
 
         score = 0
         layers = []
@@ -1164,59 +1164,212 @@ with tab_dash:
     components.html(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
 
 
-    # ── AMAZON AFFILIATE SCROLLER — below live chart ──────────────────────────
-    # ══════════════════════════════════════════════════════════════════════
-    # AFFILIATE PRODUCTS — update URLs with your real Amazon affiliate links
-    # Get your links at: affiliate-program.amazon.com → search product → Get Link
-    # Format: {"name": "Product Name", "tag": "Short description",
-    #           "url": "https://amzn.to/YOURCODE", "emoji": "🖥️"}
-    # ══════════════════════════════════════════════════════════════════════
-    amazon_products = [
-        {"name": "Logitech MX Master 3 Mouse",         "tag": "Best for multi-screen trading setups",         "url": "https://amzn.to/3trading1",  "emoji": "🖱️"},
-        {"name": "Dell 27-inch 4K Monitor",                "tag": "Ultra-sharp charting display",                 "url": "https://amzn.to/3trading2",  "emoji": "🖥️"},
-        {"name": "Autonomous SmartDesk Pro",            "tag": "Stand-up trading desk",                        "url": "https://amzn.to/3trading3",  "emoji": "🪑"},
-        {"name": "Blue Yeti USB Microphone",            "tag": "For trading livestreams & YouTube",            "url": "https://amzn.to/3trading4",  "emoji": "🎙️"},
-        {"name": "Elgato Stream Deck",                  "tag": "One-click order shortcuts for traders",        "url": "https://amzn.to/3trading5",  "emoji": "⌨️"},
-        {"name": "Trading in the Zone — Mark Douglas",  "tag": "The #1 trading psychology book",               "url": "https://amzn.to/3trading6",  "emoji": "📘"},
-        {"name": "Reminiscences of a Stock Operator",   "tag": "Jesse Livermore — timeless trading bible",     "url": "https://amzn.to/3trading7",  "emoji": "📗"},
-        {"name": "Bose QuietComfort 45 Headphones",     "tag": "Stay focused during volatile sessions",        "url": "https://amzn.to/3trading8",  "emoji": "🎧"},
-        {"name": "LG 34-inch UltraWide Monitor",           "tag": "See more charts on one screen",                "url": "https://amzn.to/3trading9",  "emoji": "🖥️"},
-        {"name": "Ergonomic Lumbar Support Chair",      "tag": "Long session comfort essential",               "url": "https://amzn.to/3trading10", "emoji": "💺"},
-        {"name": "Mechanical Trading Journal Notebook", "tag": "Track every trade by hand",                    "url": "https://amzn.to/3trading11", "emoji": "📓"},
-        {"name": "Ring Light 18-inch for Traders",         "tag": "Look professional on video calls & streams",   "url": "https://amzn.to/3trading12", "emoji": "💡"},
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # AMAZON AFFILIATE SCROLLER
+    # ══════════════════════════════════════════════════════════════════════════
+    # HOW TO ADD YOUR AFFILIATE LINKS:
+    #   1. Go to affiliate-program.amazon.com and sign in
+    #   2. Search each product → click "Get Link" → copy the short URL
+    #   3. Paste it into the matching "url" field below
+    #   4. For product images: save a product image to static/amz_img/monitor1.jpg etc
+    #      then set "img": "app/static/amz_img/monitor1.jpg"
+    #      OR leave "img": "" to show the emoji instead
+    # ══════════════════════════════════════════════════════════════════════════
+    #
+    # Each product has 3 variants — replace the placeholder URLs with real ones:
+    #   variant 1 = budget option
+    #   variant 2 = mid-range (recommended)
+    #   variant 3 = premium option
+    # ══════════════════════════════════════════════════════════════════════════
+
+    _AMZ_PRODUCTS = [
+        {
+            "name": "LG UltraWide Monitor",
+            "desc": "View multiple charts at once without multiple screens",
+            "emoji": "🖥️",
+            "img": "",
+            "variants": [
+                {"label": '29" UltraWide', "url": "https://amzn.to/4uCHhwO"},
+                {"label": '34" UltraWide', "url": "https://amzn.to/4bPPjev"},
+                {"label": '38" Premium',   "url": "https://amzn.to/3NoFzP8"},
+            ]
+        },
+        {
+            "name": "Logitech MX Master 3S",
+            "desc": "Ergonomic mouse for traders who spend hours on charts",
+            "emoji": "🖱️",
+            "img": "",
+            "variants": [
+                {"label": "MX Master 3",   "url": "https://amzn.to/4rEaTHK"},
+                {"label": "MX Master 3S",  "url": "https://amzn.to/4lE8KKP"},
+                {"label": "MX Master 3S Mac", "url": "https://amzn.to/4bBw4nH"},
+            ]
+        },
+        {
+            "name": "Keychron K4 Keyboard",
+            "desc": "Fast responsive keyboard for executing trades quickly",
+            "emoji": "⌨️",
+            "img": "",
+            "variants": [
+                {"label": "K4 Brown Switch",  "url": "https://amzn.to/4rC9qla"},
+                {"label": "K4 Red Switch",    "url": "https://amzn.to/4bj18K9"},
+                {"label": "K4 RGB Backlit",   "url": "https://amzn.to/4sipw4z"},
+            ]
+        },
+        {
+            "name": "Dell XPS 15 Laptop",
+            "desc": "Run multiple trading platforms simultaneously",
+            "emoji": "💻",
+            "img": "",
+            "variants": [
+                {"label": "XPS 15 i5",    "url": "https://amzn.to/4lAG5pV"},
+                {"label": "XPS 15 i7",    "url": "https://amzn.to/4beKc7u"},
+                {"label": "XPS 15 i9",    "url": "https://amzn.to/3PjBImY"},
+            ]
+        },
+        {
+            "name": "Electric Standing Desk",
+            "desc": "Switch between sitting and standing during long sessions",
+            "emoji": "🪑",
+            "img": "",
+            "variants": [
+                {"label": '48" Basic',    "url": "https://amzn.to/4rIbd85"},
+                {"label": '55" Mid',      "url": "https://amzn.to/4lGJuUg"},
+                {"label": '60" Premium',  "url": "https://amzn.to/4skcdk9"},
+            ]
+        },
+        {
+            "name": "Ergonomic Office Chair",
+            "desc": "Designed for comfort during long trading sessions",
+            "emoji": "💺",
+            "img": "",
+            "variants": [
+                {"label": "Basic Lumbar",    "url": "https://amzn.to/4byJ1yw"},
+                {"label": "Mesh Ergonomic",  "url": "https://amzn.to/4uJaiHx"},
+                {"label": "Executive Pro",   "url": "https://amzn.to/4sf7yjh"},
+            ]
+        },
+        {
+            "name": "Mini UPS Backup Battery",
+            "desc": "Keep your internet running during power outages",
+            "emoji": "🔋",
+            "img": "",
+            "variants": [
+                {"label": "600VA Compact",  "url": "https://amzn.to/3Pg5yJe"},
+                {"label": "1000VA Mid",     "url": "https://amzn.to/476Hsqe"},
+                {"label": "1500VA Pro",     "url": "https://amzn.to/3Pg6cq8"},
+            ]
+        },
+        {
+            "name": "Triple Monitor Mount",
+            "desc": "Mount three screens for full chart coverage",
+            "emoji": "🖥️",
+            "img": "",
+            "variants": [
+                {"label": "Clamp Mount",    "url": "https://amzn.to/4lED7AP"},
+                {"label": "Freestanding",   "url": "https://amzn.to/3Neer5n"},
+                {"label": "Full Motion",    "url": "https://amzn.to/4rF8BYG"},
+            ]
+        },
+        {
+            "name": "Blue Light Glasses",
+            "desc": "Reduce eye strain from long hours on screens",
+            "emoji": "🕶️",
+            "img": "",
+            "variants": [
+                {"label": "Classic Frame",  "url": "https://amzn.to/4buKs10"},
+                {"label": "Sport Frame",    "url": "https://amzn.to/3NrsqVu"},
+                {"label": "Premium Anti-UV","url": "https://amzn.to/4cURVZG"},
+            ]
+        },
+        {
+            "name": "Logitech C920 Webcam",
+            "desc": "Stream trading content or record your analysis",
+            "emoji": "📷",
+            "img": "",
+            "variants": [
+                {"label": "C920 HD",        "url": "https://amzn.to/4rzTuQh"},
+                {"label": "C920s Privacy",  "url": "https://amzn.to/3NLroUj"},
+                {"label": "C922 Pro",       "url": "https://amzn.to/47Uk6Ey"},
+            ]
+        },
+        {
+            "name": "Blue Yeti Microphone",
+            "desc": "Record trading videos or host live sessions",
+            "emoji": "🎙️",
+            "img": "",
+            "variants": [
+                {"label": "Yeti Nano",      "url": "https://amzn.to/4sQNoMr"},
+                {"label": "Yeti USB",       "url": "https://amzn.to/4rIGpnH"},
+                {"label": "Yeti X Pro",     "url": "https://amzn.to/40AujlJ"},
+            ]
+        },
+        {
+            "name": "Forex Trading Book",
+            "desc": "Learn forex fundamentals from scratch",
+            "emoji": "📘",
+            "img": "",
+            "variants": [
+                {"label": "Basics Explained", "url": "https://amzn.to/3PJ8n5u"},
+                {"label": "Trading in the Zone","url": "https://amzn.to/4791UHb"},
+                {"label": "Market Wizards",   "url": "https://amzn.to/4biJrKB"},
+            ]
+        },
     ]
 
-    cards_html = "".join([
-        f'''<a href="{p["url"]}" target="_blank" style="text-decoration:none;">
-        <div class="amz-card">
-            <span style="font-size:28px;">{p["emoji"]}</span>
-            <div style="margin-top:6px;font-weight:bold;color:#D4AF37;font-size:12px;">{p["name"]}</div>
-            <div style="color:#aaa;font-size:10px;margin-top:3px;">{p["tag"]}</div>
-            <div style="margin-top:6px;background:#FF9900;color:#000;border-radius:3px;
-                        padding:3px 8px;font-size:10px;font-weight:bold;display:inline-block;">
-                🛒 View on Amazon
-            </div>
-        </div></a>'''
-        for p in amazon_products
-    ])
+    # Build cards HTML — each card shows product + 3 variant buttons
+    def _build_amz_cards(products):
+        cards = []
+        for p in products:
+            # Image or emoji header
+            if p["img"]:
+                top = ('<img src="' + p["img"] + '" style="width:100%;height:90px;'
+                       'object-fit:cover;border-radius:4px;margin-bottom:8px;" '
+                       'onerror="this.style.display:none">')
+            else:
+                top = '<div style="font-size:32px;margin-bottom:8px;">' + p["emoji"] + '</div>'
+            # Variant buttons
+            vbtns = ""
+            for v in p["variants"]:
+                vbtns += (
+                    '<a href="' + v["url"] + '" target="_blank" style="text-decoration:none;">'
+                    '<div style="background:#1a1a1a;border:1px solid #333;border-radius:3px;'
+                    'padding:3px 6px;font-size:9px;color:#aaa;margin-bottom:3px;'
+                    'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+                    "🛒 " + v["label"] + "</div></a>"
+                )
+            cards.append(
+                '<div class="amz-card">'
+                + top
+                + '<div style="font-weight:bold;color:#D4AF37;font-size:11px;'
+                + 'margin-bottom:4px;line-height:1.3;">' + p["name"] + "</div>"
+                + '<div style="color:#666;font-size:9px;margin-bottom:8px;'
+                + 'line-height:1.4;">' + p["desc"] + "</div>"
+                + vbtns
+                + "</div>"
+            )
+        return "".join(cards)
+
+    _cards_html = _build_amz_cards(_AMZ_PRODUCTS)
 
     components.html(f"""
     <style>
     .amz-track {{
         display: flex;
-        gap: 16px;
+        gap: 14px;
         width: max-content;
+        align-items: flex-start;
     }}
     .amz-card {{
         background: #111;
-        border: 1px solid #333;
+        border: 1px solid #222;
         border-radius: 8px;
         padding: 12px;
-        width: 160px;
-        text-align: center;
+        width: 170px;
         flex-shrink: 0;
+        cursor: default;
         transition: border-color 0.3s;
-        cursor: pointer;
     }}
     .amz-card:hover {{ border-color: #FF9900; }}
     #amz-wrapper {{
@@ -1224,61 +1377,51 @@ with tab_dash:
         width: 100%;
         background: #0a0a0a;
         border-top: 1px solid #D4AF37;
-        border-bottom: 1px solid #D4AF37;
+        border-bottom: 1px solid #1a1a1a;
         padding: 12px 0;
-        position: relative;
     }}
     #amz-label {{
         color: #FF9900;
         font-size: 10px;
         font-weight: bold;
         letter-spacing: 2px;
-        padding: 0 0 6px 4px;
+        padding: 0 0 8px 4px;
         font-family: monospace;
     }}
     </style>
-    <div id="amz-label">🛒 RECOMMENDED TRADING GEAR — AMAZON</div>
+    <div id="amz-label">🛒 TRADER GEAR — AMAZON PICKS</div>
     <div id="amz-wrapper">
         <div class="amz-track" id="amz-track">
-            {cards_html}
-            {cards_html}
+            {_cards_html}
+            {_cards_html}
         </div>
     </div>
     <script>
     (function() {{
         const track   = document.getElementById('amz-track');
         const wrapper = document.getElementById('amz-wrapper');
-        let pos       = 0;
-        let paused    = false;
-        let pauseTimer = null;
-        const speed   = 0.6;  // px per frame — adjust for faster/slower
+        let pos    = 0;
+        let paused = false;
+        const speed = 0.5;
 
-        function getHalfWidth() {{
-            return track.scrollWidth / 2;
-        }}
+        function halfWidth() {{ return track.scrollWidth / 2; }}
 
         function step() {{
             if (!paused) {{
                 pos += speed;
-                // No auto-pause — scrolls continuously unless hovered
-                // Reset when one full copy has scrolled past
-                if (pos >= getHalfWidth()) {{
-                    pos = 0;
-                    track.dataset.paused = "";
-                }}
+                if (pos >= halfWidth()) pos = 0;
                 track.style.transform = 'translateX(-' + pos + 'px)';
             }}
             requestAnimationFrame(step);
         }}
-        requestAnimationFrame(step);
 
-        // Pause on hover only — resume immediately when cursor leaves
         wrapper.addEventListener('mouseenter', function() {{ paused = true; }});
         wrapper.addEventListener('mouseleave', function() {{ paused = false; }});
+
+        requestAnimationFrame(step);
     }})();
     </script>
-    """, height=220)
-
+    """, height=260)
 
 
 # ================= TAB 2: COT DATA =================
