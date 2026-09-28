@@ -978,12 +978,14 @@ def start_monitor():
     t = threading.Thread(target=_monitor_loop, name="alphaedge_monitor", daemon=True)
     t.start()
 
-start_monitor()
+_RUN_IN_APP = os.environ.get("MONITOR_MODE", "app") == "app"
+if _RUN_IN_APP:
+    start_monitor()
 
 # ── STARTUP PING — fires once when Render starts the app ─────────────────────
 # Sends one message to Telegram so you know the bot is live and credentials work
 _STARTUP_FLAG = "startup_ping.flag"
-if not os.path.exists(_STARTUP_FLAG):
+if os.environ.get("MONITOR_MODE", "app") != "off" and not os.path.exists(_STARTUP_FLAG):
     _ok = _send_telegram(
         f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
