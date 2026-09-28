@@ -3,6 +3,7 @@ import time
 import os
 import json
 import html
+import re
 import sqlite3
 import threading
 import requests
@@ -110,27 +111,49 @@ st.markdown("""
 # Set these as Environment Variables on Render dashboard
 # OR replace the placeholder strings below with your actual values
 # ══════════════════════════════════════════════════════════════════════════════
-_TG_TOKEN   = os.environ.get("TG_TOKEN",   "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE")   # from @BotFather
-_TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "5689404731")     # your Telegram chat ID
+_TG_TOKEN   = os.environ.get("TG_TOKEN", "").strip()     # from @BotFather — set on Render, never in code
+_TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "").strip()   # your Telegram chat ID — set on Render
 
 # NOTE: No Finnhub key needed. No other API keys needed.
 # Signal engine uses yfinance — free, no key, works on Render.
 
 
-def _send_telegram(message: str):
-    """Send a message to the Telegram bot. Silently skips if credentials not set."""
-    if not _TG_TOKEN or "YOUR_" in _TG_TOKEN:
-        return
-    if not _TG_CHAT_ID or "YOUR_" in _TG_CHAT_ID:
-        return
-    try:
-        requests.post(
-            f"https://api.telegram.org/bot{_TG_TOKEN}/sendMessage",
-            json={"chat_id": _TG_CHAT_ID, "text": message, "parse_mode": "HTML"},
-            timeout=10
-        )
-    except Exception:
-        pass
+def _tg_escape(text) -> str:
+    """Escape <, > and & so Telegram's HTML parser accepts dynamic text
+    (strategy reasons contain '->' and '<0.05%', which made Telegram reject
+    the whole message with 'can't parse entities')."""
+    return html.escape(str(text), quote=False)
+
+
+def _send_telegram(message: str) -> bool:
+    """Send a message to the Telegram bot. Returns True on success.
+    Failures are printed to the Render logs instead of being silently ignored."""
+    if not _TG_TOKEN or not _TG_CHAT_ID:
+        print("[telegram] TG_TOKEN / TG_CHAT_ID not set — message skipped", flush=True)
+        return False
+    url = f"https://api.telegram.org/bot{_TG_TOKEN}/sendMessage"
+    payload = {"chat_id": _TG_CHAT_ID, "text": message[:4096],
+               "parse_mode": "HTML", "disable_web_page_preview": True}
+    for attempt in range(3):
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            if r.ok:
+                return True
+            desc = r.json().get("description", r.text) if r.headers.get("content-type", "").startswith("application/json") else r.text
+            print(f"[telegram] send failed ({r.status_code}): {desc}", flush=True)
+            if r.status_code == 400 and "parse" in str(desc).lower():
+                # Formatting problem: resend as plain text so the alert still arrives
+                payload.pop("parse_mode", None)
+                payload["text"] = re.sub(r"</?[a-zA-Z][^>]*>", "", message)[:4096]
+                continue
+            if r.status_code == 429:
+                time.sleep(int(r.json().get("parameters", {}).get("retry_after", 5)))
+                continue
+            return False
+        except Exception as e:
+            print(f"[telegram] network error: {e}", flush=True)
+            time.sleep(2)
+    return False
 
 
 def get_session_info():
@@ -266,8 +289,8 @@ def _log_data_error(symbol: str, interval: str, reason: str):
         try:
             _send_telegram(
                 f"⚠️ <b>DATA ERROR</b>\n"
-                f"Symbol: {symbol} | Interval: {interval}\n"
-                f"Reason: {reason}\n"
+                f"Symbol: {_tg_escape(symbol)} | Interval: {_tg_escape(interval)}\n"
+                f"Reason: {_tg_escape(reason)}\n"
                 f"<i>Check yfinance / network on Render</i>"
             )
         except Exception:
@@ -810,17 +833,17 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
     return (
         f"🚨 <b>ALPHAEDGE SIGNAL</b> 🚨\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 <b>Asset:</b> {display_name}\n"
+        f"📊 <b>Asset:</b> {_tg_escape(display_name)}\n"
         f"📈 <b>Signal:</b> {direction}\n"
         f"⏰ <b>Time (UTC):</b> {datetime.now(timezone.utc).strftime('%H:%M  %d/%m/%Y')}\n"
-        f"🏦 <b>Session:</b> {session_name}\n"
+        f"🏦 <b>Session:</b> {_tg_escape(session_name)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"💰 <b>Entry:</b>  {entry:.5f}\n"
         f"🎯 <b>TP:</b>     {tp:.5f}\n"
         f"🛑 <b>SL:</b>     {sl:.5f}\n"
         f"📐 <b>R:R:</b>    1 : {rr:.1f}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🔍 <b>Why this trade:</b>\n{reason}\n"
+        f"🔍 <b>Why this trade:</b>\n{_tg_escape(reason)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
     )
@@ -891,7 +914,8 @@ def _monitor_loop():
                             last_signals[display_name] = "⚪ WAITING"
                             _write_state(in_kz, last_signals)
                         time.sleep(1)
-                    except Exception:
+                    except Exception as e:
+                        print(f"[monitor] {display_name} scan error: {e!r}", flush=True)
                         continue
                 # Send scan summary every 30 min (6 loops × 5 min) so you know bot is alive
                 scan_count = state.get("scan_count", 0) + 1
@@ -908,12 +932,12 @@ def _monitor_loop():
                         f"🔍 <b>SCAN UPDATE</b> — {session_name}\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
                         f"📊 Scanned 20 markets\n"
-                        f"{status}\n"
+                        f"{_tg_escape(status)}\n"
                         f"<i>Next scan in 5 min</i>"
                     )
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[monitor] loop error: {e!r}", flush=True)
         time.sleep(300)
 
 
@@ -943,21 +967,22 @@ start_monitor()
 # Sends one message to Telegram so you know the bot is live and credentials work
 _STARTUP_FLAG = "startup_ping.flag"
 if not os.path.exists(_STARTUP_FLAG):
-    try:
-        with open(_STARTUP_FLAG, "w") as _f:
-            _f.write("1")
-        _send_telegram(
-            f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-            f"✅ Credentials loaded\n"
-            f"✅ Monitor thread started\n"
-            f"✅ Scanning: London 07-17 UTC\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"<i>Bot will scan every 5 min during sessions</i>"
-        )
-    except Exception:
-        pass
+    _ok = _send_telegram(
+        f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+        f"✅ Credentials loaded\n"
+        f"✅ Monitor thread started\n"
+        f"✅ Scanning: London &amp; NY 07-17 UTC\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"<i>Bot will scan every 5 min during sessions</i>"
+    )
+    if _ok:   # only mark as sent once Telegram actually accepted it
+        try:
+            with open(_STARTUP_FLAG, "w") as _f:
+                _f.write("1")
+        except Exception:
+            pass
 
 
 # --- TRADINGVIEW POP-UP ---
