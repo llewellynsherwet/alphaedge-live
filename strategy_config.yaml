@@ -1,0 +1,114 @@
+# ════════════════════════════════════════════════════════════════════════════
+# AlphaEdge — Confluence Day Template
+# Reloaded every monitor loop (~5 min). Edit and the next scan picks it up.
+# Defaults tuned for selectivity. orb_open is available but disabled by default
+# after a weak 30-day replay; flip enabled:true to re-arm it.
+# ════════════════════════════════════════════════════════════════════════════
+
+session:
+  weekdays_only: true
+  windows:
+    - {name: "🇬🇧 LONDON OPEN",           start: "07:00", end: "10:00"}
+    - {name: "🇬🇧🇺🇸 LONDON CONTINUATION", start: "10:00", end: "12:00"}
+    - {name: "🇺🇸 NY / LONDON OVERLAP",    start: "12:00", end: "16:00"}
+    - {name: "🇺🇸 NEW YORK CLOSE",         start: "16:00", end: "17:00"}
+  kill_zones:
+    - {name: "London KZ", start: "07:00", end: "10:00"}
+    - {name: "NY KZ",     start: "12:30", end: "16:00"}
+
+symbols:
+  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, vwap_pullback, orb_open]}
+  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, vwap_pullback, orb_open]}
+  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, vwap_pullback, orb_open]}
+  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, vwap_pullback]}
+  - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep]}
+  - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep]}
+  - {name: "USD/JPY",    yf: "USDJPY=X", priority: 7, setups: [smc_sweep]}
+  - {name: "AUD/USD",    yf: "AUDUSD=X", priority: 8, setups: [smc_sweep]}
+
+risk:
+  min_rr: 2.5                 # reject any setup below 1:2.5
+  tp_rr: 2.5                  # TP placed at 2.5 × risk
+  daily_max_signals: 6
+  per_symbol_max: 1
+  cooldown_minutes: 45        # min gap between ANY two trade alerts
+  symbol_cooldown_minutes: 120 # min gap between alerts on the same symbol
+  max_signal_age_minutes: 20
+
+correlation_groups:
+  - name: us_indices
+    members: {"US 30": 1, "NASDAQ 100": 1, "S&P 500": 1}
+  - name: eur_gbp
+    members: {"EUR/USD": 1, "GBP/USD": 1}
+
+confluence:
+  min_score: 4                # global floor (out of 6); setups may demand more
+
+setups:
+  smc_sweep:
+    enabled: true
+    label: "Liquidity Sweep + BOS"
+    entry_tf: "15m"
+    min_score: 5
+    swing_strength: 2
+    sweep_lookback_bars: 28
+    displacement_atr: 0.6
+    min_fvg_atr: 0.08
+    max_risk_atr: 3.5
+    min_risk_atr: 0.3
+    sl_buffer_atr: 0.15
+    checklist:
+      htf_bias:         {weight: 1, required: true}
+      premium_discount: {weight: 1, required: false}
+      liquidity_sweep:  {weight: 1, required: true}
+      mss_bos:          {weight: 1, required: true}
+      pd_array:         {weight: 1, required: true}
+      kill_zone:        {weight: 1, required: true}
+
+  orb_open:
+    enabled: false            # weak on 30-day yfinance replay — re-enable after live review
+    label: "NY Opening Range Breakout"
+    entry_tf: "5m"
+    min_score: 5
+    open_time_ny: "09:30"
+    range_minutes: 15
+    entry_until_ny: "10:30"
+    sl_mode: "opposite"
+    min_body_ratio: 0.55
+    volume_mult: 1.3
+    max_range_atr: 3.5
+    checklist:
+      htf_bias:       {weight: 1, required: true}
+      breakout_close: {weight: 1, required: true}
+      strong_candle:  {weight: 1, required: true}
+      volume_confirm: {weight: 1, required: false}
+      vwap_side:      {weight: 1, required: true}
+      gap_align:      {weight: 1, required: false}
+
+  vwap_pullback:
+    enabled: true
+    label: "Session VWAP Pullback"
+    entry_tf: "5m"
+    min_score: 5
+    anchor_ny: "09:30"
+    trend_bars: 18
+    trend_min_frac: 0.75
+    min_separation_atr: 1.2
+    touch_atr: 0.2
+    avoid_ny: ["11:30", "13:30"]
+    sl_buffer_atr: 0.25
+    max_risk_atr: 2.5
+    checklist:
+      htf_bias:         {weight: 1, required: true}
+      vwap_trend:       {weight: 1, required: true}
+      pullback_touch:   {weight: 1, required: true}
+      confirm_close:    {weight: 1, required: true}
+      volume_signature: {weight: 1, required: false}
+      active_hours:     {weight: 1, required: true}
+
+telegram:
+  trade_alerts: true
+  session_open: true
+  daily_summary: true
+  scan_updates: false
+  data_errors: true

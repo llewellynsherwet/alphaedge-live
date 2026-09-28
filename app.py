@@ -14,6 +14,21 @@ import base64
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+# Confluence Day Template engine (config-driven; shared with monitor_worker)
+from strategy.engine import (
+    session_info as _engine_session_info,
+    next_session as _engine_next_session,
+    load_state as _engine_load_state,
+    save_state as _engine_save_state,
+    scan_once as _engine_scan_once,
+    evaluate_display as _engine_evaluate_display,
+    format_trade_message as _engine_format_trade,
+    format_daily_summary as _engine_format_summary,
+    record_emits as _engine_record_emits,
+    load_config as _engine_load_config,
+)
+from strategy.config_loader import load_config as _load_strategy_config
+
 _NY_TZ = ZoneInfo("America/New_York")
 
 # ================= 1. PAGE CONFIG & BRANDING =================
@@ -160,26 +175,15 @@ def _send_telegram(message: str) -> bool:
 
 
 def get_session_info():
-    """Returns (in_session, session_name) based on current UTC time."""
-    now = datetime.now(timezone.utc)
-    h   = now.hour + now.minute / 60.0
-    if   7.0  <= h < 10.0: return True,  "🇬🇧 LONDON OPEN"
-    elif 10.0 <= h < 12.0: return True,  "🇬🇧🇺🇸 LONDON CONTINUATION"
-    elif 12.0 <= h < 16.0: return True,  "🇺🇸 NY / LONDON OVERLAP"
-    elif 16.0 <= h < 17.0: return True,  "🇺🇸 NEW YORK CLOSE"
-    else:                   return False, "🔴 OFF-SESSION"
+    """Returns (in_session, session_name). Delegates to the config-driven engine
+    (Mon–Fri, 07:00–17:00 UTC by default — see strategy_config.yaml)."""
+    return _engine_session_info()
 
 
 def _next_session():
-    """Returns (name, time_str) of the next upcoming session."""
-    now = datetime.now(timezone.utc)
-    h   = now.hour + now.minute / 60.0
-    if h < 7.0:
-        return "🇬🇧 London Open", "07:00 UTC"
-    elif h < 12.0:
-        return "🇺🇸 NY / London Overlap", "12:00 UTC"
-    else:
-        return "🇬🇧 London Open (tomorrow)", "07:00 UTC"
+    """Returns (name, time_str) of the next upcoming session window."""
+    return _engine_next_session()
+
 
 
 def _calc_rsi(series, period=14):
@@ -300,6 +304,8 @@ def _log_data_error(symbol: str, interval: str, reason: str):
 
 
 def _us30_open_strategy(ticker_symbol):
+    # LEGACY — superseded by strategy.setups.orb_open; kept for reference.
+    # The live engine never calls this.
     try:
         # NYSE cash open is 09:30 New York time. Work in NY time so the windows
         # stay correct through daylight-saving changes (13:30 UTC in summer,
@@ -482,6 +488,8 @@ def _us30_open_strategy(ticker_symbol):
 
 
 def _smc_4h_strategy(display_name, ticker_symbol):
+    # LEGACY — superseded by strategy.setups.smc_sweep; kept for reference.
+    # The live engine never calls this.
     try:
         df_4h = _yf_candles(ticker_symbol, "4h", 31)
         df_1h = _yf_candles(ticker_symbol, "1h", 51)
@@ -617,22 +625,12 @@ def _smc_4h_strategy(display_name, ticker_symbol):
 
 
 def _signal_engine(display_name):
-    """
-    ALPHAEDGE SIGNAL ENGINE
-    US30  -> US30 Open Strategy (5 layers: pre-market box, DOW stocks, DXY, double top/bottom, 4H SMC)
-    Other -> SMC 4H Strategy   (5 layers: structure, order block, 1H EMA, RSI, MACD)
+    """UI + monitor entry point. Runs the Confluence Day Template for one symbol.
+    Returns (sig, entry, tp, sl, reason) — same 5-tuple the rest of the app expects.
     """
     try:
-        now_utc    = datetime.now(timezone.utc)
-        h          = now_utc.hour + now_utc.minute / 60.0
-        if not (7.0 <= h < 17.0):
-            return "WAIT", 0.0, 0.0, 0.0, "Outside session (07-17 UTC)"
-        ticker_symbol = TICKER_MAP.get(display_name)
-        if not ticker_symbol:
-            return "WAIT", 0.0, 0.0, 0.0, "Unknown asset"
-        if display_name == "US 30":
-            return _us30_open_strategy(ticker_symbol)
-        return _smc_4h_strategy(display_name, ticker_symbol)
+        sig, entry, tp, sl, reason, _meta = _engine_evaluate_display(display_name)
+        return sig, entry, tp, sl, reason
     except Exception as e:
         return "WAIT", 0.0, 0.0, 0.0, "Engine error: " + str(e)
 
@@ -814,50 +812,39 @@ def get_scalp_signal(ticker_symbol):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BACKGROUND TELEGRAM MONITOR
-# Uses Finnhub real-time data. Runs every 5 min. Silent — no UI.
-# Sends session open/close alerts + signals when all 4 layers align.
+# BACKGROUND TELEGRAM MONITOR — Confluence Day Template
+# Scans the allowlist in strategy_config.yaml every 5 min during Mon–Fri
+# 07:00–17:00 UTC. Emits at most daily_max_signals trade alerts (default 6),
+# with sticky zone-key dedupe, cooldowns, and correlation filters.
+# Telegram noise: trade alerts + one session-open + one daily summary only.
 # ══════════════════════════════════════════════════════════════════════════════
-_last_signals: dict = {}
-
-# ── STATE FILE — persists across Streamlit reruns and page visits ────────────
-# Module-level variables reset every time Streamlit reruns the script.
-# We write session state to a file so the monitor thread reads/writes disk,
-# not memory — this guarantees ONE open alert and ONE close alert only.
 _STATE_FILE = "monitor_state.json"
+_data_errors_sent: set = set()   # "symbol|interval|YYYY-MM-DD" — once per day
+
 
 def _read_state() -> dict:
-    try:
-        with open(_STATE_FILE, "r") as f:
-            data = json.load(f)
-            # Ensure scan_count key always exists
-            data.setdefault("scan_count", 0)
-            return data
-    except Exception:
-        return {"in_kz": None, "last_signals": {}, "scan_count": 0}
+    return _engine_load_state(_STATE_FILE)
 
-def _write_state(in_kz: bool, last_signals: dict):
-    try:
-        with open(_STATE_FILE, "w") as f:
-            json.dump({"in_kz": in_kz, "last_signals": last_signals}, f)
-    except Exception:
-        pass
+
+def _write_state_raw(state: dict):
+    _engine_save_state(state, _STATE_FILE)
 
 
 def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
-    rr        = abs(tp - entry) / abs(sl - entry) if abs(sl - entry) > 0 else 0
-    direction = "🟢 BUY" if "BUY" in sig else "🔴 SELL"
+    """Legacy signature kept for any stray callers; prefer engine formatter."""
+    rr = abs(tp - entry) / abs(sl - entry) if abs(sl - entry) > 0 else 0
+    direction = "🟢 BUY" if "BUY" in str(sig) else "🔴 SELL"
     return (
-        f"🚨 <b>ALPHAEDGE SIGNAL</b> 🚨\n"
+        f"🚨 <b>ALPHAEDGE SIGNAL</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"📊 <b>Asset:</b> {_tg_escape(display_name)}\n"
         f"📈 <b>Signal:</b> {direction}\n"
         f"⏰ <b>Time (UTC):</b> {datetime.now(timezone.utc).strftime('%H:%M  %d/%m/%Y')}\n"
         f"🏦 <b>Session:</b> {_tg_escape(session_name)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"💰 <b>Entry:</b>  {entry:.5f}\n"
-        f"🎯 <b>TP:</b>     {tp:.5f}\n"
-        f"🛑 <b>SL:</b>     {sl:.5f}\n"
+        f"💰 <b>Entry:</b>  {entry}\n"
+        f"🎯 <b>TP:</b>     {tp}\n"
+        f"🛑 <b>SL:</b>     {sl}\n"
         f"📐 <b>R:R:</b>    1 : {rr:.1f}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🔍 <b>Why this trade:</b>\n{_tg_escape(reason)}\n"
@@ -867,90 +854,87 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
 
 
 def _monitor_loop():
-    """
-    Background thread — runs once per process lifetime.
-    State is stored in monitor_state.json so it survives Streamlit reruns.
-    ONE open message, ONE close message — nothing else fires repeatedly.
-    """
+    """Background thread — one per process. State is date-keyed so a wiped
+    monitor_state.json (Render free disk is ephemeral) just starts a fresh day
+    and never re-fires yesterday's alerts."""
+    import pandas as pd
     while True:
         try:
-            in_kz, session_name  = get_session_info()
-            state                = _read_state()
-            prev_kz              = state.get("in_kz", None)   # None = first ever run
-            last_signals         = state.get("last_signals", {})
+            cfg = _load_strategy_config()          # hot-reload every loop
+            now = pd.Timestamp.now(tz="UTC")
+            state = _read_state()
+            in_kz, session_name = _engine_session_info(now, cfg)
+            prev = state.get("in_session", None)
+            tg = cfg.get("telegram", {})
 
-            # First ever run — record state silently, no message sent
-            if prev_kz is None:
-                _write_state(in_kz, last_signals)
+            # First ever observation today — record silently
+            if prev is None:
+                state["in_session"] = in_kz
+                _write_state_raw(state)
 
-            # Kill zone just OPENED (False → True) — send ONE open message
-            elif in_kz and prev_kz is False:
-                _send_telegram(
-                    f"🟢 <b>SESSION OPEN — {session_name}</b>\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"📡 Scanning 20 markets\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
-                )
-                _write_state(in_kz, last_signals)
-
-            # Kill zone just CLOSED (True → False) — send ONE close message
-            elif not in_kz and prev_kz is True:
-                nxt_name, nxt_time = _next_session()
-                _send_telegram(
-                    f"🔴 <b>SESSION CLOSED — {session_name}</b>\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                    f"😴 No signals until next session\n"
-                    f"⏭️ <b>Next:</b> {nxt_name} at {nxt_time}\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
-                )
-                last_signals = {}   # fresh slate for next session
-                _write_state(in_kz, last_signals)
-
-            # No transition — just update in_kz in case it drifted
-            else:
-                _write_state(in_kz, last_signals)
-
-            # Signal scan — Finnhub real-time, London + NY sessions
-            if in_kz:
-                signals_found = []
-                for display_name in TICKER_MAP.keys():
-                    try:
-                        sig, entry, tp, sl, reason = _signal_engine(display_name)
-                        prev_sig = last_signals.get(display_name, "⚪ WAITING")
-                        if sig not in ("⚪ WAITING", "WAIT", "WAITING") and sig != prev_sig:
-                            msg = _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name)
-                            _send_telegram(msg)
-                            last_signals[display_name] = sig
-                            signals_found.append(f"{display_name}: {sig}")
-                            _write_state(in_kz, last_signals)
-                        elif sig in ("⚪ WAITING","WAIT","WAITING") and prev_sig not in ("⚪ WAITING","WAIT","WAITING"):
-                            last_signals[display_name] = "⚪ WAITING"
-                            _write_state(in_kz, last_signals)
-                        time.sleep(1)
-                    except Exception as e:
-                        print(f"[monitor] {display_name} scan error: {e!r}", flush=True)
-                        continue
-                # Send scan summary every 30 min (6 loops × 5 min) so you know bot is alive
-                scan_count = state.get("scan_count", 0) + 1
-                # Write scan_count separately — don't mix into last_signals
-                try:
-                    sc_data = {"in_kz": in_kz, "last_signals": last_signals, "scan_count": scan_count}
-                    with open(_STATE_FILE, "w") as _f:
-                        json.dump(sc_data, _f)
-                except Exception:
-                    pass
-                if scan_count % 6 == 0:
-                    status = "✅ " + ", ".join(signals_found) if signals_found else "⏳ No setups yet — watching"
+            # Session OPEN edge
+            elif in_kz and prev is False:
+                if tg.get("session_open", True):
                     _send_telegram(
-                        f"🔍 <b>SCAN UPDATE</b> — {session_name}\n"
+                        f"🟢 <b>SESSION OPEN — {_tg_escape(session_name)}</b>\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                        f"📊 Scanned 20 markets\n"
-                        f"{_tg_escape(status)}\n"
-                        f"<i>Next scan in 5 min</i>"
+                        f"📡 Confluence Day Template armed\n"
+                        f"🎯 Daily budget: {cfg.get('risk', {}).get('daily_max_signals', 6)} alerts\n"
+                        f"━━━━━━━━━━━━━━━━━━━━\n"
+                        f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
+                    )
+                state["in_session"] = True
+                state["summary_sent"] = False
+                _write_state_raw(state)
+
+            # Session CLOSE edge → one daily summary, then stop scanning
+            elif (not in_kz) and prev is True:
+                if tg.get("daily_summary", True) and not state.get("summary_sent"):
+                    _send_telegram(_engine_format_summary(state, session_name))
+                    state["summary_sent"] = True
+                state["in_session"] = False
+                _write_state_raw(state)
+
+            else:
+                state["in_session"] = in_kz
+                _write_state_raw(state)
+
+            # Signal scan
+            if in_kz:
+                result = _engine_scan_once(now=now, cfg=cfg, state=state)
+                # data errors — at most once per symbol/interval/day
+                if tg.get("data_errors", True):
+                    day = now.strftime("%Y-%m-%d")
+                    for sym, interval, reason in result["data_errors"]:
+                        key = f"{sym}|{interval}|{day}"
+                        if key not in _data_errors_sent:
+                            _data_errors_sent.add(key)
+                            _send_telegram(
+                                f"⚠️ <b>DATA ERROR</b>\n"
+                                f"Symbol: {_tg_escape(sym)} | Interval: {_tg_escape(interval)}\n"
+                                f"Reason: {_tg_escape(reason)}"
+                            )
+
+                accepted = result["accepted"]
+                if accepted and tg.get("trade_alerts", True):
+                    for cand in accepted:
+                        _send_telegram(_engine_format_trade(cand, session_name))
+                    state = _engine_record_emits(state, accepted, now)
+
+                state["scan_count"] = int(state.get("scan_count", 0)) + 1
+                state["in_session"] = True
+                _write_state_raw(state)
+
+                # Optional scan updates — OFF by default in strategy_config.yaml
+                if tg.get("scan_updates", False) and state["scan_count"] % 6 == 0:
+                    status = (
+                        "✅ " + ", ".join(f"{c.symbol} {c.side}" for c in accepted)
+                        if accepted else "⏳ No A-tier setups — watching"
+                    )
+                    _send_telegram(
+                        f"🔍 <b>SCAN UPDATE</b> — {_tg_escape(session_name)}\n"
+                        f"{_tg_escape(status)}"
                     )
 
         except Exception as e:
@@ -958,23 +942,12 @@ def _monitor_loop():
         time.sleep(300)
 
 
-# ── MONITOR SINGLETON — survives Streamlit reruns on Render ─────────────────
-# threading.enumerate() checks if our named thread is already alive.
-# This works across all Streamlit reruns because threads live at the OS level,
-# not the Python module level. No file locks, no race conditions.
-
 def start_monitor():
-    # Check if monitor thread is already running by name
     for thread in threading.enumerate():
         if thread.name == "alphaedge_monitor":
-            return  # Already running — do nothing
-    # Fresh start — wipe stale state so old last_signals don't block new signals
-    try:
-        if os.path.exists(_STATE_FILE):
-            os.remove(_STATE_FILE)
-    except Exception:
-        pass
-    # Not running — start it
+            return  # already running
+    # Do NOT wipe monitor_state.json — date-keyed state is restart-safe.
+    # A missing/stale file simply starts a fresh day budget.
     t = threading.Thread(target=_monitor_loop, name="alphaedge_monitor", daemon=True)
     t.start()
 
@@ -982,21 +955,26 @@ _RUN_IN_APP = os.environ.get("MONITOR_MODE", "app") == "app"
 if _RUN_IN_APP:
     start_monitor()
 
-# ── STARTUP PING — fires once when Render starts the app ─────────────────────
-# Sends one message to Telegram so you know the bot is live and credentials work
+# ── STARTUP PING — once per deploy (flag file). ──────────────────────────────
 _STARTUP_FLAG = "startup_ping.flag"
 if os.environ.get("MONITOR_MODE", "app") != "off" and not os.path.exists(_STARTUP_FLAG):
+    try:
+        _cfg0 = _load_strategy_config()
+        _nsym = len(_cfg0.get("symbols", []))
+        _cap = _cfg0.get("risk", {}).get("daily_max_signals", 6)
+    except Exception:
+        _nsym, _cap = "?", "?"
     _ok = _send_telegram(
         f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-        f"✅ Credentials loaded\n"
-        f"✅ Monitor thread started\n"
-        f"✅ Scanning: London &amp; NY 07-17 UTC\n"
+        f"✅ Confluence Day Template loaded\n"
+        f"✅ Allowlist: {_nsym} symbols · daily cap {_cap}\n"
+        f"✅ Sessions: Mon–Fri 07–17 UTC\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"<i>Bot will scan every 5 min during sessions</i>"
+        f"<i>Trade alerts only — no scan spam</i>"
     )
-    if _ok:   # only mark as sent once Telegram actually accepted it
+    if _ok:
         try:
             with open(_STARTUP_FLAG, "w") as _f:
                 _f.write("1")
@@ -1179,7 +1157,7 @@ with tab_dash:
     st.markdown("""
     <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
         <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-        <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Triple confluence engine • 4H trend • 1H EMA cross • RSI + MACD • London &amp; NY sessions • 2.5R minimum</p>
+        <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS / ORB / VWAP • checklist ≥4/6 • Mon–Fri 07–17 UTC • daily cap 6 • 2.5R min</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1198,7 +1176,7 @@ with tab_dash:
     sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("📐 EMA SIGNAL", sig)
+    c1.metric("📐 SIGNAL", sig)
     st.caption(f"📌 Analysing: **{focus_ticker}**")
 
     if sig not in ("⚪ WAITING", "WAIT", "WAITING"):
