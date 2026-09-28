@@ -17,10 +17,17 @@ session:
     - {name: "NY KZ",     start: "12:30", end: "16:00"}
 
 symbols:
-  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, vwap_pullback, orb_open]}
-  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, vwap_pullback, orb_open]}
-  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, vwap_pullback, orb_open]}
-  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, vwap_pullback]}
+  # yf = signal feed (futures have volume). quote = what users trade (cash / CFD /
+  # spot). Entry/SL/TP in alerts are converted into the quote price by removing
+  # the live futures basis, so US30 alerts match a broker US30, not YM futures.
+  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, vwap_pullback, orb_open],
+     quote: {source: yf, ticker: "^DJI", label: "US30 cash (^DJI)"}}
+  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, vwap_pullback, orb_open],
+     quote: {source: yf, ticker: "^NDX", label: "NAS100 cash (^NDX)"}}
+  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, vwap_pullback, orb_open],
+     quote: {source: yf, ticker: "^GSPC", label: "SPX500 cash (^GSPC)"}}
+  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, vwap_pullback],
+     quote: {source: gold_api, ticker: "XAU", label: "XAUUSD spot"}}
   - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep]}
   - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep]}
   - {name: "USD/JPY",    yf: "USDJPY=X", priority: 7, setups: [smc_sweep]}
@@ -34,6 +41,18 @@ risk:
   cooldown_minutes: 45        # min gap between ANY two trade alerts
   symbol_cooldown_minutes: 120 # min gap between alerts on the same symbol
   max_signal_age_minutes: 20
+
+# ── Live execution checks (applied at alert time, before the daily budget) ──
+execution:
+  enabled: true
+  entry_mode: market           # market = entry at live price | limit = original zone entry
+  tp_on_reprice: keep_rr       # keep_rr = TP re-placed at tp_rr × new risk | keep_target = original TP
+  max_data_age_minutes: 15     # reject if the signal feed's last 1m bar is older (Yahoo futures ≈10m delayed)
+  max_price_age_minutes: 10    # live quote considered fresh within this many minutes
+  max_drift_atr: 0.3           # reject if price already ran toward TP by more than 0.3 × ATR…
+  max_drift_tp_frac: 0.25      # …or by more than 25% of the distance to TP
+  reject_if_tp_sl_hit: true    # reject if TP or SL traded after the trigger candle closed
+  max_basis_age_hours: 96      # oldest common minute accepted for futures↔cash basis
 
 correlation_groups:
   - name: us_indices

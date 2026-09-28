@@ -28,6 +28,7 @@ from strategy.engine import (
     load_config as _engine_load_config,
 )
 from strategy.config_loader import load_config as _load_strategy_config
+from strategy.common import fmt_price as _fmt_price
 
 _NY_TZ = ZoneInfo("America/New_York")
 
@@ -48,7 +49,8 @@ TV_MAP = {
     "EUR/USD": "FX:EURUSD", "GBP/USD": "FX:GBPUSD", "USD/JPY": "FX:USDJPY",
     "USD/CHF": "FX:USDCHF", "AUD/USD": "FX:AUDUSD", "USD/CAD": "FX:USDCAD",
     "NZD/USD": "FX:NZDUSD", "USD/ZAR": "FX:USDZAR", "GBP/ZAR": "FX:GBPZAR",
-    "S&P 500": "CME_MINI:ES1!", "NASDAQ 100": "CME_MINI:NQ1!", "US 30": "CBOT_MINI:YM1!",
+    # Indices: cash/CFD symbols, matching the repriced signal levels (quote: in strategy_config.yaml)
+    "S&P 500": "OANDA:SPX500USD", "NASDAQ 100": "OANDA:NAS100USD", "US 30": "OANDA:US30USD",
     "VIX": "TVC:VIX", "DAX 40": "INDEX:DE40",
     "GOLD": "OANDA:XAUUSD", "SILVER": "TVC:SILVER", "OIL (WTI)": "NYMEX:CL1!",
     "BITCOIN": "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT", "SOLANA": "BINANCE:SOLUSDT"
@@ -995,7 +997,7 @@ def show_popup_chart(ticker):
         st.info("⚠️ 'tv_banner.jpg' not found in 'static' folder.")
     st.markdown(f'<a href="{tv_link}" target="_blank"><button style="width:100%;background-color:#2962FF;color:white;border:none;padding:12px;border-radius:5px;font-weight:bold;cursor:pointer;margin-bottom:15px;">🚀 UPGRADE TO TRADINGVIEW PRO ➤</button></a>', unsafe_allow_html=True)
     tv_symbol = TV_MAP.get(ticker, "FX:EURUSD")
-    st.iframe(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_popup"}});</script>""", height=510)
+    st.iframe(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"60","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_popup"}});</script>""", height=510)
     st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
@@ -1137,7 +1139,7 @@ with tab_dash:
             tech  = row.get("tech",  "—")
             css   = "bullish" if "BULL" in str(bias) else "bearish" if "BEAR" in str(bias) else ""
             try:
-                price_str = f"{price:,.4f}" if price else "—"
+                price_str = _fmt_price(float(price)) if price else "—"
             except Exception:
                 price_str = str(price)
             rows_html += (
@@ -1146,7 +1148,7 @@ with tab_dash:
                 f'<td class="{css}">{score}</td>'
                 f'<td>{trend}</td><td>{tech}</td>'
                 f'<td style="color:#D4AF37;font-weight:bold;">{price_str}</td>'
-                f'<td><span class="live-tag">⚡ LIVE</span></td></tr>'
+                f'<td><span class="live-tag">{"⚡ FUTURES ~10m" if str(TICKER_MAP.get(name, "")).endswith("=F") else "⚡ LIVE"}</span></td></tr>'
             )
     else:
         rows_html = "<tr><td colspan='7'>Loading Data...</td></tr>"
@@ -1180,8 +1182,8 @@ with tab_dash:
     st.caption(f"📌 Analysing: **{focus_ticker}**")
 
     if sig not in ("⚪ WAITING", "WAIT", "WAITING"):
-        c2.metric("⚡ LIVE ENTRY", f"{ent:.4f}")
-        c3.metric("🎯 TARGETS",    f"TP: {tp:.4f} | SL: {sl:.4f}")
+        c2.metric("⚡ LIVE ENTRY", _fmt_price(ent))
+        c3.metric("🎯 TARGETS",    f"TP: {_fmt_price(tp, ent)} | SL: {_fmt_price(sl, ent)}")
         box_class    = "reason-box" if "BUY" in sig else "reason-box-sell"
         reason_lines = reason.replace("\n", "<br>")
         st.markdown(f'<div class="{box_class}"><p style="margin:0 0 6px 0;font-weight:bold;color:#ccc;font-size:12px;">📋 WHY THIS TRADE:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
@@ -1193,7 +1195,7 @@ with tab_dash:
             st.markdown(f'<div style="background:#0a0a0f;border:1px solid #333;border-left:3px solid #888;border-radius:4px;padding:10px 14px;margin-top:10px;font-size:12px;color:#666;"><p style="margin:0 0 4px 0;color:#888;font-weight:bold;">⏳ WAITING — CONDITIONS NOT YET MET:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
 
     tv_symbol = TV_MAP.get(focus_ticker, "FX:EURUSD")
-    st.iframe(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
+    st.iframe(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"60","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
 
 
 
@@ -1484,6 +1486,9 @@ with tab_cot:
         try:
             with open("cot_live.json","r") as f: cot_data = json.load(f)
             table_rows = "".join([make_row(dict(v, Symbol=k)) for k,v in cot_data.items()])
+            _dates = sorted({v.get("report_date") for v in cot_data.values() if v.get("report_date")})
+            if _dates:
+                st.caption(f"CFTC report date: {', '.join(_dates)} · Commodities = Managed Money (Disaggregated), Financials = Leveraged Funds (TFF)")
             st.markdown(f'<table class="heatmap-table" style="width:100%;text-align:center;"><thead><tr style="background:#111;color:#D4AF37;"><th>Symbol</th><th>Longs</th><th>Shorts</th><th>Δ Long</th><th>Δ Short</th><th>Long %</th><th>Short %</th><th>Net %</th><th>Net Pos</th><th>OI</th><th>Δ OI</th></tr></thead><tbody>{table_rows}</tbody></table>', unsafe_allow_html=True)
         except (json.JSONDecodeError, KeyError) as e:
             st.error(f"⚠️ Failed to parse COT data: {e}. Try refreshing.")

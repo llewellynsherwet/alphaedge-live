@@ -29,6 +29,7 @@ class Candidate:
     max_score: int = 0
     priority: int = 99
     checklist_lines: list = field(default_factory=list)
+    meta: dict = field(default_factory=dict)
 
     @property
     def risk(self) -> float:

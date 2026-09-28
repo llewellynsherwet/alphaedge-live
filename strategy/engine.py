@@ -18,6 +18,7 @@ from .checklist import score as score_checklist  # noqa: F401  (re-export useful
 from .common import Candidate, fmt_price, in_window, minutes_of, parse_hhmm
 from .config_loader import load_config
 from .setups import REGISTRY
+from . import pricing
 
 _STATE_DEFAULT = Path(__file__).resolve().parent.parent / "monitor_state.json"
 
@@ -249,7 +250,8 @@ def evaluate_symbol(sym_cfg: dict, frames: dict, cfg: dict, now: pd.Timestamp) -
 
 
 def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
-              state: dict | None = None, fetch_fn=None, apply_gates: bool = True):
+              state: dict | None = None, fetch_fn=None, apply_gates: bool = True,
+              snapshot_fn=None):
     """
     Full scan of the allowlist.
     Returns dict with keys:
@@ -280,13 +282,24 @@ def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
             result["data_errors"].append((sym["name"], interval, reason))
         if not frames:
             continue
-        all_cands.extend(evaluate_symbol(sym, frames, cfg, now))
+        cands = evaluate_symbol(sym, frames, cfg, now)
+        if cands and cfg.get("execution", {}).get("enabled", True) and snapshot_fn is not False:
+            snap = (snapshot_fn or pricing.snapshot)(sym, cfg, now)
+            kept = []
+            for c in cands:
+                ok, why = pricing.validate_and_reprice(c, snap, cfg, now)
+                if ok:
+                    kept.append(c)
+                else:
+                    result["reject_reasons"].append(f"{c.symbol}/{c.setup}/{c.side}: {why}")
+            cands = kept
+        all_cands.extend(cands)
 
     result["candidates"] = all_cands
     if apply_gates:
         accepted, reasons = gate_candidates(all_cands, state, cfg, now)
         result["accepted"] = accepted
-        result["reject_reasons"] = reasons
+        result["reject_reasons"].extend(reasons)
     else:
         result["accepted"] = all_cands
     return result
@@ -325,18 +338,47 @@ def evaluate_display(display_name: str, now: pd.Timestamp | None = None, cfg: di
             f"Session: {sess_name}"
         ), {}
 
+    rejected = []
+    if cfg.get("execution", {}).get("enabled", True):
+        snap = pricing.snapshot(sym, cfg, now)
+        kept = []
+        for c in cands:
+            ok, why = pricing.validate_and_reprice(c, snap, cfg, now)
+            (kept if ok else rejected).append(c if ok else f"{c.label} {c.side}: {why}")
+        cands = kept
+    if not cands:
+        return "WAIT", 0.0, 0.0, 0.0, (
+            f"Setup detected on {display_name} but rejected at live-price check:\n"
+            + "\n".join(rejected)
+        ), {}
+
     best = sorted(cands, key=lambda c: (-c.score, -c.rr, c.priority))[0]
     reason = (
         f"{best.label}  {best.score}/{best.max_score}\n"
         + "\n".join(best.checklist_lines) + "\n"
         + "-" * 24 + "\n"
         + "\n".join(best.notes) + "\n"
+        + _data_line(best) + "\n"
         + f"Entry {fmt_price(best.entry, best.entry)} | SL {fmt_price(best.sl, best.entry)} | "
           f"TP {fmt_price(best.tp, best.entry)} | R:R 1:{best.rr:.1f}"
     )
     sig = "BUY" if best.side == "BUY" else "SELL"
     meta = {"candidate": best, "session": sess_name}
     return sig, best.entry, best.tp, best.sl, reason, meta
+
+
+def _data_line(c: Candidate) -> str:
+    m = c.meta or {}
+    if not m:
+        return "Data age: n/a (not live-validated)"
+    parts = [
+        f"Candle closed {m.get('candle_age_min', 0):.0f}m ago",
+        f"feed age {m.get('signal_age_min', 0):.0f}m ({m.get('signal_ticker', '')})",
+        f"price {m.get('quote_label', '')} {m.get('quote_age_min', 0):.0f}m old",
+    ]
+    if m.get("basis"):
+        parts.append(f"futures basis {m['basis']:+.2f} removed")
+    return " · ".join(parts)
 
 
 def format_trade_message(c: Candidate, session_name: str) -> str:
@@ -353,10 +395,13 @@ def format_trade_message(c: Candidate, session_name: str) -> str:
         f"⏰ <b>Time (UTC):</b> {datetime.now(timezone.utc).strftime('%H:%M  %d/%m/%Y')}\n"
         f"🏦 <b>Session:</b> {escape(session_name)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"💰 <b>Entry:</b>  {fmt_price(c.entry, c.entry)}\n"
+        f"💰 <b>Entry:</b>  {fmt_price(c.entry, c.entry)}"
+        f"{' (LIMIT)' if c.meta.get('entry_mode') == 'limit' else ' (market @ live)' if c.meta else ''}\n"
         f"🎯 <b>TP:</b>     {fmt_price(c.tp, c.entry)}\n"
         f"🛑 <b>SL:</b>     {fmt_price(c.sl, c.entry)}\n"
         f"📐 <b>R:R:</b>    1 : {c.rr:.1f}\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"🕒 {escape(_data_line(c))}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"<b>Checklist</b>\n{lines}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"

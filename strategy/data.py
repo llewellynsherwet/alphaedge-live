@@ -34,6 +34,12 @@ def closed_only(df, interval: str, now: pd.Timestamp):
     return df[df.index + pd.Timedelta(minutes=INTERVAL_MIN[interval]) <= now]
 
 
+def closed_only_minutes(df, minutes: int, now: pd.Timestamp):
+    if df is None:
+        return None
+    return df[df.index + pd.Timedelta(minutes=minutes) <= now]
+
+
 def fetch(yf_symbol: str, interval: str, period: str):
     """Returns (DataFrame|None, error|None)."""
     try:
