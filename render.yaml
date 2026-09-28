@@ -3,7 +3,11 @@ services:
     name: alphaedge-live
     runtime: python
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: rm -f startup_ping.flag monitor_state.json; python monitor_worker.py & MONITOR_MODE=off streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    # Only clear the startup-ping flag on deploy so the "bot online" message
+    # fires once. monitor_state.json is date-keyed and restart-safe — do NOT
+    # delete it here (even if the free disk is wiped, a missing file just
+    # starts a fresh day budget and never re-fires yesterday's alerts).
+    startCommand: rm -f startup_ping.flag; python monitor_worker.py & MONITOR_MODE=off streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
