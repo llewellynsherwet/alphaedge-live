@@ -134,8 +134,9 @@ def update_cot_data():
         with open("cot_live.json", "w") as f:
             json.dump(all_data, f)
         print(f"✅ SUCCESS! Saved {len(all_data)} assets.")
-    else:
-        print("❌ Fatal: No assets found.")
+        return True
+    print("❌ Fatal: No assets found.")
+    return False
 
 if __name__ == "__main__":
     update_cot_data()

@@ -3,14 +3,18 @@ import time
 import os
 import json
 import html
+import re
 import sqlite3
 import threading
 import requests
 import pandas as pd
 import yfinance as yf
-import streamlit.components.v1 as components
+
 import base64
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+_NY_TZ = ZoneInfo("America/New_York")
 
 # ================= 1. PAGE CONFIG & BRANDING =================
 st.set_page_config(page_title="AlphaEdge | Trading Intelligence", page_icon="🅰️", layout="wide", initial_sidebar_state="expanded")
@@ -110,27 +114,49 @@ st.markdown("""
 # Set these as Environment Variables on Render dashboard
 # OR replace the placeholder strings below with your actual values
 # ══════════════════════════════════════════════════════════════════════════════
-_TG_TOKEN   = os.environ.get("TG_TOKEN",   "8546515684:AAF4rVZbiqtEqHVPFloJ26wHeDsaHR8hKHE")   # from @BotFather
-_TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "5689404731")     # your Telegram chat ID
+_TG_TOKEN   = os.environ.get("TG_TOKEN", "").strip()     # from @BotFather — set on Render, never in code
+_TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "").strip()   # your Telegram chat ID — set on Render
 
 # NOTE: No Finnhub key needed. No other API keys needed.
 # Signal engine uses yfinance — free, no key, works on Render.
 
 
-def _send_telegram(message: str):
-    """Send a message to the Telegram bot. Silently skips if credentials not set."""
-    if not _TG_TOKEN or "YOUR_" in _TG_TOKEN:
-        return
-    if not _TG_CHAT_ID or "YOUR_" in _TG_CHAT_ID:
-        return
-    try:
-        requests.post(
-            f"https://api.telegram.org/bot{_TG_TOKEN}/sendMessage",
-            json={"chat_id": _TG_CHAT_ID, "text": message, "parse_mode": "HTML"},
-            timeout=10
-        )
-    except Exception:
-        pass
+def _tg_escape(text) -> str:
+    """Escape <, > and & so Telegram's HTML parser accepts dynamic text
+    (strategy reasons contain '->' and '<0.05%', which made Telegram reject
+    the whole message with 'can't parse entities')."""
+    return html.escape(str(text), quote=False)
+
+
+def _send_telegram(message: str) -> bool:
+    """Send a message to the Telegram bot. Returns True on success.
+    Failures are printed to the Render logs instead of being silently ignored."""
+    if not _TG_TOKEN or not _TG_CHAT_ID:
+        print("[telegram] TG_TOKEN / TG_CHAT_ID not set — message skipped", flush=True)
+        return False
+    url = f"https://api.telegram.org/bot{_TG_TOKEN}/sendMessage"
+    payload = {"chat_id": _TG_CHAT_ID, "text": message[:4096],
+               "parse_mode": "HTML", "disable_web_page_preview": True}
+    for attempt in range(3):
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            if r.ok:
+                return True
+            desc = r.json().get("description", r.text) if r.headers.get("content-type", "").startswith("application/json") else r.text
+            print(f"[telegram] send failed ({r.status_code}): {desc}", flush=True)
+            if r.status_code == 400 and "parse" in str(desc).lower():
+                # Formatting problem: resend as plain text so the alert still arrives
+                payload.pop("parse_mode", None)
+                payload["text"] = re.sub(r"</?[a-zA-Z][^>]*>", "", message)[:4096]
+                continue
+            if r.status_code == 429:
+                time.sleep(int(r.json().get("parameters", {}).get("retry_after", 5)))
+                continue
+            return False
+        except Exception as e:
+            print(f"[telegram] network error: {e}", flush=True)
+            time.sleep(2)
+    return False
 
 
 def get_session_info():
@@ -146,11 +172,10 @@ def get_session_info():
 
 def _next_session():
     """Returns (name, time_str) of the next upcoming session."""
-    now  = datetime.now(timezone.utc)
-    h    = now.hour + now.minute / 60.0
+    now = datetime.now(timezone.utc)
+    h   = now.hour + now.minute / 60.0
     if h < 7.0:
-        mins = int((7.0 - h) * 60)
-        return "🇬🇧 London Open", f"{7 - (now.hour if now.hour > 7 else 0):02d}:00 UTC"
+        return "🇬🇧 London Open", "07:00 UTC"
     elif h < 12.0:
         return "🇺🇸 NY / London Overlap", "12:00 UTC"
     else:
@@ -266,8 +291,8 @@ def _log_data_error(symbol: str, interval: str, reason: str):
         try:
             _send_telegram(
                 f"⚠️ <b>DATA ERROR</b>\n"
-                f"Symbol: {symbol} | Interval: {interval}\n"
-                f"Reason: {reason}\n"
+                f"Symbol: {_tg_escape(symbol)} | Interval: {_tg_escape(interval)}\n"
+                f"Reason: {_tg_escape(reason)}\n"
                 f"<i>Check yfinance / network on Render</i>"
             )
         except Exception:
@@ -276,12 +301,15 @@ def _log_data_error(symbol: str, interval: str, reason: str):
 
 def _us30_open_strategy(ticker_symbol):
     try:
-        now_utc    = datetime.now(timezone.utc)
-        h          = now_utc.hour + now_utc.minute / 60.0
-        in_preopen = 11.5 <= h < 13.5
-        at_open    = 13.5 <= h < 14.5
-        if not (in_preopen or at_open):
-            return "WAIT", 0.0, 0.0, 0.0, "US30: waiting for pre-open window (11:30-14:30 UTC / 13:30-16:30 SAST)"
+        # NYSE cash open is 09:30 New York time. Work in NY time so the windows
+        # stay correct through daylight-saving changes (13:30 UTC in summer,
+        # 14:30 UTC in winter). The old code hard-coded UTC hours.
+        now_ny     = datetime.now(_NY_TZ)
+        h          = now_ny.hour + now_ny.minute / 60.0
+        in_preopen = 7.5 <= h < 9.5     # 07:30-09:30 NY
+        at_open    = 9.5 <= h < 10.5    # first hour after the open
+        if now_ny.weekday() >= 5 or not (in_preopen or at_open):
+            return "WAIT", 0.0, 0.0, 0.0, "US30: waiting for pre-open window (07:30-10:30 New York time)"
 
         score = 0
         layers = []
@@ -290,8 +318,13 @@ def _us30_open_strategy(ticker_symbol):
         # L1: Pre-market box
         df_5m = _yf_candles(ticker_symbol, "5m", 100)
         box_high = box_low = 0.0
+        pm = None
         if df_5m is not None and len(df_5m) >= 20:
-            pm = df_5m.iloc[-20:-10]
+            idx_ny = df_5m.index.tz_convert(_NY_TZ)
+            today  = idx_ny.date == now_ny.date()
+            mins   = idx_ny.hour * 60 + idx_ny.minute
+            pm     = df_5m[today & (mins >= 8 * 60 + 30) & (mins < 9 * 60 + 30)]
+        if pm is not None and len(pm) >= 3:
             box_high = pm["High"].max()
             box_low  = pm["Low"].min()
             px = df_5m["Close"].iloc[-1]
@@ -304,7 +337,7 @@ def _us30_open_strategy(ticker_symbol):
             else:
                 layers.append("L1 WAIT: Price inside pre-market box")
         else:
-            layers.append("L1 SKIP: 5M data unavailable")
+            layers.append("L1 SKIP: pre-market box (08:30-09:30 NY) not formed yet or 5M data unavailable")
 
         # L2: DOW component bias
         dow = {"UNH":"UNH","GS":"GS","MSFT":"MSFT","HD":"HD","AMGN":"AMGN","MCD":"MCD","CAT":"CAT","V":"V"}
@@ -371,8 +404,9 @@ def _us30_open_strategy(ticker_symbol):
             layers.append("L4 SKIP: 30M data unavailable")
 
         # L5: SMC 4H structure
-        df_4h = _yf_candles(ticker_symbol, "4h", 20)
-        if df_4h is not None and len(df_4h) >= 8:
+        df_4h = _yf_candles(ticker_symbol, "4h", 21)
+        if df_4h is not None and len(df_4h) >= 9:
+            df_4h = df_4h.iloc[:-1]   # closed candles only
             c4 = df_4h["Close"]; h4 = df_4h["High"]; l4 = df_4h["Low"]
             e4 = c4.ewm(span=21, adjust=False).mean()
             hh = h4.iloc[-1] > h4.iloc[-3]; hl = l4.iloc[-1] > l4.iloc[-3]
@@ -407,7 +441,7 @@ def _us30_open_strategy(ticker_symbol):
             bias_lbl = "BULLISH" if direction == "bull" else "BEARISH"
             return "WAIT", 0.0, 0.0, 0.0, (
                 hdr + bias_lbl + " bias confirmed\n"
-                + "WAIT for 14:30 UTC open candle to close\n"
+                + "WAIT for the 09:30 New York open candle to close\n"
                 + "ENTRY: Pullback to first open 5M candle body"
             )
 
@@ -433,7 +467,7 @@ def _us30_open_strategy(ticker_symbol):
                 if risk <= 0 or risk > price * 0.05:
                     sl = price + atr5 * 3; risk = sl - price
                 tp = price - max(risk * 2.5, atr5 * 5)
-                rr = risk / (price - tp) if (price - tp) > 0 else 0
+                rr = (price - tp) / risk if risk > 0 else 0
                 return "SELL", price, tp, sl, (
                     hdr + "SELL " + str(round(price, 1))
                     + " | TP " + str(round(tp, 1))
@@ -449,10 +483,16 @@ def _us30_open_strategy(ticker_symbol):
 
 def _smc_4h_strategy(display_name, ticker_symbol):
     try:
-        df_4h = _yf_candles(ticker_symbol, "4h", 30)
-        df_1h = _yf_candles(ticker_symbol, "1h", 50)
+        df_4h = _yf_candles(ticker_symbol, "4h", 31)
+        df_1h = _yf_candles(ticker_symbol, "1h", 51)
         if df_4h is None or df_1h is None:
             return "WAIT", 0.0, 0.0, 0.0, "SMC 4H: data unavailable"
+        live_price = float(df_1h["Close"].iloc[-1])
+        # The last bar yfinance returns is still forming and changes every
+        # minute, which made signals appear and disappear. Judge structure,
+        # EMAs, RSI and MACD on CLOSED candles only; enter at the live price.
+        df_4h = df_4h.iloc[:-1]
+        df_1h = df_1h.iloc[:-1]
         if len(df_4h) < 8 or len(df_1h) < 20:
             return "WAIT", 0.0, 0.0, 0.0, "SMC 4H: insufficient bars"
 
@@ -477,7 +517,7 @@ def _smc_4h_strategy(display_name, ticker_symbol):
 
         # L2: 4H Order block
         ob_high = ob_low = 0.0
-        for i in range(len(df_4h) - 2, max(len(df_4h) - 8, 0), -1):
+        for i in range(len(df_4h) - 1, max(len(df_4h) - 8, -1), -1):
             o = df_4h["Open"].iloc[i]; c = df_4h["Close"].iloc[i]
             if direction == "bull" and c < o:
                 ob_high = df_4h["High"].iloc[i]; ob_low = df_4h["Low"].iloc[i]
@@ -496,7 +536,7 @@ def _smc_4h_strategy(display_name, ticker_symbol):
         h1c  = df_1h["Close"]
         e9   = h1c.ewm(span=9,  adjust=False).mean()
         e21  = h1c.ewm(span=21, adjust=False).mean()
-        price = h1c.iloc[-1]
+        price = live_price
         ab = e9.iloc[-1] > e21.iloc[-1]
         be = e9.iloc[-1] < e21.iloc[-1]
         if direction == "bull" and ab:
@@ -563,7 +603,7 @@ def _smc_4h_strategy(display_name, ticker_symbol):
             if risk <= 0 or risk > price * 0.07:
                 return "WAIT", price, 0.0, 0.0, hdr + "SL too wide, wait for better pullback"
             tp = price - max(risk * 2.5, atr1h * 3)
-            rr = risk / (price - tp) if (price - tp) > 0 else 0
+            rr = (price - tp) / risk if risk > 0 else 0
             return "SELL", price, tp, sl, (
                 hdr + "Session: " + sess + "\n"
                 + "Entry: " + str(round(price, 5))
@@ -810,17 +850,17 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
     return (
         f"🚨 <b>ALPHAEDGE SIGNAL</b> 🚨\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 <b>Asset:</b> {display_name}\n"
+        f"📊 <b>Asset:</b> {_tg_escape(display_name)}\n"
         f"📈 <b>Signal:</b> {direction}\n"
         f"⏰ <b>Time (UTC):</b> {datetime.now(timezone.utc).strftime('%H:%M  %d/%m/%Y')}\n"
-        f"🏦 <b>Session:</b> {session_name}\n"
+        f"🏦 <b>Session:</b> {_tg_escape(session_name)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"💰 <b>Entry:</b>  {entry:.5f}\n"
         f"🎯 <b>TP:</b>     {tp:.5f}\n"
         f"🛑 <b>SL:</b>     {sl:.5f}\n"
         f"📐 <b>R:R:</b>    1 : {rr:.1f}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🔍 <b>Why this trade:</b>\n{reason}\n"
+        f"🔍 <b>Why this trade:</b>\n{_tg_escape(reason)}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
     )
@@ -891,7 +931,8 @@ def _monitor_loop():
                             last_signals[display_name] = "⚪ WAITING"
                             _write_state(in_kz, last_signals)
                         time.sleep(1)
-                    except Exception:
+                    except Exception as e:
+                        print(f"[monitor] {display_name} scan error: {e!r}", flush=True)
                         continue
                 # Send scan summary every 30 min (6 loops × 5 min) so you know bot is alive
                 scan_count = state.get("scan_count", 0) + 1
@@ -908,12 +949,12 @@ def _monitor_loop():
                         f"🔍 <b>SCAN UPDATE</b> — {session_name}\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
                         f"📊 Scanned 20 markets\n"
-                        f"{status}\n"
+                        f"{_tg_escape(status)}\n"
                         f"<i>Next scan in 5 min</i>"
                     )
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[monitor] loop error: {e!r}", flush=True)
         time.sleep(300)
 
 
@@ -943,21 +984,22 @@ start_monitor()
 # Sends one message to Telegram so you know the bot is live and credentials work
 _STARTUP_FLAG = "startup_ping.flag"
 if not os.path.exists(_STARTUP_FLAG):
-    try:
-        with open(_STARTUP_FLAG, "w") as _f:
-            _f.write("1")
-        _send_telegram(
-            f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-            f"✅ Credentials loaded\n"
-            f"✅ Monitor thread started\n"
-            f"✅ Scanning: London 07-17 UTC\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"<i>Bot will scan every 5 min during sessions</i>"
-        )
-    except Exception:
-        pass
+    _ok = _send_telegram(
+        f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
+        f"✅ Credentials loaded\n"
+        f"✅ Monitor thread started\n"
+        f"✅ Scanning: London &amp; NY 07-17 UTC\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"<i>Bot will scan every 5 min during sessions</i>"
+    )
+    if _ok:   # only mark as sent once Telegram actually accepted it
+        try:
+            with open(_STARTUP_FLAG, "w") as _f:
+                _f.write("1")
+        except Exception:
+            pass
 
 
 # --- TRADINGVIEW POP-UP ---
@@ -973,7 +1015,7 @@ def show_popup_chart(ticker):
         st.info("⚠️ 'tv_banner.jpg' not found in 'static' folder.")
     st.markdown(f'<a href="{tv_link}" target="_blank"><button style="width:100%;background-color:#2962FF;color:white;border:none;padding:12px;border-radius:5px;font-weight:bold;cursor:pointer;margin-bottom:15px;">🚀 UPGRADE TO TRADINGVIEW PRO ➤</button></a>', unsafe_allow_html=True)
     tv_symbol = TV_MAP.get(ticker, "FX:EURUSD")
-    components.html(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_popup"}});</script>""", height=510)
+    st.iframe(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_popup"}});</script>""", height=510)
     st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
@@ -1029,21 +1071,31 @@ with st.sidebar:
         tv_channel = st.selectbox("Select Channel:", [
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
-        if tv_channel == "Bloomberg Markets":
-            components.html('<iframe width="100%" height="200" src="https://www.youtube.com/embed/iEpJwprxDdk?autoplay=1&mute=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>', height=210)
-        elif tv_channel == "CNBC Live":
-            st.video("https://www.youtube.com/watch?v=9NyxcX3rhQs")
-        elif tv_channel == "Reuters TV":
-            st.video("https://www.youtube.com/watch?v=H6hY8Y9n4c0")
+        # Embed each channel's CURRENT live stream (not a fixed video ID, which
+        # breaks every time a broadcast ends). components.iframe loads YouTube
+        # directly so it gets a proper Referer (srcdoc iframes trigger YouTube
+        # "Error 153"). Browsers only allow autoplay when muted.
+        _tv_channels = {
+            "Bloomberg Markets": ("UCIALMKvObZNtJ6AmdCLP7Lg", "https://www.youtube.com/@markets/streams"),
+            "CNBC Live":         ("UCvJJ_dzjViJCoLf5uKUTwoA", "https://www.youtube.com/@CNBC/streams"),
+            "Reuters TV":        ("UChqUTb7kYRX8-EiaN3XFrSQ", "https://www.youtube.com/@Reuters/streams"),
+        }
+        _ch_id, _ch_link = _tv_channels[tv_channel]
+        st.iframe(
+            f"https://www.youtube.com/embed/live_stream?channel={_ch_id}&autoplay=1&mute=1&playsinline=1",
+            height=210,
+        )
+        st.caption(f"If the player says the video is unavailable, {tv_channel} isn't live on YouTube right now. "
+                   f"[Open their live streams]({_ch_link})")
 
         st.subheader("🎵 TRADING STATION")
         station = st.selectbox("Select Audio:", [
             "Lofi Trading Beats", "Chillout Jazz", "Pop Radio", "Hip Hop Radio"
         ], label_visibility="collapsed")
         if station == "Lofi Trading Beats":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+            st.iframe("https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&playsinline=1", height=160)
         elif station == "Chillout Jazz":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+            st.iframe("https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1&playsinline=1", height=160)
         elif station == "Pop Radio":
             st.audio("https://listen.181fm.com/181-themix_128k.mp3")
         elif station == "Hip Hop Radio":
@@ -1052,17 +1104,17 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<p style="text-align:center;color:#D4AF37;font-size:11px;font-weight:bold;letter-spacing:2px;">🏆 FEATURED PARTNERS</p>', unsafe_allow_html=True)
 
-    if os.path.exists("static/exness_logo.png"): st.image("static/exness_logo.png", use_container_width=True)
+    if os.path.exists("static/exness_logo.png"): st.image("static/exness_logo.png", width="stretch")
     if os.path.exists("static/exness.mp4"):      st.video("static/exness.mp4", start_time=0)
     st.markdown('<a href="https://one.exnessonelink.com/a/9wwklqzfxb" target="_blank"><button style="width:100%;background-color:#D4AF37;color:#000;border:none;padding:12px;border-radius:5px;font-weight:bold;cursor:pointer;margin-top:6px;font-size:13px;">🚀 TRADE WITH 0 SPREADS ➤</button></a>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    if os.path.exists("static/goat_logo.png"): st.image("static/goat_logo.png", use_container_width=True)
+    if os.path.exists("static/goat_logo.png"): st.image("static/goat_logo.png", width="stretch")
     if os.path.exists("static/goat.mp4"):      st.video("static/goat.mp4", start_time=0)
     st.markdown('<a href="https://checkout.goatfundedtrader.com/aff/Sherwet/" target="_blank"><button style="width:100%;background-color:#00E676;color:#000;border:none;padding:12px;border-radius:5px;font-weight:bold;cursor:pointer;margin-top:6px;font-size:13px;">🐐 GET FUNDED TODAY ➤</button></a>', unsafe_allow_html=True)
 
     st.divider()
     focus_ticker = st.selectbox("ACTIVE CHART ASSET:", list(TICKER_MAP.keys()), index=0)
-    if st.button("GET YOUR TRADING VIEW ADVANCE CHART HERE", use_container_width=True):
+    if st.button("GET YOUR TRADING VIEW ADVANCE CHART HERE", width="stretch"):
         show_popup_chart(focus_ticker)
 
 
@@ -1161,7 +1213,7 @@ with tab_dash:
             st.markdown(f'<div style="background:#0a0a0f;border:1px solid #333;border-left:3px solid #888;border-radius:4px;padding:10px 14px;margin-top:10px;font-size:12px;color:#666;"><p style="margin:0 0 4px 0;color:#888;font-weight:bold;">⏳ WAITING — CONDITIONS NOT YET MET:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
 
     tv_symbol = TV_MAP.get(focus_ticker, "FX:EURUSD")
-    components.html(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
+    st.iframe(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"H1","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
 
 
 
@@ -1353,7 +1405,7 @@ with tab_dash:
 
     _cards_html = _build_amz_cards(_AMZ_PRODUCTS)
 
-    components.html(f"""
+    st.iframe(f"""
     <style>
     .amz-track {{
         display: flex;
@@ -1434,6 +1486,8 @@ with tab_cot:
                 import cot_fetcher
                 if cot_fetcher.update_cot_data():
                     st.success("Updated!"); time.sleep(1); st.rerun()
+                else:
+                    st.error("⚠️ COT refresh returned no data. The CFTC site may be down, try again later.")
             except ModuleNotFoundError:
                 st.error("⚠️ cot_fetcher module not found.")
             except Exception as e:
@@ -1464,32 +1518,32 @@ with tab_sent:
     tv_gauge    = TV_MAP.get(gauge_asset, "FX:EURUSD")
     st.write(f"Displaying Sentiment for: **{gauge_asset}**")
     c1, c2 = st.columns(2)
-    with c1: st.caption("1 Hour Interval"); components.html(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"1h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
-    with c2: st.caption("4 Hour Interval"); components.html(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"4h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
+    with c1: st.caption("1 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"1h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
+    with c2: st.caption("4 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"4h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
 
 
 # ================= TAB 4: INDICES =================
 with tab_ind:
     st.title("🏙️ GLOBAL INDICES HEATMAP")
-    components.html('<iframe src="https://www.tradingview-widget.com/embed-widget/stock-heatmap/?theme=dark&market=america" height="800" width="100%"></iframe>', height=820)
+    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/stock-heatmap/?theme=dark&market=america" height="800" width="100%"></iframe>', height=820)
 
 
 # ================= TAB 5: FOREX =================
 with tab_fx:
     st.title("💱 GLOBAL CURRENCY MATRIX")
-    components.html('<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-heat-map.js" async>{"width":"100%","height":800,"currencies":["EUR","USD","JPY","GBP","CHF","AUD","CAD","NZD","ZAR"],"isTransparent":false,"colorTheme":"dark","locale":"en"}</script></div>', height=820)
+    st.iframe('<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-heat-map.js" async>{"width":"100%","height":800,"currencies":["EUR","USD","JPY","GBP","CHF","AUD","CAD","NZD","ZAR"],"isTransparent":false,"colorTheme":"dark","locale":"en"}</script></div>', height=820)
 
 
 # ================= TAB 6: NEWS =================
 with tab_news:
     st.title("📰 LIVE MARKET NEWS")
-    components.html('<iframe src="https://www.tradingview-widget.com/embed-widget/timeline/?feedMode=all_symbols&theme=dark" height="800" width="100%"></iframe>', height=820)
+    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/timeline/?feedMode=all_symbols&theme=dark" height="800" width="100%"></iframe>', height=820)
 
 
 # ================= TAB 7: CALENDAR =================
 with tab_cal:
     st.title("📅 ECONOMIC CALENDAR")
-    components.html('<iframe src="https://www.tradingview-widget.com/embed-widget/events/?theme=dark&importance=high" height="800" width="100%"></iframe>', height=820)
+    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/events/?theme=dark&importance=high" height="800" width="100%"></iframe>', height=820)
 
 
 # ================= TAB 8: COMMUNITY CHAT =================
@@ -1500,7 +1554,7 @@ with tab_chat:
     with col_info:
         st.info("🔄 **Note:** Click refresh to see the latest messages from other traders.")
     with col_btn:
-        if st.button("🔄 REFRESH CHAT", use_container_width=True):
+        if st.button("🔄 REFRESH CHAT", width="stretch"):
             st.rerun()
     st.markdown("---")
     chat_history   = load_chat()
