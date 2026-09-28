@@ -1054,21 +1054,31 @@ with st.sidebar:
         tv_channel = st.selectbox("Select Channel:", [
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
-        if tv_channel == "Bloomberg Markets":
-            components.html('<iframe width="100%" height="200" src="https://www.youtube.com/embed/iEpJwprxDdk?autoplay=1&mute=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>', height=210)
-        elif tv_channel == "CNBC Live":
-            st.video("https://www.youtube.com/watch?v=9NyxcX3rhQs")
-        elif tv_channel == "Reuters TV":
-            st.video("https://www.youtube.com/watch?v=H6hY8Y9n4c0")
+        # Embed each channel's CURRENT live stream (not a fixed video ID, which
+        # breaks every time a broadcast ends). components.iframe loads YouTube
+        # directly so it gets a proper Referer (srcdoc iframes trigger YouTube
+        # "Error 153"). Browsers only allow autoplay when muted.
+        _tv_channels = {
+            "Bloomberg Markets": ("UCIALMKvObZNtJ6AmdCLP7Lg", "https://www.youtube.com/@markets/streams"),
+            "CNBC Live":         ("UCvJJ_dzjViJCoLf5uKUTwoA", "https://www.youtube.com/@CNBC/streams"),
+            "Reuters TV":        ("UChqUTb7kYRX8-EiaN3XFrSQ", "https://www.youtube.com/@Reuters/streams"),
+        }
+        _ch_id, _ch_link = _tv_channels[tv_channel]
+        components.iframe(
+            f"https://www.youtube.com/embed/live_stream?channel={_ch_id}&autoplay=1&mute=1&playsinline=1",
+            height=210,
+        )
+        st.caption(f"If the player says the video is unavailable, {tv_channel} isn't live on YouTube right now. "
+                   f"[Open their live streams]({_ch_link})")
 
         st.subheader("🎵 TRADING STATION")
         station = st.selectbox("Select Audio:", [
             "Lofi Trading Beats", "Chillout Jazz", "Pop Radio", "Hip Hop Radio"
         ], label_visibility="collapsed")
         if station == "Lofi Trading Beats":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+            components.iframe("https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&playsinline=1", height=160)
         elif station == "Chillout Jazz":
-            components.html('<iframe width="100%" height="150" src="https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1" frameborder="0" allowfullscreen></iframe>', height=160)
+            components.iframe("https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1&playsinline=1", height=160)
         elif station == "Pop Radio":
             st.audio("https://listen.181fm.com/181-themix_128k.mp3")
         elif station == "Hip Hop Radio":
