@@ -29,6 +29,8 @@ from strategy.engine import (
 )
 from strategy.config_loader import load_config as _load_strategy_config
 from strategy.common import fmt_price as _fmt_price
+from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
+                        station_html, tv_chart_url)
 
 _NY_TZ = ZoneInfo("America/New_York")
 
@@ -54,6 +56,25 @@ TV_MAP = {
     "VIX": "TVC:VIX", "DAX 40": "INDEX:DE40",
     "GOLD": "OANDA:XAUUSD", "SILVER": "TVC:SILVER", "OIL (WTI)": "NYMEX:CL1!",
     "BITCOIN": "BINANCE:BTCUSDT", "ETHEREUM": "BINANCE:ETHUSDT", "SOLANA": "BINANCE:SOLUSDT"
+}
+
+CHART_HEIGHT = 820
+_CHART_HTML = persistent_chart_html(TV_MAP["EUR/USD"])
+
+# Trading Station sources: YouTube IDs tried in order (verified live 2026-09-29), then a
+# plain audio stream, so an ended live stream never leaves "Video unavailable".
+STATIONS_YT = {
+    "Lofi Trading Beats": (
+        [{"id": "rFZHOHl-L8A", "title": "Lofi Girl · lofi hip hop radio 📚"},
+         {"id": "JD-kMIpDfnY", "title": "Lofi Girl · lofi hip hop radio 💤"},
+         {"id": "CwPCy1GLS38", "title": "Lofi Girl · sad lofi radio ☔"},
+         {"id": "1Tl2FtV06qo", "title": "Lofi Girl · asian lofi radio ⛩️"}],
+        {"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi radio"}),
+    "Chillout Jazz": (
+        [{"id": "Dx5qFachd3A", "title": "Relaxing Jazz Piano Radio"},
+         {"id": "E2vONfzoyRI", "title": "Lofi Girl · jazz lofi radio 🎷"},
+         {"id": "A8jDx9TLMQc", "title": "Lofi Girl · relaxing jazz radio 🌹"}],
+        {"url": "https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3", "title": "Jazz Radio (FR)"}),
 }
 
 PIP_MAP = {
@@ -98,6 +119,7 @@ _css = (
     ".dead-zone-badge { display:inline-block; background:#ff4b4b; color:#fff; font-size:10px; font-weight:bold; padding:2px 8px; border-radius:3px; margin-left:8px; }"
     ".reason-box { background:#0a0f0a; border:1px solid #1a3a1a; border-left:3px solid #00ff88; border-radius:4px; padding:10px 14px; margin-top:10px; font-size:12px; color:#aaa; line-height:1.7; }"
     ".reason-box-sell { background:#0f0a0a; border:1px solid #3a1a1a; border-left:3px solid #ff4b4b; border-radius:4px; padding:10px 14px; margin-top:10px; font-size:12px; color:#aaa; line-height:1.7; }"
+    ".stElementContainer:has(iframe[srcdoc*='ae-chart-bridge']) { display:none !important; }"
     "</style>"
 )
 st.markdown(_css, unsafe_allow_html=True)
@@ -997,7 +1019,8 @@ def show_popup_chart(ticker):
         st.info("⚠️ 'tv_banner.jpg' not found in 'static' folder.")
     st.markdown(f'<a href="{tv_link}" target="_blank"><button style="width:100%;background-color:#2962FF;color:white;border:none;padding:12px;border-radius:5px;font-weight:bold;cursor:pointer;margin-bottom:15px;">🚀 UPGRADE TO TRADINGVIEW PRO ➤</button></a>', unsafe_allow_html=True)
     tv_symbol = TV_MAP.get(ticker, "FX:EURUSD")
-    st.iframe(f"""<div id="tv_chart_popup" style="height:500px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"60","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_popup"}});</script>""", height=510)
+    st.iframe(popup_chart_html(tv_symbol, height=640), height=650)
+    st.markdown(f'<a href="{tv_chart_url(tv_symbol)}" target="_blank">Open {ticker} on TradingView ↗</a> — drawings made there save to your TradingView account.', unsafe_allow_html=True)
     st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
@@ -1074,10 +1097,9 @@ with st.sidebar:
         station = st.selectbox("Select Audio:", [
             "Lofi Trading Beats", "Chillout Jazz", "Pop Radio", "Hip Hop Radio"
         ], label_visibility="collapsed")
-        if station == "Lofi Trading Beats":
-            st.iframe("https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&playsinline=1", height=160)
-        elif station == "Chillout Jazz":
-            st.iframe("https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1&playsinline=1", height=160)
+        if station in STATIONS_YT:
+            _vids, _aud = STATIONS_YT[station]
+            st.iframe(station_html(_vids, _aud, height=190), height=190)
         elif station == "Pop Radio":
             st.audio("https://listen.181fm.com/181-themix_128k.mp3")
         elif station == "Hip Hop Radio":
@@ -1113,89 +1135,99 @@ tab_dash, tab_cot, tab_sent, tab_ind, tab_fx, tab_news, tab_cal, tab_chat = st.t
 
 # ================= TAB 1: DASHBOARD =================
 with tab_dash:
-    st.title("📊 ALPHAEDGE COMMAND CENTRE")
+    # Keep the chart in its own container at a fixed position in the tab so its
+    # iframe is never re-created on reruns (that would wipe drawings).
+    _dash_top = st.container()
+    _dash_chart = st.container()
+    with _dash_top:
+        st.title("📊 ALPHAEDGE COMMAND CENTRE")
 
-    if in_kz:
-        st.markdown(f'<div style="background:#0a1a0a;border:1px solid #00ff88;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#00ff88;font-weight:bold;font-size:13px;">🟢 ACTIVE SESSION</span><span class="kill-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
-    else:
-        st.markdown(f'<div style="background:#1a0a0a;border:1px solid #ff4b4b;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#888;font-weight:bold;font-size:13px;">⏸️ OFF SESSION</span><span class="dead-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
+        if in_kz:
+            st.markdown(f'<div style="background:#0a1a0a;border:1px solid #00ff88;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#00ff88;font-weight:bold;font-size:13px;">🟢 ACTIVE SESSION</span><span class="kill-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div style="background:#1a0a0a;border:1px solid #ff4b4b;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#888;font-weight:bold;font-size:13px;">⏸️ OFF SESSION</span><span class="dead-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
 
-    st.write("⏳ *Analyzing Live Market Structure...*")
-    data = get_dashboard_data()
+        st.write("⏳ *Analyzing Live Market Structure...*")
+        data = get_dashboard_data()
 
-    errors = st.session_state.get("data_errors", [])
-    if errors:
-        with st.expander(f"⚠️ {len(errors)} asset(s) failed to load", expanded=False):
-            for e in errors: st.caption(e)
-        st.session_state["data_errors"] = []
+        errors = st.session_state.get("data_errors", [])
+        if errors:
+            with st.expander(f"⚠️ {len(errors)} asset(s) failed to load", expanded=False):
+                for e in errors: st.caption(e)
+            st.session_state["data_errors"] = []
 
-    rows_html = ""
-    if data:
-        for name, row in data.items():
-            bias  = row.get("bias",  "—")
-            price = row.get("price", 0)
-            score = row.get("score", 0)
-            trend = row.get("trend", "—")
-            tech  = row.get("tech",  "—")
-            css   = "bullish" if "BULL" in str(bias) else "bearish" if "BEAR" in str(bias) else ""
-            try:
-                price_str = _fmt_price(float(price)) if price else "—"
-            except Exception:
-                price_str = str(price)
-            rows_html += (
-                f'<tr><td><b>{name}</b></td>'
-                f'<td class="{css}">{bias}</td>'
-                f'<td class="{css}">{score}</td>'
-                f'<td>{trend}</td><td>{tech}</td>'
-                f'<td style="color:#D4AF37;font-weight:bold;">{price_str}</td>'
-                f'<td><span class="live-tag">{"⚡ FUTURES ~10m" if str(TICKER_MAP.get(name, "")).endswith("=F") else "⚡ LIVE"}</span></td></tr>'
-            )
-    else:
-        rows_html = "<tr><td colspan='7'>Loading Data...</td></tr>"
+        rows_html = ""
+        if data:
+            for name, row in data.items():
+                bias  = row.get("bias",  "—")
+                price = row.get("price", 0)
+                score = row.get("score", 0)
+                trend = row.get("trend", "—")
+                tech  = row.get("tech",  "—")
+                css   = "bullish" if "BULL" in str(bias) else "bearish" if "BEAR" in str(bias) else ""
+                try:
+                    price_str = _fmt_price(float(price)) if price else "—"
+                except Exception:
+                    price_str = str(price)
+                rows_html += (
+                    f'<tr><td><b>{name}</b></td>'
+                    f'<td class="{css}">{bias}</td>'
+                    f'<td class="{css}">{score}</td>'
+                    f'<td>{trend}</td><td>{tech}</td>'
+                    f'<td style="color:#D4AF37;font-weight:bold;">{price_str}</td>'
+                    f'<td><span class="live-tag">{"⚡ FUTURES ~10m" if str(TICKER_MAP.get(name, "")).endswith("=F") else "⚡ LIVE"}</span></td></tr>'
+                )
+        else:
+            rows_html = "<tr><td colspan='7'>Loading Data...</td></tr>"
 
-    st.markdown(f'<table class="heatmap-table"><thead><tr><th>SYMBOL</th><th>BIAS</th><th>SCORE</th><th>TREND</th><th>TECH</th><th>PRICE</th><th>SOURCE</th></tr></thead><tbody>{rows_html}</tbody></table>', unsafe_allow_html=True)
-    st.markdown("---")
+        st.markdown(f'<table class="heatmap-table"><thead><tr><th>SYMBOL</th><th>BIAS</th><th>SCORE</th><th>TREND</th><th>TECH</th><th>PRICE</th><th>SOURCE</th></tr></thead><tbody>{rows_html}</tbody></table>', unsafe_allow_html=True)
+        st.markdown("---")
 
-    st.markdown("""
-    <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
-        <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-        <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS / ORB / VWAP • checklist ≥4/6 • Mon–Fri 07–17 UTC • daily cap 6 • 2.5R min</p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
+            <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
+            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS / ORB / VWAP • checklist ≥4/6 • Mon–Fri 07–17 UTC • daily cap 6 • 2.5R min</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="background-color:#0d1117;border:1px solid #FF6B35;border-radius:6px;padding:12px 16px;margin-bottom:14px;">
-        <p style="margin:0;color:#FF6B35;font-size:11px;font-weight:bold;letter-spacing:1px;">⚠️ RISK DISCLAIMER — NOT FINANCIAL ADVICE</p>
-        <p style="margin:6px 0 0 0;color:#888;font-size:11px;line-height:1.6;">
-            Signals are generated algorithmically for <b style="color:#ccc;">educational and informational purposes only</b>.
-            Trading leveraged products carries a <b style="color:#ccc;">high level of risk</b>.
-            Past performance is not indicative of future results.
-        </p>
-        <p style="margin:8px 0 0 0;color:#D4AF37;font-size:11px;">📌 <b>Change ACTIVE CHART ASSET in the sidebar to switch instruments.</b></p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="background-color:#0d1117;border:1px solid #FF6B35;border-radius:6px;padding:12px 16px;margin-bottom:14px;">
+            <p style="margin:0;color:#FF6B35;font-size:11px;font-weight:bold;letter-spacing:1px;">⚠️ RISK DISCLAIMER — NOT FINANCIAL ADVICE</p>
+            <p style="margin:6px 0 0 0;color:#888;font-size:11px;line-height:1.6;">
+                Signals are generated algorithmically for <b style="color:#ccc;">educational and informational purposes only</b>.
+                Trading leveraged products carries a <b style="color:#ccc;">high level of risk</b>.
+                Past performance is not indicative of future results.
+            </p>
+            <p style="margin:8px 0 0 0;color:#D4AF37;font-size:11px;">📌 <b>Change ACTIVE CHART ASSET in the sidebar to switch instruments.</b></p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
+        sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("📐 SIGNAL", sig)
-    st.caption(f"📌 Analysing: **{focus_ticker}**")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("📐 SIGNAL", sig)
+        st.caption(f"📌 Analysing: **{focus_ticker}**")
 
-    if sig not in ("⚪ WAITING", "WAIT", "WAITING"):
-        c2.metric("⚡ LIVE ENTRY", _fmt_price(ent))
-        c3.metric("🎯 TARGETS",    f"TP: {_fmt_price(tp, ent)} | SL: {_fmt_price(sl, ent)}")
-        box_class    = "reason-box" if "BUY" in sig else "reason-box-sell"
-        reason_lines = reason.replace("\n", "<br>")
-        st.markdown(f'<div class="{box_class}"><p style="margin:0 0 6px 0;font-weight:bold;color:#ccc;font-size:12px;">📋 WHY THIS TRADE:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
-    else:
-        c2.metric("⚡ LIVE ENTRY", "Searching...")
-        c3.metric("🎯 TARGETS",    "Awaiting Confluence")
-        if reason:
+        if sig not in ("⚪ WAITING", "WAIT", "WAITING"):
+            c2.metric("⚡ LIVE ENTRY", _fmt_price(ent))
+            c3.metric("🎯 TARGETS",    f"TP: {_fmt_price(tp, ent)} | SL: {_fmt_price(sl, ent)}")
+            box_class    = "reason-box" if "BUY" in sig else "reason-box-sell"
             reason_lines = reason.replace("\n", "<br>")
-            st.markdown(f'<div style="background:#0a0a0f;border:1px solid #333;border-left:3px solid #888;border-radius:4px;padding:10px 14px;margin-top:10px;font-size:12px;color:#666;"><p style="margin:0 0 4px 0;color:#888;font-weight:bold;">⏳ WAITING — CONDITIONS NOT YET MET:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="{box_class}"><p style="margin:0 0 6px 0;font-weight:bold;color:#ccc;font-size:12px;">📋 WHY THIS TRADE:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
+        else:
+            c2.metric("⚡ LIVE ENTRY", "Searching...")
+            c3.metric("🎯 TARGETS",    "Awaiting Confluence")
+            if reason:
+                reason_lines = reason.replace("\n", "<br>")
+                st.markdown(f'<div style="background:#0a0a0f;border:1px solid #333;border-left:3px solid #888;border-radius:4px;padding:10px 14px;margin-top:10px;font-size:12px;color:#666;"><p style="margin:0 0 4px 0;color:#888;font-weight:bold;">⏳ WAITING — CONDITIONS NOT YET MET:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
 
-    tv_symbol = TV_MAP.get(focus_ticker, "FX:EURUSD")
-    st.iframe(f"""<div id="tv_chart_main" style="height:600px;"></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script><script type="text/javascript">new TradingView.widget({{"autosize":true,"symbol":"{tv_symbol}","interval":"60","theme":"dark","style":"1","locale":"en","toolbar_bg":"#f1f3f6","enable_publishing":false,"hide_side_toolbar":false,"allow_symbol_change":true,"container_id":"tv_chart_main"}});</script>""", height=610)
+    with _dash_chart:
+        st.markdown('<p style="margin:14px 0 4px 0;color:#D4AF37;font-size:12px;font-weight:bold;letter-spacing:1px;">📈 LIVE CHART · drawings, indicators, symbol search & fullscreen · switch pairs in the sidebar — drawings stay per pair until you refresh</p>', unsafe_allow_html=True)
+        # Constant HTML → Streamlit never re-creates this iframe; one TradingView chart per
+        # visited symbol lives inside it and is only shown/hidden (see ui_widgets.py).
+        st.iframe(_CHART_HTML, height=CHART_HEIGHT)
+        st.iframe(chart_bridge_html(TV_MAP.get(focus_ticker, "FX:EURUSD")), height=1)
+        st.markdown(f'<a href="{tv_chart_url(TV_MAP.get(focus_ticker, "FX:EURUSD"))}" target="_blank" style="font-size:11px;color:#787b86;">Want drawings saved permanently? Open {focus_ticker} on TradingView ↗ (saves to your TradingView account)</a>', unsafe_allow_html=True)
 
 
 
