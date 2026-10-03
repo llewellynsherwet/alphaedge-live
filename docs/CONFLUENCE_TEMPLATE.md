@@ -45,10 +45,29 @@ Note: the backtest does not apply these live checks, so live will emit somewhat 
 backtest. Your broker's CFD can still differ from the cash index by a few points (fair value/spread).
 
 ## Telegram
-Trade alerts (setup, score, checklist, entry/SL/TP in cash/CFD price, R:R, data age) + one SESSION OPEN + one daily summary at close. Startup ping once per deploy. Scan updates off (`telegram.scan_updates`). Data errors at most once per symbol/interval/day.
+Trade alerts (setup, score, checklist, entry/SL/TP in cash/CFD price, R:R, data age) + TP/SL/expiry follow-ups + one SESSION OPEN + one daily summary at close. Startup ping once per deploy. Scan updates off (`telegram.scan_updates`). Data errors at most once per symbol/interval/day.
+
+## Trade outcomes (TP / SL follow-ups) — `outcomes:` · `strategy/outcomes.py`
+- Every trade alert that Telegram accepted is stored as an open trade (id, symbol, side, setup, entry/SL/TP,
+  quote source + basis, sent time) under `trades.open` in `monitor_state.json`.
+- Every monitor loop (5-min cadence, in and out of session) while markets trade (Sun 17:00 → Fri 17:00 New York),
+  1m candles (5m fallback) since the alert are fetched in the **same price space as the alert**:
+  spot FX → the yf ticker; `quote.source: yf` → the cash ticker (e.g. `^DJI`), with signal futures − stored basis
+  filling minutes when the cash market is shut (that is how the entry was derived then);
+  `quote.source: gold_api` → `GC=F` − stored basis plus the live gold-api spot print (gold-api has no candles).
+- Candles are walked in order from the first bar starting at/after the alert; highs/lows count (wicks).
+  TP and SL in the same candle → **SL** (conservative), and the message says so.
+- No hit after `max_open_hours` (default 48 h wall-clock) → `⌛ EXPIRED` notice, marked at the last price before
+  the deadline; tracking stops. Expired R is shown but not counted in the net R.
+- A trade is moved to `trades.closed` and saved **before** the Telegram follow-up is sent, so it can only close once;
+  an undelivered follow-up is retried on later loops (max 3 attempts).
+- The session-close summary adds `Outcomes today: W / L / expired · net R · win rate` for results that closed today
+  plus any not yet reported (e.g. overnight/weekend hits), and the count still open.
+- Only runs where `TG_TOKEN`/`TG_CHAT_ID` are set (the Render worker). `outcomes.enabled: false` turns it off.
 
 ## State
 `monitor_state.json` is keyed by UTC date. Missing, old-format or yesterday's file → fresh day budget (never re-fires old alerts). Old setups can't re-alert after a restart because signals must come from a candle that closed within the last 20 minutes.
+The `trades` book (open trades + 14 days of results) is carried across the daily reset; it is lost only if the file itself is wiped (e.g. Render free-disk redeploy).
 
 ## Backtest
 ```

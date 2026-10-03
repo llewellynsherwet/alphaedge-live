@@ -19,6 +19,7 @@ from .common import Candidate, fmt_price, in_window, minutes_of, parse_hhmm
 from .config_loader import load_config
 from .setups import REGISTRY
 from . import pricing
+from .outcomes import format_day_outcomes, outcome_cfg
 
 _STATE_DEFAULT = Path(__file__).resolve().parent.parent / "monitor_state.json"
 
@@ -76,8 +77,15 @@ def load_state(path: str | os.PathLike | None = None, now: pd.Timestamp | None =
     try:
         with open(path, encoding="utf-8") as f:
             st = json.load(f)
-        if not isinstance(st, dict) or st.get("day") != day:
-            return _empty_day(day)  # new day OR wiped/stale file → fresh budget
+        if not isinstance(st, dict):
+            return _empty_day(day)
+        if st.get("day") != day:
+            # New day OR stale file → fresh alert budget, but the trade-outcome
+            # book (open trades awaiting TP/SL + recent results) is NOT daily.
+            fresh = _empty_day(day)
+            if isinstance(st.get("trades"), dict):
+                fresh["trades"] = st["trades"]
+            return fresh
         st.setdefault("emitted", [])
         st.setdefault("symbol_last_ts", {})
         st.setdefault("scan_count", 0)
@@ -411,7 +419,8 @@ def format_trade_message(c: Candidate, session_name: str) -> str:
     )
 
 
-def format_daily_summary(state: dict, session_name: str, daily_cap: int | None = None) -> str:
+def format_daily_summary(state: dict, session_name: str, daily_cap: int | None = None,
+                         outcomes_enabled: bool | None = None) -> str:
     from html import escape
     emitted = state.get("emitted", [])
     if daily_cap is None:
@@ -429,12 +438,21 @@ def format_daily_summary(state: dict, session_name: str, daily_cap: int | None =
                 f"score {e.get('score','?')}  R:R 1:{e.get('rr','?')}"
             )
         body = "\n".join(rows)
+    if outcomes_enabled is None:
+        try:
+            outcomes_enabled = bool(outcome_cfg(load_config()).get("enabled", True))
+        except Exception:
+            outcomes_enabled = True
+    outcome_block = ""
+    if outcomes_enabled:
+        outcome_block = f"━━━━━━━━━━━━━━━━━━━━\n{format_day_outcomes(state, escape=escape)}\n"
     return (
         f"🔴 <b>SESSION CLOSED</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
         f"📊 <b>Alerts today:</b> {len(emitted)} / {daily_cap}\n"
         f"{body}\n"
+        f"{outcome_block}"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⚠️ <i>Not financial advice.</i>"
     )
