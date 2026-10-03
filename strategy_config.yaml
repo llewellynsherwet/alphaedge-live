@@ -125,6 +125,17 @@ setups:
       volume_signature: {weight: 1, required: false}
       active_hours:     {weight: 1, required: true}
 
+# ── Trade outcome tracking (TP / SL follow-up alerts) ──
+# Every delivered trade alert is tracked as an open trade (persisted in
+# monitor_state.json → trades, not reset daily). Each ~5-min loop, while
+# markets trade, 1m candles (5m fallback) of the alert's own price source
+# (cash/CFD/spot) since the alert are checked; wicks count. TP and SL in the
+# same candle → counted as SL (conservative). Results feed the daily summary.
+outcomes:
+  enabled: true
+  max_open_hours: 48          # no TP/SL by then → "⌛ EXPIRED" notice, tracking stops
+  retain_days: 14             # keep closed results this long in state
+
 telegram:
   trade_alerts: true
   session_open: true

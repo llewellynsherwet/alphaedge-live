@@ -28,6 +28,7 @@ from strategy.engine import (
     load_config as _engine_load_config,
 )
 from strategy.config_loader import load_config as _load_strategy_config
+from strategy import outcomes as _outcomes
 from strategy.common import fmt_price as _fmt_price
 from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
                         station_html, tv_chart_url)
@@ -877,12 +878,36 @@ def _build_tg_message(display_name, sig, entry, tp, sl, reason, session_name):
     )
 
 
+def _track_outcomes(state: dict, cfg: dict, now) -> dict:
+    """Resolve open trades (TP / SL / expiry) and send each follow-up once.
+    Runs every loop, in and out of session, while markets trade. Only on the
+    service that actually has Telegram credentials (the Render worker)."""
+    ocfg = _outcomes.outcome_cfg(cfg)
+    if not ocfg.get("enabled", True) or not (_TG_TOKEN and _TG_CHAT_ID):
+        return state
+    newly = _outcomes.check_open_trades(state, cfg, now)
+    pending = _outcomes.pending_notifications(state, cfg)
+    if not newly and not pending:
+        return state
+    _write_state_raw(state)          # persist "closed" BEFORE sending → never double-closes
+    for rec in pending:
+        rec["notify_attempts"] = int(rec.get("notify_attempts", 0)) + 1
+        rec["notified"] = _send_telegram(_outcomes.format_outcome_message(
+            rec, escape=_tg_escape, max_open_hours=ocfg.get("max_open_hours")))
+        print(f"[outcomes] {rec['id']} {rec['status']} {rec.get('r')}R "
+              f"notified={rec['notified']}", flush=True)
+    _write_state_raw(state)
+    return state
+
+
 def _monitor_loop():
     """Background thread — one per process. State is date-keyed so a wiped
     monitor_state.json (Render free disk is ephemeral) just starts a fresh day
-    and never re-fires yesterday's alerts."""
+    and never re-fires yesterday's alerts. The trade-outcome book
+    (state["trades"]) is carried across days."""
     import pandas as pd
     while True:
+        loop_t0 = time.time()
         try:
             cfg = _load_strategy_config()          # hot-reload every loop
             now = pd.Timestamp.now(tz="UTC")
@@ -890,6 +915,12 @@ def _monitor_loop():
             in_kz, session_name = _engine_session_info(now, cfg)
             prev = state.get("in_session", None)
             tg = cfg.get("telegram", {})
+
+            # Trade outcomes first, so a session-close summary includes them
+            try:
+                state = _track_outcomes(state, cfg, now)
+            except Exception as e:
+                print(f"[outcomes] tracking error: {e!r}", flush=True)
 
             # First ever observation today — record silently
             if prev is None:
@@ -915,7 +946,8 @@ def _monitor_loop():
             # Session CLOSE edge → one daily summary, then stop scanning
             elif (not in_kz) and prev is True:
                 if tg.get("daily_summary", True) and not state.get("summary_sent"):
-                    _send_telegram(_engine_format_summary(state, session_name))
+                    if _send_telegram(_engine_format_summary(state, session_name)):
+                        _outcomes.mark_summarized(state)   # each result in one summary only
                     state["summary_sent"] = True
                 state["in_session"] = False
                 _write_state_raw(state)
@@ -942,9 +974,14 @@ def _monitor_loop():
 
                 accepted = result["accepted"]
                 if accepted and tg.get("trade_alerts", True):
-                    for cand in accepted:
-                        _send_telegram(_engine_format_trade(cand, session_name))
+                    delivered = [c for c in accepted
+                                 if _send_telegram(_engine_format_trade(c, session_name))]
                     state = _engine_record_emits(state, accepted, now)
+                    # Track TP/SL only for alerts that actually reached Telegram
+                    if _outcomes.outcome_cfg(cfg).get("enabled", True):
+                        for c in delivered:
+                            rec = _outcomes.add_open_trade(state, c, cfg, now)
+                            print(f"[outcomes] tracking {rec['id']}", flush=True)
 
                 state["scan_count"] = int(state.get("scan_count", 0)) + 1
                 state["in_session"] = True
@@ -963,7 +1000,8 @@ def _monitor_loop():
 
         except Exception as e:
             print(f"[monitor] loop error: {e!r}", flush=True)
-        time.sleep(300)
+        # 5-minute cadence measured from loop start (scan time no longer adds drift)
+        time.sleep(max(30.0, 300.0 - (time.time() - loop_t0)))
 
 
 def start_monitor():
