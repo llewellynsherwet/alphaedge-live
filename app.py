@@ -1364,62 +1364,136 @@ with tab_dash:
         },
     ]
 
-    st.markdown(
-        (
-            '<div style="margin:28px 0 12px 0;padding:14px 16px;border:1px solid #2a2a2a;'
-            'border-left:3px solid #D4AF37;border-radius:8px;background:#0a0a0f;">'
-            '<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;">'
-            '<span style="color:#D4AF37;font-size:15px;font-weight:700;letter-spacing:1.5px;">'
-            'NOVA &amp; INK · Printables from our shop</span>'
-            f'<a href="{_ETSY_SHOP_URL}" target="_blank" rel="noopener" '
-            'style="color:#aaa;font-size:12px;text-decoration:none;border-bottom:1px solid #444;">'
-            'novaandinkbycharl.etsy.com ↗</a></div>'
-            '<p style="margin:8px 0 0 0;color:#666;font-size:12px;">'
-            'Emergency &amp; home printables · R30 each · instant download on Etsy</p></div>'
-        ),
-        unsafe_allow_html=True,
-    )
-
     def _etsy_img_data_uri(path):
-        """Inline local product image so the shop grid does not depend on CDN hotlinking."""
+        """Inline local product image so the scroller does not depend on CDN hotlinking."""
         try:
             with open(path, "rb") as f:
                 return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
         except OSError:
             return ""
 
-    _cols_per_row = 3
-    for _row_start in range(0, len(_ETSY_PRODUCTS), _cols_per_row):
-        _row = _ETSY_PRODUCTS[_row_start:_row_start + _cols_per_row]
-        _cols = st.columns(len(_row), gap="medium")
-        for _col, _p in zip(_cols, _row):
-            with _col:
-                _src = _etsy_img_data_uri(_p["img"]) if os.path.exists(_p["img"]) else ""
-                _img_html = (
-                    f'<img src="{_src}" alt="{html.escape(_p["title"])}" '
-                    'style="width:100%;height:210px;object-fit:cover;border-radius:6px;'
-                    'display:block;background:#1a1a1a;margin-bottom:8px;">'
-                    if _src else
-                    '<div style="height:210px;border-radius:6px;background:#1a1a1a;margin-bottom:8px;"></div>'
-                )
-                st.markdown(
-                    (
-                        '<div style="background:#111;border:1px solid #222;border-radius:10px;'
-                        'padding:10px;height:100%;">'
-                        + _img_html
-                        + '<div style="color:#D4AF37;font-weight:700;font-size:13px;line-height:1.35;'
-                        f'margin-bottom:4px;">{html.escape(_p["title"])}</div>'
-                        '<div style="color:#888;font-size:11px;line-height:1.4;min-height:32px;'
-                        f'margin-bottom:10px;">{html.escape(_p["blurb"])}</div>'
-                        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
-                        '<span style="color:#fff;font-weight:700;font-size:14px;">R30</span>'
-                        f'<a href="{html.escape(_p["url"])}" target="_blank" rel="noopener" '
-                        'style="background:#D4AF37;color:#000;text-decoration:none;font-size:11px;'
-                        'font-weight:700;padding:6px 10px;border-radius:4px;white-space:nowrap;">'
-                        'View on Etsy ↗</a></div></div>'
-                    ),
-                    unsafe_allow_html=True,
-                )
+    def _build_etsy_cards(products):
+        cards = []
+        for p in products:
+            src = _etsy_img_data_uri(p["img"]) if os.path.exists(p["img"]) else ""
+            img = (
+                f'<img src="{src}" alt="{html.escape(p["title"])}" '
+                'style="width:100%;height:140px;object-fit:cover;border-radius:6px;'
+                'display:block;background:#1a1a1a;margin-bottom:8px;">'
+                if src else
+                '<div style="height:140px;border-radius:6px;background:#1a1a1a;margin-bottom:8px;"></div>'
+            )
+            cards.append(
+                '<div class="etsy-card">'
+                + img
+                + '<div style="color:#D4AF37;font-weight:700;font-size:12px;line-height:1.35;'
+                + 'margin-bottom:4px;min-height:32px;">' + html.escape(p["title"]) + "</div>"
+                + '<div style="color:#888;font-size:10px;line-height:1.4;min-height:36px;'
+                + 'margin-bottom:8px;">' + html.escape(p["blurb"]) + "</div>"
+                + '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">'
+                + '<span style="color:#fff;font-weight:700;font-size:13px;">R30</span>'
+                + '<a href="' + html.escape(p["url"]) + '" target="_blank" rel="noopener" '
+                + 'style="background:#D4AF37;color:#000;text-decoration:none;font-size:10px;'
+                + 'font-weight:700;padding:5px 8px;border-radius:4px;white-space:nowrap;">'
+                + "View on Etsy ↗</a></div></div>"
+            )
+        return "".join(cards)
+
+    _etsy_cards_html = _build_etsy_cards(_ETSY_PRODUCTS)
+
+    st.iframe(f"""
+    <style>
+    html, body {{
+        margin: 0; padding: 0; background: #0a0a0a;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }}
+    .etsy-track {{
+        display: flex;
+        gap: 14px;
+        width: max-content;
+        align-items: stretch;
+        will-change: transform;
+    }}
+    .etsy-card {{
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 10px;
+        width: 190px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        transition: border-color 0.25s;
+    }}
+    .etsy-card:hover {{ border-color: #D4AF37; }}
+    #etsy-wrapper {{
+        overflow: hidden;
+        width: 100%;
+        background: #0a0a0a;
+        border-top: 1px solid #D4AF37;
+        border-bottom: 1px solid #1a1a1a;
+        padding: 12px 0;
+    }}
+    #etsy-header {{
+        padding: 4px 4px 10px 4px;
+    }}
+    #etsy-title {{
+        color: #D4AF37;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }}
+    #etsy-header a {{
+        color: #aaa;
+        font-size: 11px;
+        text-decoration: none;
+        border-bottom: 1px solid #444;
+        margin-left: 12px;
+    }}
+    #etsy-sub {{
+        color: #666;
+        font-size: 11px;
+        margin-top: 6px;
+    }}
+    </style>
+    <div id="etsy-header">
+      <span id="etsy-title">NOVA &amp; INK · Printables from our shop</span>
+      <a href="{_ETSY_SHOP_URL}" target="_blank" rel="noopener">novaandinkbycharl.etsy.com ↗</a>
+      <div id="etsy-sub">Emergency &amp; home printables · R30 each · instant download on Etsy · hover to pause</div>
+    </div>
+    <div id="etsy-wrapper">
+        <div class="etsy-track" id="etsy-track">
+            {_etsy_cards_html}
+            {_etsy_cards_html}
+        </div>
+    </div>
+    <script>
+    (function() {{
+        const track   = document.getElementById('etsy-track');
+        const wrapper = document.getElementById('etsy-wrapper');
+        let pos    = 0;
+        let paused = false;
+        const speed = 0.45;
+
+        function halfWidth() {{ return track.scrollWidth / 2; }}
+
+        function step() {{
+            if (!paused) {{
+                pos += speed;
+                if (pos >= halfWidth()) pos = 0;
+                track.style.transform = 'translateX(-' + pos + 'px)';
+            }}
+            requestAnimationFrame(step);
+        }}
+
+        wrapper.addEventListener('mouseenter', function() {{ paused = true; }});
+        wrapper.addEventListener('mouseleave', function() {{ paused = false; }});
+        // Pause while interacting with links
+        track.addEventListener('mousedown', function() {{ paused = true; }});
+
+        requestAnimationFrame(step);
+    }})();
+    </script>
+    """, height=320)
 
 
 # ================= TAB 2: COT DATA =================
