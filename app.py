@@ -31,7 +31,7 @@ from strategy.config_loader import load_config as _load_strategy_config
 from strategy import outcomes as _outcomes
 from strategy.common import fmt_price as _fmt_price
 from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
-                        station_html, station_static_url, tv_channel_card_html, tv_chart_url)
+                        station_html, station_static_url, tv_desk_html, TV_DESKS, tv_chart_url)
 
 from billing.ui import render_auth_sidebar, render_paywall, render_teaser_banner, require_access
 from billing.gate import is_paid as _billing_is_paid
@@ -69,19 +69,46 @@ _CHART_HTML = persistent_chart_html(TV_MAP["EUR/USD"])
 # YouTube links open on youtube.com — we never embed or scrape YouTube here.
 STATIONS = {
     "Lofi Trading Beats": {
-        "radio": {"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi radio"},
+        "radio": {
+            "url": "https://lofi.stream.laut.fm/lofi",
+            "title": "laut.fm lofi radio",
+            "fallback": [
+                "https://stream.laut.fm/lofi",
+                "https://ice1.somafm.com/dronezone-128-mp3",
+            ],
+        },
         "youtube": "https://www.youtube.com/@LofiGirl",
     },
     "Chillout Jazz": {
-        "radio": {"url": "https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3", "title": "Jazz Radio (FR)"},
+        "radio": {
+            "url": "https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3",
+            "title": "Jazz Radio (FR)",
+            "fallback": ["https://ice1.somafm.com/groovesalad-128-mp3"],
+        },
         "youtube": "https://www.youtube.com/results?search_query=relaxing+jazz+piano+radio",
     },
+    "Chill / Groove": {
+        "radio": {
+            "url": "https://ice1.somafm.com/groovesalad-128-mp3",
+            "title": "SomaFM Groove Salad",
+            "fallback": ["https://ice1.somafm.com/dronezone-128-mp3"],
+        },
+        "youtube": None,
+    },
     "Pop Radio": {
-        "radio": {"url": "https://listen.181fm.com/181-themix_128k.mp3", "title": "181.FM The Mix"},
+        "radio": {
+            "url": "https://listen.181fm.com/181-themix_128k.mp3",
+            "title": "181.FM The Mix",
+            "fallback": ["https://ice1.somafm.com/poptron-128-mp3"],
+        },
         "youtube": None,
     },
     "Hip Hop Radio": {
-        "radio": {"url": "https://pureplay.cdnstream1.com/6045_128.mp3", "title": "Hip Hop Radio"},
+        "radio": {
+            "url": "https://pureplay.cdnstream1.com/6045_128.mp3",
+            "title": "Hip Hop Radio",
+            "fallback": ["https://ice1.somafm.com/beatblender-128-mp3"],
+        },
         "youtube": None,
     },
 }
@@ -964,6 +991,24 @@ def _monitor_loop():
                 state["in_session"] = in_kz
                 _write_state_raw(state)
 
+            # always_on: no session-close edge — fire daily summary once near configured UTC hour
+            _sess_cfg = cfg.get("session", {}) or {}
+            if (
+                _sess_cfg.get("always_on")
+                and tg.get("daily_summary", True)
+                and not state.get("summary_sent")
+            ):
+                _sum_hhmm = str(_sess_cfg.get("daily_summary_utc") or "21:00")
+                try:
+                    _sh, _sm = [int(x) for x in _sum_hhmm.split(":")[:2]]
+                except Exception:
+                    _sh, _sm = 21, 0
+                if (now.hour, now.minute) >= (_sh, _sm):
+                    if _send_telegram(_engine_format_summary(state, session_name)):
+                        _outcomes.mark_summarized(state)
+                    state["summary_sent"] = True
+                    _write_state_raw(state)
+
             # Signal scan
             if in_kz:
                 result = _engine_scan_once(now=now, cfg=cfg, state=state)
@@ -1125,37 +1170,30 @@ with st.sidebar:
         render_paywall(_access.get("user"))
     elif _access.get("paywall_enabled") and not _access.get("authenticated"):
         st.caption("Sign in to subscribe · teaser dashboard is free")
-    elif not _access.get("paywall_enabled"):
-        st.caption("Paywall off · full platform free for everyone")
+    # When paywall is OFF: no status caption / seat chrome for visitors (clean free site).
     st.markdown("---")
 
     with st.expander("🔴 LIVE MEDIA", expanded=True):
         st.subheader("📺 LIVE FINANCIAL TV")
-        tv_channel = st.selectbox("Select Channel:", [
-            "Bloomberg Markets", "CNBC Live", "Reuters TV"
-        ], label_visibility="collapsed", key="tv_sel")
-        # Open on YouTube only — no in-app embed (bot-checks / Error 153) and no scraping.
-        _tv_channels = {
-            "Bloomberg Markets": "https://www.youtube.com/@markets/streams",
-            "CNBC Live":         "https://www.youtube.com/@CNBC/streams",
-            "Reuters TV":        "https://www.youtube.com/@Reuters/streams",
-        }
-        st.markdown(
-            tv_channel_card_html(tv_channel, _tv_channels[tv_channel]),
-            unsafe_allow_html=True,
+        tv_channel = st.selectbox(
+            "Select Channel:",
+            list(TV_DESKS.keys()),
+            label_visibility="collapsed",
+            key="tv_sel",
         )
+        # In-page TradingView / news desk — YouTube Live embeds fail bot-checks in iframes.
+        st.iframe(tv_desk_html(tv_channel, height=450), height=450)
+        st.caption("Live TradingView desk · in-page (no YouTube bot-check)")
 
         st.subheader("🎵 TRADING STATION")
         station = st.selectbox("Select Audio:", list(STATIONS.keys()), label_visibility="collapsed")
         _stn = STATIONS[station]
-        # Radio-first HTML player (no YouTube embed). Same-origin static page is also
-        # available at /app/static/station.html when enableStaticServing is on.
         st.iframe(
-            station_html(_stn["radio"], youtube_url=_stn.get("youtube"), height=190),
-            height=190,
+            station_html(_stn["radio"], youtube_url=_stn.get("youtube"), height=210),
+            height=210,
         )
         st.caption(
-            f"Radio stream · [same-origin station page]({station_static_url(_stn['radio'], _stn.get('youtube'))})"
+            f"In-page radio · [station page]({station_static_url(_stn['radio'], _stn.get('youtube'))})"
             + (f" · [Open on YouTube]({_stn['youtube']})" if _stn.get("youtube") else "")
         )
 

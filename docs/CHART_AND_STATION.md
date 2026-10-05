@@ -1,4 +1,4 @@
-# Live chart & Trading Station
+# Live chart, Financial TV & Trading Station
 
 ## Immersive chart (Dashboard tab)
 TradingView Advanced Chart widget, 820 px tall, full width: top toolbar, drawing tools (left
@@ -32,15 +32,15 @@ HTML), so switching pairs destroyed the chart and everything drawn on it.
 For permanent drawings use **Open full chart on TradingView ↗** (saved to the user's TradingView account).
 
 ## Live Financial TV
-**Open on YouTube only** — no in-app YouTube embed and no scraping. Channel picker shows a card with
-**Open on YouTube ↗** to that channel's `/streams` page (Bloomberg Markets, CNBC, Reuters). Embeds
-were removed because YouTube frequently shows “Sign in to confirm you're not a bot” / Error 153
-inside Streamlit iframes.
+**In-page TradingView desk** (`tv_desk_html` / `TV_DESKS`): Market Overview, Market News timeline,
+Economic Calendar, Forex Cross Rates, Crypto Heatmap. These load inside the sidebar iframe — no
+YouTube Live embeds (those hit “Sign in to confirm you're not a bot” / Error 153 in Streamlit).
 
 ## Trading Station
-**Radio-first.** `station_html()` plays an HTML5 audio stream (laut.fm lofi, Jazz Radio, 181.FM,
-hip-hop). Optional **Open on YouTube ↗** links open youtube.com in a new tab — we never embed the
-YouTube IFrame API for music and we never scrape YouTube.
+**Radio-first, multi-source.** `station_html()` plays HTML5 audio with auto-fallback URLs (laut.fm,
+Jazz Radio, SomaFM, 181.FM, etc.). **▶ Play** / **Next stream** if a source fails. Optional
+**Open on YouTube ↗** opens youtube.com in a new tab — we never embed the YouTube IFrame API for
+music and we never scrape YouTube.
 
-A same-origin static player lives at `/app/static/station.html?url=…&title=…&yt=…` when
-`server.enableStaticServing = true` in `config.toml`.
+A same-origin static player lives at `/app/static/station.html?url=…&title=…&alts=…&yt=…` when
+`server.enableStaticServing = true` (see `.streamlit/config.toml` and the Render start command).

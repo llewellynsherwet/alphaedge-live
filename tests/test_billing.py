@@ -71,3 +71,19 @@ def test_magic_link_login_and_demo_pay():
     user2 = db.get_user(user["id"])
     assert gate.is_paid(user2) is True
     assert gate.seats_remaining() == SEAT_CAP - 1
+
+
+def test_owner_pin_gate():
+    from billing import owner as ow
+    # No pin → never owner
+    os.environ.pop("OWNER_PIN", None)
+    os.environ.pop("AE_OWNER_PIN", None)
+    assert ow.owner_pin() is None
+    assert ow.try_unlock("secret") is False
+
+    os.environ["OWNER_PIN"] = "test-pin-9"
+    assert ow.owner_pin() == "test-pin-9"
+    assert ow.try_unlock("wrong") is False
+    # try_unlock needs streamlit session_state — skip full unlock here;
+    # compare_digest path is covered by wrong-pin False above.
+    os.environ.pop("OWNER_PIN", None)

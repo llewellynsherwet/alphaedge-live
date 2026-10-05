@@ -9,13 +9,22 @@
 # ════════════════════════════════════════════════════════════════════════════
 
 session:
-  weekdays_only: true
+  # 24/7 global scanner: always_on keeps scanning Mon–Sun. Named windows are
+  # labels only (Telegram / UI). Quality gates (min_score, caps, cooldowns,
+  # kill_zone checklist) still apply — KZ is a confluence factor, not the
+  # on/off switch for the monitor.
+  always_on: true
+  weekdays_only: false
+  daily_summary_utc: "21:00"   # when always_on, fire once/day near this UTC hour
   windows:
+    - {name: "🌏 ASIA / TOKYO",           start: "00:00", end: "07:00"}
     - {name: "🇬🇧 LONDON OPEN",           start: "07:00", end: "10:00"}
     - {name: "🇬🇧🇺🇸 LONDON CONTINUATION", start: "10:00", end: "12:00"}
     - {name: "🇺🇸 NY / LONDON OVERLAP",    start: "12:00", end: "16:00"}
-    - {name: "🇺🇸 NEW YORK CLOSE",         start: "16:00", end: "17:00"}
+    - {name: "🇺🇸 NEW YORK CLOSE",         start: "16:00", end: "21:00"}
+    - {name: "🌙 LATE / SYDNEY PREP",     start: "21:00", end: "24:00"}
   kill_zones:
+    - {name: "Tokyo KZ",  start: "00:00", end: "03:00"}
     - {name: "London KZ", start: "07:00", end: "10:00"}
     - {name: "NY KZ",     start: "12:30", end: "16:00"}
 

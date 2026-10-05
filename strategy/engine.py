@@ -15,7 +15,7 @@ import pandas as pd
 
 from . import data as mdata
 from .checklist import score as score_checklist  # noqa: F401  (re-export useful)
-from .common import Candidate, fmt_price, in_window, minutes_of, parse_hhmm
+from .common import Candidate, fmt_price, in_window, minutes_of, parse_hhmm, hhmm_to_minutes
 from .config_loader import load_config
 from .setups import REGISTRY
 from . import pricing
@@ -27,12 +27,29 @@ _STATE_DEFAULT = Path(__file__).resolve().parent.parent / "monitor_state.json"
 # ── session helpers ───────────────────────────────────────────────────────────
 
 def session_info(now: pd.Timestamp | None = None, cfg: dict | None = None):
-    """Returns (in_session: bool, session_name: str)."""
+    """Returns (in_session: bool, session_name: str).
+
+    When session.always_on is true, the scanner stays armed 24/7 (Mon–Sun).
+    Named windows still label which global session is active; quality gates
+    (min_score, caps, kill_zone checklist) are unchanged.
+    """
     cfg = cfg or load_config()
     now = now or pd.Timestamp.now(tz="UTC")
     if now.tzinfo is None:
         now = now.tz_localize("UTC")
     sess = cfg.get("session", {})
+    always_on = bool(sess.get("always_on", False))
+
+    def _window_name() -> str:
+        for w in sess.get("windows", []):
+            if in_window(now, w["start"], w["end"]):
+                return w.get("name", "SESSION")
+        return "🌐 GLOBAL / OFF-PEAK"
+
+    if always_on:
+        # Ignore weekdays_only when always_on — global traders run weekends too.
+        return True, _window_name()
+
     if sess.get("weekdays_only", True) and now.weekday() >= 5:
         return False, "🔴 WEEKEND"
     for w in sess.get("windows", []):
@@ -44,15 +61,25 @@ def session_info(now: pd.Timestamp | None = None, cfg: dict | None = None):
 def next_session(now: pd.Timestamp | None = None, cfg: dict | None = None):
     cfg = cfg or load_config()
     now = now or pd.Timestamp.now(tz="UTC")
-    windows = cfg.get("session", {}).get("windows", [])
+    sess = cfg.get("session", {})
+    windows = sess.get("windows", [])
+    if sess.get("always_on"):
+        # Already scanning — surface the next named window label for UI copy.
+        if not windows:
+            return "Global scan", "continuous"
+        m = minutes_of(now)
+        for w in windows:
+            start_m = hhmm_to_minutes(w["start"])
+            if m < start_m:
+                return w.get("name", "SESSION"), f"{w['start']} UTC"
+        return windows[0].get("name", "SESSION"), f"{windows[0]['start']} UTC (tomorrow)"
     if not windows:
         return "London Open", "07:00 UTC"
     m = minutes_of(now)
     for w in windows:
-        start_m = minutes_of(parse_hhmm(w["start"]))
-        if m < start_m and not (cfg.get("session", {}).get("weekdays_only") and now.weekday() >= 5):
+        start_m = hhmm_to_minutes(w["start"])
+        if m < start_m and not (sess.get("weekdays_only") and now.weekday() >= 5):
             return w.get("name", "SESSION"), f"{w['start']} UTC"
-    # next weekday open
     return windows[0].get("name", "SESSION") + " (next weekday)", f"{windows[0]['start']} UTC"
 
 

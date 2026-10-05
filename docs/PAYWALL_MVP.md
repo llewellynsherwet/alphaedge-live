@@ -11,9 +11,12 @@ The paywall is **not deleted** — it is a switch:
 
 Control:
 1. **Env** `PAYWALL_ENABLED` — unset or `false`/`0`/`off` → OFF; `true`/`1`/`on` → ON
-2. **Sidebar** — Streamlit toggle "Require Pro subscription" writes `paywall_override.json` (durable for all visitors). "Reset to env / default" clears the override.
+2. **Owner sidebar** — unlock with `OWNER_PIN` (env) via `?owner_pin=<pin>` or `?owner=1` + PIN form, then use the "Require Pro subscription" toggle (`paywall_override.json`). Visitors never see this panel.
 
-`render.yaml` ships `PAYWALL_ENABLED=false`.
+`render.yaml` ships `PAYWALL_ENABLED=false`. Set `OWNER_PIN` in the Render dashboard (sync: false).
+
+### Clean free-open site (paywall OFF)
+Visitors do **not** see: paywall toggle, "Dev: simulate Telegram login", teaser banners, seat counters, or checkout chrome. Owner unlocks the ops panel with the PIN.
 
 ## Pricing (ZAR, Paystack) — only when paywall ON
 | Plan | Price | Notes |
@@ -26,7 +29,7 @@ Hard cap: **300** concurrent active paid seats.
 ## Auth
 - **Email magic link** — token in DB; emailed when `SMTP_*` set; otherwise link shown in UI (demo).
 - **Telegram Login Widget** — verify HMAC with `TELEGRAM_LOGIN_BOT_TOKEN`; set `TELEGRAM_LOGIN_BOT_USERNAME`.
-- Dev helper: simulate Telegram login when bot username unset.
+- Dev helper: simulate Telegram login when bot username unset — **owner session only**.
 
 ## Paystack
 Env (never commit secrets):
@@ -34,6 +37,7 @@ Env (never commit secrets):
 - `APP_BASE_URL` (callback base)
 - Optional: `MAGIC_LINK_SECRET`, `TELEGRAM_LOGIN_BOT_*`, `SMTP_*`
 - `PAYWALL_ENABLED` (default false)
+- `OWNER_PIN` (owner unlock; never commit)
 
 Without Paystack keys the app runs a **demo checkout** that activates a subscription on return
 (`?ae_pay_ref=…&ae_pay_demo=1`) so the gate can be tested end-to-end when the paywall is ON.
