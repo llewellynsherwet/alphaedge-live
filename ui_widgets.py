@@ -8,14 +8,19 @@ and come back. The sidebar selection reaches the chart through a tiny "bridge" i
 (`chart_bridge_html`) that re-renders on every symbol change and calls into the chart
 frame (same origin) plus writes sessionStorage as a fallback.
 
-`station_html` is a YouTube player with an ordered list of fallback video IDs plus a
-final plain-audio stream, so a live stream that ends doesn't leave "Video unavailable".
+`station_html` is radio-first (HTML5 audio). Optional YouTube links open on youtube.com —
+we never embed or scrape YouTube for the station. `tv_channel_card_html` is Open-on-YouTube only.
 """
 from __future__ import annotations
 
+import html as _html_mod
 import json
 
 TV_AFF = "163585"
+
+
+def _esc(s: str) -> str:
+    return _html_mod.escape(s, quote=True)
 
 CHART_OPTIONS = {
     "autosize": True,
@@ -162,65 +167,104 @@ def popup_chart_html(tv_symbol: str, height: int = 640) -> str:
             f'<script>new TradingView.widget({json.dumps(o)});</script>')
 
 
-def station_html(videos: list[dict], audio: dict | None = None, height: int = 170) -> str:
-    """YouTube player trying `videos` in order (onError / not playing → next), then `audio`.
 
-    videos: [{"id": "rFZHOHl-L8A", "title": "..."}], audio: {"url": ..., "title": ...}
+def station_html(radio_or_videos=None, audio: dict | None = None, height: int = 170,
+                 youtube_url: str | None = None, *, videos: list | None = None,
+                 radio: dict | None = None) -> str:
+    """Radio-first Trading Station player (no YouTube embed / scrape).
+
+    New: station_html({"url","title"}, youtube_url="https://...")
+         station_html(radio={...}, youtube_url=...)
+    Legacy: station_html([{id,title},...], audio={url,title})
     """
-    cfg = json.dumps({"videos": videos, "audio": audio})
-    return """<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="strict-origin-when-cross-origin">
-<style>html,body{margin:0;background:#000;color:#aaa;font:11px -apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
-#p{width:100%;height:""" + str(height - 22) + """px;background:#000}#p iframe{width:100%;height:100%;border:0}
-#st{height:22px;line-height:22px;padding:0 4px;display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
-#st span{flex:1;overflow:hidden;text-overflow:ellipsis}
-button{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:3px;font-size:10px;padding:1px 6px;cursor:pointer}
-audio{width:100%;height:40px}</style>
-</head><body><div id="p"><div id="yt"></div></div><div id="st"><span id="msg">Loading…</span><button id="nx" title="Try the next source">Next ▶</button></div>
+    # Resolve radio + optional youtube link from new or legacy shapes.
+    if radio is not None:
+        radio_or_videos = radio
+    if isinstance(radio_or_videos, list):
+        videos = videos or radio_or_videos
+        radio_d = audio
+    elif isinstance(radio_or_videos, dict):
+        radio_d = radio_or_videos
+    else:
+        radio_d = audio
+    if not radio_d or not radio_d.get("url"):
+        return ('<!doctype html><html><body style="background:#000;color:#888;font:12px sans-serif;padding:16px">'
+                'No radio stream configured.</body></html>')
+    if not youtube_url and videos:
+        vid = videos[0] if isinstance(videos[0], dict) else None
+        if vid and vid.get("id"):
+            youtube_url = f"https://www.youtube.com/watch?v={vid['id']}"
+    title = _esc(str(radio_d.get("title") or "Radio"))
+    url = _esc(str(radio_d["url"]))
+    yt = _esc(str(youtube_url)) if youtube_url else ""
+    yt_btn = (
+        f'<a class="btn gold" href="{yt}" target="_blank" rel="noopener">Open on YouTube ↗</a>'
+        if yt else ""
+    )
+    title_js = json.dumps(str(radio_d.get("title") or "Radio"))
+    url_js = json.dumps(str(radio_d["url"]))
+    return f"""<!doctype html><html><head><meta charset="utf-8">
+<style>
+html,body{{margin:0;background:#050505;color:#ccc;font:12px -apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}}
+.wrap{{padding:12px 10px;box-sizing:border-box;height:{int(height)}px}}
+.title{{color:#D4AF37;font-weight:700;font-size:12px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+.meta{{color:#666;font-size:10px;margin-bottom:8px}}
+audio{{width:100%;height:36px}}
+.row{{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}}
+.btn{{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:3px;padding:4px 8px;text-decoration:none;font-size:10px;cursor:pointer}}
+.btn.gold{{background:#D4AF37;color:#000;border-color:#D4AF37;font-weight:700}}
+#st{{color:#888;font-size:10px;margin-top:6px}}
+</style></head><body>
+<div class="wrap">
+  <div class="title">♪ {title}</div>
+  <div class="meta">Radio-first · same-origin player · no YouTube embed</div>
+  <audio id="au" controls preload="none" src="{url}"></audio>
+  <div class="row">
+    <button class="btn" id="play" type="button">▶ Play</button>
+    {yt_btn}
+  </div>
+  <div id="st">Ready</div>
+</div>
 <script>
-var CFG = """ + cfg + """, idx = -1, player = null, watchdog = null, state = 'init', LOG = [];
-window.AE_STATION = {get: function(){ return {idx: idx, state: state, id: (CFG.videos[idx] || {}).id || null, log: LOG.slice(-12)}; }};
-function log(e, d){ LOG.push([idx, e, d]); }
-function msg(t){ document.getElementById('msg').textContent = t; }
-function playAudio(){
-  log('audio', null); state = 'audio'; clearTimeout(watchdog);
-  var a = CFG.audio; var box = document.getElementById('p');
-  if (!a) { msg('No source available right now'); return; }
-  box.innerHTML = '<div style="padding:18px 8px 0"><div style="color:#D4AF37;font-weight:bold;font-size:12px;margin-bottom:10px">♪ ' + a.title +
-    '</div><audio id="au" controls autoplay preload="none" src="' + a.url + '"></audio>' +
-    '<div style="color:#666;margin-top:8px">YouTube stream unavailable here, playing radio instead. Press ▶ if it does not start.</div></div>';
-  msg('Radio fallback · Next ▶ retries YouTube');
-}
-function next(){
-  idx++; clearTimeout(watchdog);
-  if (idx >= CFG.videos.length) { playAudio(); return; }
-  var v = CFG.videos[idx]; state = 'loading'; msg('▶ ' + v.title);
-  if (!player) {
-    player = new YT.Player('yt', {videoId: v.id, host: 'https://www.youtube.com',
-      playerVars: {autoplay: 1, mute: 1, playsinline: 1, rel: 0, modestbranding: 1, origin: location.origin && location.origin !== 'null' ? location.origin : undefined},
-      events: {onReady: function(e){ try { e.target.mute(); e.target.playVideo(); } catch (x) {} },
-               onError: function(e){ log('error', e.data); msg('Source ' + (idx + 1) + ' unavailable (' + e.data + '), trying next…'); setTimeout(next, 600); },
-               onStateChange: function(e){ log('state', e.data); if (e.data === 1) { state = 'playing'; clearTimeout(watchdog); msg('▶ ' + CFG.videos[idx].title + ' · muted, tap 🔊 to listen'); } }}});
-  } else {
-    try { player.loadVideoById(v.id); } catch (x) { setTimeout(next, 300); return; }
-  }
-  // Live stream offline / stuck without an error event → move on, but only while the
-  // player is actually visible (browsers may hold back autoplay for hidden iframes).
-  armWatchdog();
-}
-var visible = true;
-try { new IntersectionObserver(function(es){ visible = es[0].isIntersecting; }).observe(document.getElementById('p')); } catch (x) {}
-function armWatchdog(){
-  clearTimeout(watchdog);
-  watchdog = setTimeout(function(){
-    if (state === 'playing' || state === 'audio') return;
-    var ps = -1; try { ps = player.getPlayerState(); } catch (x) {}
-    log('watchdog', ps + '/' + document.visibilityState + '/' + visible);
-    if (document.visibilityState === 'visible' && visible && (ps === -1 || ps === 5)) next(); else armWatchdog();
-  }, 25000);
-}
-document.getElementById('nx').onclick = function(){ if (state === 'audio') { idx = -1; player = null; document.getElementById('p').innerHTML = '<div id="yt"></div>'; } next(); };
-window.onYouTubeIframeAPIReady = function(){ next(); };
-var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api';
-s.onerror = function(){ playAudio(); }; document.head.appendChild(s);
-setTimeout(function(){ if (idx < 0) playAudio(); }, 15000);
+(function(){{
+  var au=document.getElementById('au'), st=document.getElementById('st');
+  function set(t,ok){{ st.textContent=t; st.style.color=ok===1?'#00ff88':(ok===0?'#ff6b6b':'#888'); }}
+  document.getElementById('play').onclick=function(){{
+    au.play().then(function(){{ set('Playing',1); }}).catch(function(){{ set('Press play on the bar if blocked',0); }});
+  }};
+  au.addEventListener('playing', function(){{ set('Playing',1); }});
+  au.addEventListener('error', function(){{ set('Stream error — try another station',0); }});
+  au.play().then(function(){{ set('Playing',1); }}).catch(function(){{ set('Ready — press ▶ to start',2); }});
+  window.AE_STATION = {{get: function(){{ return {{mode:'radio', title: {title_js}, url: {url_js} }}; }}}};
+}})();
 </script></body></html>"""
+
+
+
+def station_static_url(radio: dict, youtube_url: str | None = None) -> str:
+    """Same-origin static station page URL (requires server.enableStaticServing)."""
+    from urllib.parse import urlencode
+    q = {"url": radio.get("url", ""), "title": radio.get("title") or "Radio"}
+    if youtube_url:
+        q["yt"] = youtube_url
+    return "/app/static/station.html?" + urlencode(q)
+
+
+def tv_channel_card_html(name: str, streams_url: str, blurb: str = "") -> str:
+    """Open-on-YouTube card — never embeds or scrapes YouTube live streams."""
+    n = _esc(name)
+    u = _esc(streams_url)
+    b = _esc(blurb or (
+        "Watch the live broadcast on YouTube (opens in a new tab). "
+        "In-app embeds are disabled to avoid bot-checks and Error 153."
+    ))
+    return f"""
+<div style="background:#0b0b0b;border:1px solid #333;border-radius:8px;padding:14px 14px 12px;margin:4px 0 10px 0;">
+  <div style="color:#D4AF37;font-weight:700;font-size:14px;letter-spacing:.5px;margin-bottom:6px;">📺 {n}</div>
+  <div style="color:#888;font-size:12px;line-height:1.5;margin-bottom:12px;">{b}</div>
+  <a href="{u}" target="_blank" rel="noopener"
+     style="display:inline-block;background:#D4AF37;color:#000;font-weight:700;text-decoration:none;
+            padding:10px 14px;border-radius:5px;font-size:13px;">Open on YouTube ↗</a>
+  <div style="color:#555;font-size:10px;margin-top:10px;">No in-app YouTube player · no scraping · you watch on youtube.com</div>
+</div>
+"""

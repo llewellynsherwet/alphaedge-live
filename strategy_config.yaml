@@ -1,8 +1,11 @@
 # ════════════════════════════════════════════════════════════════════════════
-# AlphaEdge — Confluence Day Template
+# AlphaEdge — Confluence Day Template (2026-10-05 tune)
 # Reloaded every monitor loop (~5 min). Edit and the next scan picks it up.
-# Defaults tuned for selectivity. orb_open is available but disabled by default
-# after a weak 30-day replay; flip enabled:true to re-arm it.
+#
+# Goal: useful alerts without spam. Honest 30d replay (to 2026-10-05): requiring
+# premium/discount on SMC + tp_rr 2.0 → 5 alerts (0.17/day), 40% WR, +0.20R.
+# Looser configs (~0.6/day) went negative on the same window — we keep quality.
+# ema_vwap_kz stays in code but disabled (no edge in sample). orb_open disabled.
 # ════════════════════════════════════════════════════════════════════════════
 
 session:
@@ -20,13 +23,13 @@ symbols:
   # yf = signal feed (futures have volume). quote = what users trade (cash / CFD /
   # spot). Entry/SL/TP in alerts are converted into the quote price by removing
   # the live futures basis, so US30 alerts match a broker US30, not YM futures.
-  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, vwap_pullback, orb_open],
+  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
      quote: {source: yf, ticker: "^DJI", label: "US30 cash (^DJI)"}}
-  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, vwap_pullback, orb_open],
+  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
      quote: {source: yf, ticker: "^NDX", label: "NAS100 cash (^NDX)"}}
-  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, vwap_pullback, orb_open],
+  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
      quote: {source: yf, ticker: "^GSPC", label: "SPX500 cash (^GSPC)"}}
-  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, vwap_pullback],
+  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
      quote: {source: gold_api, ticker: "XAU", label: "XAUUSD spot"}}
   - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep]}
   - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep]}
@@ -34,25 +37,24 @@ symbols:
   - {name: "AUD/USD",    yf: "AUDUSD=X", priority: 8, setups: [smc_sweep]}
 
 risk:
-  min_rr: 2.5                 # reject any setup below 1:2.5
-  tp_rr: 2.5                  # TP placed at 2.5 × risk
-  daily_max_signals: 6
+  min_rr: 2.0
+  tp_rr: 2.0                  # 2R — historically higher WR than 2.5R on this feed
+  daily_max_signals: 4        # few/day ceiling (not a target)
   per_symbol_max: 1
-  cooldown_minutes: 45        # min gap between ANY two trade alerts
-  symbol_cooldown_minutes: 120 # min gap between alerts on the same symbol
+  cooldown_minutes: 40
+  symbol_cooldown_minutes: 120
   max_signal_age_minutes: 20
 
-# ── Live execution checks (applied at alert time, before the daily budget) ──
 execution:
   enabled: true
-  entry_mode: market           # market = entry at live price | limit = original zone entry
-  tp_on_reprice: keep_rr       # keep_rr = TP re-placed at tp_rr × new risk | keep_target = original TP
-  max_data_age_minutes: 15     # reject if the signal feed's last 1m bar is older (Yahoo futures ≈10m delayed)
-  max_price_age_minutes: 10    # live quote considered fresh within this many minutes
-  max_drift_atr: 0.3           # reject if price already ran toward TP by more than 0.3 × ATR…
-  max_drift_tp_frac: 0.25      # …or by more than 25% of the distance to TP
-  reject_if_tp_sl_hit: true    # reject if TP or SL traded after the trigger candle closed
-  max_basis_age_hours: 96      # oldest common minute accepted for futures↔cash basis
+  entry_mode: market
+  tp_on_reprice: keep_rr
+  max_data_age_minutes: 15
+  max_price_age_minutes: 10
+  max_drift_atr: 0.3
+  max_drift_tp_frac: 0.25
+  reject_if_tp_sl_hit: true
+  max_basis_age_hours: 96
 
 correlation_groups:
   - name: us_indices
@@ -61,7 +63,7 @@ correlation_groups:
     members: {"EUR/USD": 1, "GBP/USD": 1}
 
 confluence:
-  min_score: 4                # global floor (out of 6); setups may demand more
+  min_score: 4
 
 setups:
   smc_sweep:
@@ -78,14 +80,14 @@ setups:
     sl_buffer_atr: 0.15
     checklist:
       htf_bias:         {weight: 1, required: true}
-      premium_discount: {weight: 1, required: false}
+      premium_discount: {weight: 1, required: true}   # tightened vs prior (was optional)
       liquidity_sweep:  {weight: 1, required: true}
       mss_bos:          {weight: 1, required: true}
       pd_array:         {weight: 1, required: true}
       kill_zone:        {weight: 1, required: true}
 
   orb_open:
-    enabled: false            # weak on 30-day yfinance replay — re-enable after live review
+    enabled: false
     label: "NY Opening Range Breakout"
     entry_tf: "5m"
     min_score: 5
@@ -106,17 +108,18 @@ setups:
 
   vwap_pullback:
     enabled: true
-    label: "Session VWAP Pullback"
+    label: "Session VWAP Pullback (morning)"
     entry_tf: "5m"
     min_score: 5
     anchor_ny: "09:30"
-    trend_bars: 18
+    trend_bars: 16
     trend_min_frac: 0.75
-    min_separation_atr: 1.2
+    min_separation_atr: 1.0
     touch_atr: 0.2
-    avoid_ny: ["11:30", "13:30"]
+    # Skip lunch dead-zone entirely; research: morning window carries the edge.
+    avoid_ny: ["11:30", "16:00"]
     sl_buffer_atr: 0.25
-    max_risk_atr: 2.5
+    max_risk_atr: 2.2
     checklist:
       htf_bias:         {weight: 1, required: true}
       vwap_trend:       {weight: 1, required: true}
@@ -125,16 +128,34 @@ setups:
       volume_signature: {weight: 1, required: false}
       active_hours:     {weight: 1, required: true}
 
-# ── Trade outcome tracking (TP / SL follow-up alerts) ──
-# Every delivered trade alert is tracked as an open trade (persisted in
-# monitor_state.json → trades, not reset daily). Each ~5-min loop, while
-# markets trade, 1m candles (5m fallback) of the alert's own price source
-# (cash/CFD/spot) since the alert are checked; wicks count. TP and SL in the
-# same candle → counted as SL (conservative). Results feed the daily summary.
+  ema_vwap_kz:
+    enabled: false            # researched & coded; 0% WR on loose 30d isolate — re-enable after live review
+    label: "Morning EMA+VWAP Confluence"
+    entry_tf: "5m"
+    min_score: 5
+    anchor_ny: "09:30"
+    window_ny: ["09:45", "11:30"]
+    trend_bars: 16
+    trend_min_frac: 0.70
+    min_separation_atr: 0.8
+    touch_atr: 0.25
+    slope_bars: 6
+    min_slope_atr: 0.05
+    sl_buffer_atr: 0.2
+    max_risk_atr: 2.0
+    checklist:
+      htf_bias:         {weight: 1, required: true}
+      vwap_trend:       {weight: 1, required: true}
+      ema_bone:         {weight: 1, required: true}
+      vwap_slope:       {weight: 1, required: true}
+      confirm_close:    {weight: 1, required: true}
+      volume_signature: {weight: 1, required: false}
+      morning_kz:       {weight: 1, required: true}
+
 outcomes:
   enabled: true
-  max_open_hours: 48          # no TP/SL by then → "⌛ EXPIRED" notice, tracking stops
-  retain_days: 14             # keep closed results this long in state
+  max_open_hours: 48
+  retain_days: 14
 
 telegram:
   trade_alerts: true

@@ -31,11 +31,16 @@ HTML), so switching pairs destroyed the chart and everything drawn on it.
 
 For permanent drawings use **Open full chart on TradingView ↗** (saved to the user's TradingView account).
 
+## Live Financial TV
+**Open on YouTube only** — no in-app YouTube embed and no scraping. Channel picker shows a card with
+**Open on YouTube ↗** to that channel's `/streams` page (Bloomberg Markets, CNBC, Reuters). Embeds
+were removed because YouTube frequently shows “Sign in to confirm you're not a bot” / Error 153
+inside Streamlit iframes.
+
 ## Trading Station
-`station_html()` plays YouTube with an ordered fallback list (on player error or a stream that never
-starts while visible → next source), then a plain radio stream. **Next ▶** skips/retries.
-- Lofi: `rFZHOHl-L8A` (Lofi Girl "lofi hip hop radio 📚", new since Sep 2026), `JD-kMIpDfnY`,
-  `CwPCy1GLS38`, `1Tl2FtV06qo` → radio `https://stream.laut.fm/lofi`
-- Jazz: `Dx5qFachd3A`, `E2vONfzoyRI`, `A8jDx9TLMQc` → radio Jazz Radio (infomaniak)
-The old lofi ID `jfKfPfyJRdk` ended ("This live stream recording is not available", YouTube error 150).
-Update IDs in `STATIONS_YT` in `app.py` if Lofi Girl restarts a stream again.
+**Radio-first.** `station_html()` plays an HTML5 audio stream (laut.fm lofi, Jazz Radio, 181.FM,
+hip-hop). Optional **Open on YouTube ↗** links open youtube.com in a new tab — we never embed the
+YouTube IFrame API for music and we never scrape YouTube.
+
+A same-origin static player lives at `/app/static/station.html?url=…&title=…&yt=…` when
+`server.enableStaticServing = true` in `config.toml`.

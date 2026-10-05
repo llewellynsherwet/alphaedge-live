@@ -31,7 +31,10 @@ from strategy.config_loader import load_config as _load_strategy_config
 from strategy import outcomes as _outcomes
 from strategy.common import fmt_price as _fmt_price
 from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
-                        station_html, tv_chart_url)
+                        station_html, station_static_url, tv_channel_card_html, tv_chart_url)
+
+from billing.ui import render_auth_sidebar, render_paywall, render_teaser_banner, require_access
+from billing.gate import is_paid as _billing_is_paid
 
 _NY_TZ = ZoneInfo("America/New_York")
 
@@ -62,20 +65,25 @@ TV_MAP = {
 CHART_HEIGHT = 820
 _CHART_HTML = persistent_chart_html(TV_MAP["EUR/USD"])
 
-# Trading Station sources: YouTube IDs tried in order (verified live 2026-09-29), then a
-# plain audio stream, so an ended live stream never leaves "Video unavailable".
-STATIONS_YT = {
-    "Lofi Trading Beats": (
-        [{"id": "rFZHOHl-L8A", "title": "Lofi Girl · lofi hip hop radio 📚"},
-         {"id": "JD-kMIpDfnY", "title": "Lofi Girl · lofi hip hop radio 💤"},
-         {"id": "CwPCy1GLS38", "title": "Lofi Girl · sad lofi radio ☔"},
-         {"id": "1Tl2FtV06qo", "title": "Lofi Girl · asian lofi radio ⛩️"}],
-        {"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi radio"}),
-    "Chillout Jazz": (
-        [{"id": "Dx5qFachd3A", "title": "Relaxing Jazz Piano Radio"},
-         {"id": "E2vONfzoyRI", "title": "Lofi Girl · jazz lofi radio 🎷"},
-         {"id": "A8jDx9TLMQc", "title": "Lofi Girl · relaxing jazz radio 🌹"}],
-        {"url": "https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3", "title": "Jazz Radio (FR)"}),
+# Trading Station: radio-first (HTML5 audio / same-origin static page). Optional
+# YouTube links open on youtube.com — we never embed or scrape YouTube here.
+STATIONS = {
+    "Lofi Trading Beats": {
+        "radio": {"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi radio"},
+        "youtube": "https://www.youtube.com/@LofiGirl",
+    },
+    "Chillout Jazz": {
+        "radio": {"url": "https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3", "title": "Jazz Radio (FR)"},
+        "youtube": "https://www.youtube.com/results?search_query=relaxing+jazz+piano+radio",
+    },
+    "Pop Radio": {
+        "radio": {"url": "https://listen.181fm.com/181-themix_128k.mp3", "title": "181.FM The Mix"},
+        "youtube": None,
+    },
+    "Hip Hop Radio": {
+        "radio": {"url": "https://pureplay.cdnstream1.com/6045_128.mp3", "title": "Hip Hop Radio"},
+        "youtube": None,
+    },
 }
 
 PIP_MAP = {
@@ -1109,39 +1117,45 @@ with st.sidebar:
 
     st.markdown('<div style="text-align:center;margin-bottom:20px;"><p style="font-size:10px;color:#888;">TRADING INTELLIGENCE REDEFINED</p></div><hr style="border-top:1px solid #333;">', unsafe_allow_html=True)
 
+    # ── Paid gate: auth + seat status (sidebar) ─────────────────────────────
+    _access = render_auth_sidebar()
+    _user_paid = bool(_access.get("paid"))
+    st.session_state["ae_access"] = _access
+    if _access.get("authenticated") and not _user_paid:
+        render_paywall(_access.get("user"))
+    elif not _access.get("authenticated"):
+        st.caption("Sign in to subscribe · teaser dashboard is free")
+    st.markdown("---")
+
     with st.expander("🔴 LIVE MEDIA", expanded=True):
         st.subheader("📺 LIVE FINANCIAL TV")
         tv_channel = st.selectbox("Select Channel:", [
             "Bloomberg Markets", "CNBC Live", "Reuters TV"
         ], label_visibility="collapsed", key="tv_sel")
-        # Embed each channel's CURRENT live stream (not a fixed video ID, which
-        # breaks every time a broadcast ends). components.iframe loads YouTube
-        # directly so it gets a proper Referer (srcdoc iframes trigger YouTube
-        # "Error 153"). Browsers only allow autoplay when muted.
+        # Open on YouTube only — no in-app embed (bot-checks / Error 153) and no scraping.
         _tv_channels = {
-            "Bloomberg Markets": ("UCIALMKvObZNtJ6AmdCLP7Lg", "https://www.youtube.com/@markets/streams"),
-            "CNBC Live":         ("UCvJJ_dzjViJCoLf5uKUTwoA", "https://www.youtube.com/@CNBC/streams"),
-            "Reuters TV":        ("UChqUTb7kYRX8-EiaN3XFrSQ", "https://www.youtube.com/@Reuters/streams"),
+            "Bloomberg Markets": "https://www.youtube.com/@markets/streams",
+            "CNBC Live":         "https://www.youtube.com/@CNBC/streams",
+            "Reuters TV":        "https://www.youtube.com/@Reuters/streams",
         }
-        _ch_id, _ch_link = _tv_channels[tv_channel]
-        st.iframe(
-            f"https://www.youtube.com/embed/live_stream?channel={_ch_id}&autoplay=1&mute=1&playsinline=1",
-            height=210,
+        st.markdown(
+            tv_channel_card_html(tv_channel, _tv_channels[tv_channel]),
+            unsafe_allow_html=True,
         )
-        st.caption(f"If the player says the video is unavailable, {tv_channel} isn't live on YouTube right now. "
-                   f"[Open their live streams]({_ch_link})")
 
         st.subheader("🎵 TRADING STATION")
-        station = st.selectbox("Select Audio:", [
-            "Lofi Trading Beats", "Chillout Jazz", "Pop Radio", "Hip Hop Radio"
-        ], label_visibility="collapsed")
-        if station in STATIONS_YT:
-            _vids, _aud = STATIONS_YT[station]
-            st.iframe(station_html(_vids, _aud, height=190), height=190)
-        elif station == "Pop Radio":
-            st.audio("https://listen.181fm.com/181-themix_128k.mp3")
-        elif station == "Hip Hop Radio":
-            st.audio("https://pureplay.cdnstream1.com/6045_128.mp3")
+        station = st.selectbox("Select Audio:", list(STATIONS.keys()), label_visibility="collapsed")
+        _stn = STATIONS[station]
+        # Radio-first HTML player (no YouTube embed). Same-origin static page is also
+        # available at /app/static/station.html when enableStaticServing is on.
+        st.iframe(
+            station_html(_stn["radio"], youtube_url=_stn.get("youtube"), height=190),
+            height=190,
+        )
+        st.caption(
+            f"Radio stream · [same-origin station page]({station_static_url(_stn['radio'], _stn.get('youtube'))})"
+            + (f" · [Open on YouTube]({_stn['youtube']})" if _stn.get("youtube") else "")
+        )
 
     st.markdown("---")
     st.markdown('<p style="text-align:center;color:#D4AF37;font-size:11px;font-weight:bold;letter-spacing:2px;">🏆 FEATURED PARTNERS</p>', unsafe_allow_html=True)
@@ -1171,14 +1185,32 @@ tab_dash, tab_cot, tab_sent, tab_ind, tab_fx, tab_news, tab_cal, tab_chat = st.t
 ])
 
 
+
+def _pro_only_tab(title: str) -> bool:
+    """If user is not paid, show lock UI and return True (caller should skip body)."""
+    acc = st.session_state.get("ae_access") or require_access()
+    if acc.get("paid"):
+        return False
+    st.title(title)
+    render_teaser_banner()
+    render_paywall(acc.get("user"))
+    st.info("This tab is included with AlphaEdge Pro.")
+    return True
+
+
 # ================= TAB 1: DASHBOARD =================
 with tab_dash:
     # Keep the chart in its own container at a fixed position in the tab so its
     # iframe is never re-created on reruns (that would wipe drawings).
     _dash_top = st.container()
     _dash_chart = st.container()
+    _access = st.session_state.get("ae_access") or require_access()
+    _user_paid = bool(_access.get("paid"))
     with _dash_top:
         st.title("📊 ALPHAEDGE COMMAND CENTRE")
+        if not _user_paid:
+            render_teaser_banner()
+            render_paywall(_access.get("user"))
 
         if in_kz:
             st.markdown(f'<div style="background:#0a1a0a;border:1px solid #00ff88;border-radius:6px;padding:10px 16px;margin-bottom:12px;"><span style="color:#00ff88;font-weight:bold;font-size:13px;">🟢 ACTIVE SESSION</span><span class="kill-zone-badge">{session_name}</span><span style="float:right;color:#888;font-size:12px;">{now_utc}</span></div>', unsafe_allow_html=True)
@@ -1196,7 +1228,10 @@ with tab_dash:
 
         rows_html = ""
         if data:
-            for name, row in data.items():
+            _items = list(data.items())
+            if not _user_paid:
+                _items = _items[:5]
+            for name, row in _items:
                 bias  = row.get("bias",  "—")
                 price = row.get("price", 0)
                 score = row.get("score", 0)
@@ -1219,12 +1254,14 @@ with tab_dash:
             rows_html = "<tr><td colspan='7'>Loading Data...</td></tr>"
 
         st.markdown(f'<table class="heatmap-table"><thead><tr><th>SYMBOL</th><th>BIAS</th><th>SCORE</th><th>TREND</th><th>TECH</th><th>PRICE</th><th>SOURCE</th></tr></thead><tbody>{rows_html}</tbody></table>', unsafe_allow_html=True)
+        if not _user_paid:
+            st.caption("Teaser shows 5 symbols — Pro unlocks the full heatmap + live signals.")
         st.markdown("---")
 
         st.markdown("""
         <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
             <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS / ORB / VWAP • checklist ≥4/6 • Mon–Fri 07–17 UTC • daily cap 6 • 2.5R min</p>
+            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS (+ PD) / morning VWAP • Mon–Fri 07–17 UTC • daily cap 4 • 2.0R • Pro gated</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1240,7 +1277,17 @@ with tab_dash:
         </div>
         """, unsafe_allow_html=True)
 
-        sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
+        if not _user_paid:
+            st.markdown("""
+            <div style="background:#0d1117;border:1px dashed #D4AF37;border-radius:8px;padding:20px;text-align:center;margin:12px 0;">
+              <div style="font-size:28px;">🔒</div>
+              <div style="color:#D4AF37;font-weight:700;margin-top:6px;">LIVE SIGNALS — PRO ONLY</div>
+              <div style="color:#888;font-size:12px;margin-top:8px;">Subscribe (R149/mo or R35/wk) to unlock entries, SL/TP and checklist detail.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            sig, ent, tp, sl, reason = "🔒 PRO", 0.0, 0.0, 0.0, "Unlock AlphaEdge Pro to view live signals."
+        else:
+            sig, ent, tp, sl, reason = _signal_engine(focus_ticker)
 
         c1, c2, c3 = st.columns(3)
         c1.metric("📐 SIGNAL", sig)
@@ -1498,115 +1545,136 @@ with tab_dash:
 
 # ================= TAB 2: COT DATA =================
 with tab_cot:
-    st.title("📊 INSTITUTIONAL POSITIONING")
-    col_ctrl, _ = st.columns([1, 2])
-    with col_ctrl:
-        if st.button("🔄 REFRESH DATA"):
-            try:
-                import cot_fetcher
-                if cot_fetcher.update_cot_data():
-                    st.success("Updated!"); time.sleep(1); st.rerun()
-                else:
-                    st.error("⚠️ COT refresh returned no data. The CFTC site may be down, try again later.")
-            except ModuleNotFoundError:
-                st.error("⚠️ cot_fetcher module not found.")
-            except Exception as e:
-                st.error(f"⚠️ COT refresh failed: {e}")
-
-    def make_row(row):
-        l_pct = row.get('long_pct', 0); s_pct = row.get('short_pct', 0)
-        l_cls = "bull-strong" if l_pct > 60 else "bull-med" if l_pct > 50 else ""
-        s_cls = "bear-strong" if s_pct > 60 else "bear-med" if s_pct > 50 else ""
-        nc    = "#2962FF" if row.get('net_pos', 0) > 0 else "#D50000"
-        return f"""<tr><td class="symbol-col">{row['Symbol']}</td><td>{int(row['long_pos']):,}</td><td>{int(row['short_pos']):,}</td><td style="color:{'#00E676' if row['change_long']>0 else '#FF5252'}">{int(row['change_long']):+,}</td><td style="color:{'#00E676' if row['change_short']>0 else '#FF5252'}">{int(row['change_short']):+,}</td><td class="{l_cls}">{l_pct:.1f}%</td><td class="{s_cls}">{s_pct:.1f}%</td><td>{row['net_pct']:.2f}%</td><td style="font-weight:bold;background-color:{nc};color:white;">{int(row.get('net_pos',0)):,}</td><td>{int(row['open_int']):,}</td><td>{int(row['change_oi']):+,}</td></tr>"""
-
-    if os.path.exists("cot_live.json"):
-        try:
-            with open("cot_live.json","r") as f: cot_data = json.load(f)
-            table_rows = "".join([make_row(dict(v, Symbol=k)) for k,v in cot_data.items()])
-            _dates = sorted({v.get("report_date") for v in cot_data.values() if v.get("report_date")})
-            if _dates:
-                st.caption(f"CFTC report date: {', '.join(_dates)} · Commodities = Managed Money (Disaggregated), Financials = Leveraged Funds (TFF)")
-            st.markdown(f'<table class="heatmap-table" style="width:100%;text-align:center;"><thead><tr style="background:#111;color:#D4AF37;"><th>Symbol</th><th>Longs</th><th>Shorts</th><th>Δ Long</th><th>Δ Short</th><th>Long %</th><th>Short %</th><th>Net %</th><th>Net Pos</th><th>OI</th><th>Δ OI</th></tr></thead><tbody>{table_rows}</tbody></table>', unsafe_allow_html=True)
-        except (json.JSONDecodeError, KeyError) as e:
-            st.error(f"⚠️ Failed to parse COT data: {e}. Try refreshing.")
+    if _pro_only_tab('📊 INSTITUTIONAL POSITIONING'):
+        pass
     else:
-        st.info("ℹ️ No data found. Click Refresh.")
+        st.title("📊 INSTITUTIONAL POSITIONING")
+        col_ctrl, _ = st.columns([1, 2])
+        with col_ctrl:
+            if st.button("🔄 REFRESH DATA"):
+                try:
+                    import cot_fetcher
+                    if cot_fetcher.update_cot_data():
+                        st.success("Updated!"); time.sleep(1); st.rerun()
+                    else:
+                        st.error("⚠️ COT refresh returned no data. The CFTC site may be down, try again later.")
+                except ModuleNotFoundError:
+                    st.error("⚠️ cot_fetcher module not found.")
+                except Exception as e:
+                    st.error(f"⚠️ COT refresh failed: {e}")
 
+        def make_row(row):
+            l_pct = row.get('long_pct', 0); s_pct = row.get('short_pct', 0)
+            l_cls = "bull-strong" if l_pct > 60 else "bull-med" if l_pct > 50 else ""
+            s_cls = "bear-strong" if s_pct > 60 else "bear-med" if s_pct > 50 else ""
+            nc    = "#2962FF" if row.get('net_pos', 0) > 0 else "#D50000"
+            return f"""<tr><td class="symbol-col">{row['Symbol']}</td><td>{int(row['long_pos']):,}</td><td>{int(row['short_pos']):,}</td><td style="color:{'#00E676' if row['change_long']>0 else '#FF5252'}">{int(row['change_long']):+,}</td><td style="color:{'#00E676' if row['change_short']>0 else '#FF5252'}">{int(row['change_short']):+,}</td><td class="{l_cls}">{l_pct:.1f}%</td><td class="{s_cls}">{s_pct:.1f}%</td><td>{row['net_pct']:.2f}%</td><td style="font-weight:bold;background-color:{nc};color:white;">{int(row.get('net_pos',0)):,}</td><td>{int(row['open_int']):,}</td><td>{int(row['change_oi']):+,}</td></tr>"""
 
-# ================= TAB 3: SENTIMENT =================
-with tab_sent:
-    st.title("📈 TECHNICAL SENTIMENT")
-    gauge_asset = st.selectbox("Select Asset to Analyze:", list(TICKER_MAP.keys()), key="gauge_sel")
-    tv_gauge    = TV_MAP.get(gauge_asset, "FX:EURUSD")
-    st.write(f"Displaying Sentiment for: **{gauge_asset}**")
-    c1, c2 = st.columns(2)
-    with c1: st.caption("1 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"1h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
-    with c2: st.caption("4 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"4h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
-
-
-# ================= TAB 4: INDICES =================
-with tab_ind:
-    st.title("🏙️ GLOBAL INDICES HEATMAP")
-    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/stock-heatmap/?theme=dark&market=america" height="800" width="100%"></iframe>', height=820)
-
-
-# ================= TAB 5: FOREX =================
-with tab_fx:
-    st.title("💱 GLOBAL CURRENCY MATRIX")
-    st.iframe('<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-heat-map.js" async>{"width":"100%","height":800,"currencies":["EUR","USD","JPY","GBP","CHF","AUD","CAD","NZD","ZAR"],"isTransparent":false,"colorTheme":"dark","locale":"en"}</script></div>', height=820)
-
-
-# ================= TAB 6: NEWS =================
-with tab_news:
-    st.title("📰 LIVE MARKET NEWS")
-    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/timeline/?feedMode=all_symbols&theme=dark" height="800" width="100%"></iframe>', height=820)
-
-
-# ================= TAB 7: CALENDAR =================
-with tab_cal:
-    st.title("📅 ECONOMIC CALENDAR")
-    st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/events/?theme=dark&importance=high" height="800" width="100%"></iframe>', height=820)
-
-
-# ================= TAB 8: COMMUNITY CHAT =================
-with tab_chat:
-    st.title("💬 TRADERS LOUNGE")
-    st.write("Share setups, ideas, and market news with the AlphaEdge community.")
-    col_info, col_btn = st.columns([3, 1])
-    with col_info:
-        st.info("🔄 **Note:** Click refresh to see the latest messages from other traders.")
-    with col_btn:
-        if st.button("🔄 REFRESH CHAT", width="stretch"):
-            st.rerun()
-    st.markdown("---")
-    chat_history   = load_chat()
-    chat_container = st.container(height=500)
-    with chat_container:
-        if not chat_history:
-            st.info("Welcome to the AlphaEdge Traders Lounge. Be the first to drop a setup!")
+        if os.path.exists("cot_live.json"):
+            try:
+                with open("cot_live.json","r") as f: cot_data = json.load(f)
+                table_rows = "".join([make_row(dict(v, Symbol=k)) for k,v in cot_data.items()])
+                _dates = sorted({v.get("report_date") for v in cot_data.values() if v.get("report_date")})
+                if _dates:
+                    st.caption(f"CFTC report date: {', '.join(_dates)} · Commodities = Managed Money (Disaggregated), Financials = Leveraged Funds (TFF)")
+                st.markdown(f'<table class="heatmap-table" style="width:100%;text-align:center;"><thead><tr style="background:#111;color:#D4AF37;"><th>Symbol</th><th>Longs</th><th>Shorts</th><th>Δ Long</th><th>Δ Short</th><th>Long %</th><th>Short %</th><th>Net %</th><th>Net Pos</th><th>OI</th><th>Δ OI</th></tr></thead><tbody>{table_rows}</tbody></table>', unsafe_allow_html=True)
+            except (json.JSONDecodeError, KeyError) as e:
+                st.error(f"⚠️ Failed to parse COT data: {e}. Try refreshing.")
         else:
-            for msg in chat_history:
-                with st.chat_message("user"):
-                    ts = datetime.fromtimestamp(msg['ts']).strftime("%H:%M")
-                    st.markdown(f"**Anonymous Trader** · *{ts}*")
-                    st.write(msg['text'])
-    if prompt := st.chat_input("Drop a trading idea or setup..."):
-        save_message(prompt)
-        st.rerun()
+            st.info("ℹ️ No data found. Click Refresh.")
 
 
-# ================= FIXED FOOTER =================
-_footer_url = (
-    "https://www.tradingview-widget.com/embed-widget/ticker-tape/?theme=dark"
-    "#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3ASPXUSD%22%2C%22title%22%3A%22S%26P%20500%22%7D"
-    "%2C%7B%22proName%22%3A%22FOREXCOM%3ANSXUSD%22%2C%22title%22%3A%22Nasdaq%20100%22%7D"
-    "%2C%7B%22proName%22%3A%22FX_IDC%3AEURUSD%22%2C%22title%22%3A%22EUR%2FUSD%22%7D"
-    "%2C%7B%22proName%22%3A%22OANDA%3AXAUUSD%22%2C%22title%22%3A%22GOLD%22%7D%5D"
-    "%2C%22showSymbolLogo%22%3Atrue%2C%22colorTheme%22%3A%22dark%22"
-    "%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22locale%22%3A%22en%22%7D"
-)
-st.markdown(
-    f'<div class="ticker-footer"><iframe src="{_footer_url}" width="100%" height="40" frameborder="0" scrolling="no" style="margin-top:-10px;"></iframe></div>',
-    unsafe_allow_html=True
-)
+    # ================= TAB 3: SENTIMENT =================
+with tab_sent:
+    if _pro_only_tab('📈 TECHNICAL SENTIMENT'):
+        pass
+    else:
+        st.title("📈 TECHNICAL SENTIMENT")
+        gauge_asset = st.selectbox("Select Asset to Analyze:", list(TICKER_MAP.keys()), key="gauge_sel")
+        tv_gauge    = TV_MAP.get(gauge_asset, "FX:EURUSD")
+        st.write(f"Displaying Sentiment for: **{gauge_asset}**")
+        c1, c2 = st.columns(2)
+        with c1: st.caption("1 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"1h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
+        with c2: st.caption("4 Hour Interval"); st.iframe(f'<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>{{"interval":"4h","width":"100%","isTransparent":true,"height":450,"symbol":"{tv_gauge}","showIntervalTabs":false,"displayMode":"single","locale":"en","colorTheme":"dark"}}</script></div>', height=460)
+
+
+    # ================= TAB 4: INDICES =================
+with tab_ind:
+    if _pro_only_tab('🏙️ GLOBAL INDICES HEATMAP'):
+        pass
+    else:
+        st.title("🏙️ GLOBAL INDICES HEATMAP")
+        st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/stock-heatmap/?theme=dark&market=america" height="800" width="100%"></iframe>', height=820)
+
+
+    # ================= TAB 5: FOREX =================
+with tab_fx:
+    if _pro_only_tab('💱 GLOBAL CURRENCY MATRIX'):
+        pass
+    else:
+        st.title("💱 GLOBAL CURRENCY MATRIX")
+        st.iframe('<div class="tradingview-widget-container"><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-heat-map.js" async>{"width":"100%","height":800,"currencies":["EUR","USD","JPY","GBP","CHF","AUD","CAD","NZD","ZAR"],"isTransparent":false,"colorTheme":"dark","locale":"en"}</script></div>', height=820)
+
+
+    # ================= TAB 6: NEWS =================
+with tab_news:
+    if _pro_only_tab('📰 LIVE MARKET NEWS'):
+        pass
+    else:
+        st.title("📰 LIVE MARKET NEWS")
+        st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/timeline/?feedMode=all_symbols&theme=dark" height="800" width="100%"></iframe>', height=820)
+
+
+    # ================= TAB 7: CALENDAR =================
+with tab_cal:
+    if _pro_only_tab('📅 ECONOMIC CALENDAR'):
+        pass
+    else:
+        st.title("📅 ECONOMIC CALENDAR")
+        st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/events/?theme=dark&importance=high" height="800" width="100%"></iframe>', height=820)
+
+
+    # ================= TAB 8: COMMUNITY CHAT =================
+with tab_chat:
+    if _pro_only_tab('💬 TRADERS LOUNGE'):
+        pass
+    else:
+        st.title("💬 TRADERS LOUNGE")
+        st.write("Share setups, ideas, and market news with the AlphaEdge community.")
+        col_info, col_btn = st.columns([3, 1])
+        with col_info:
+            st.info("🔄 **Note:** Click refresh to see the latest messages from other traders.")
+        with col_btn:
+            if st.button("🔄 REFRESH CHAT", width="stretch"):
+                st.rerun()
+        st.markdown("---")
+        chat_history   = load_chat()
+        chat_container = st.container(height=500)
+        with chat_container:
+            if not chat_history:
+                st.info("Welcome to the AlphaEdge Traders Lounge. Be the first to drop a setup!")
+            else:
+                for msg in chat_history:
+                    with st.chat_message("user"):
+                        ts = datetime.fromtimestamp(msg['ts']).strftime("%H:%M")
+                        st.markdown(f"**Anonymous Trader** · *{ts}*")
+                        st.write(msg['text'])
+        if prompt := st.chat_input("Drop a trading idea or setup..."):
+            save_message(prompt)
+            st.rerun()
+
+
+    # ================= FIXED FOOTER =================
+    _footer_url = (
+        "https://www.tradingview-widget.com/embed-widget/ticker-tape/?theme=dark"
+        "#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3ASPXUSD%22%2C%22title%22%3A%22S%26P%20500%22%7D"
+        "%2C%7B%22proName%22%3A%22FOREXCOM%3ANSXUSD%22%2C%22title%22%3A%22Nasdaq%20100%22%7D"
+        "%2C%7B%22proName%22%3A%22FX_IDC%3AEURUSD%22%2C%22title%22%3A%22EUR%2FUSD%22%7D"
+        "%2C%7B%22proName%22%3A%22OANDA%3AXAUUSD%22%2C%22title%22%3A%22GOLD%22%7D%5D"
+        "%2C%22showSymbolLogo%22%3Atrue%2C%22colorTheme%22%3A%22dark%22"
+        "%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22locale%22%3A%22en%22%7D"
+    )
+    st.markdown(
+        f'<div class="ticker-footer"><iframe src="{_footer_url}" width="100%" height="40" frameborder="0" scrolling="no" style="margin-top:-10px;"></iframe></div>',
+        unsafe_allow_html=True
+    )
