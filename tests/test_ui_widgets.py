@@ -45,28 +45,35 @@ def test_station_legacy_videos_audio_shape():
     assert "iframe_api" not in h
 
 
-def test_tv_desk_embeds_tradingview_not_youtube_live():
-    assert "Market Overview" in u.TV_DESKS
-    h = u.tv_desk_html("Market Overview", height=450)
-    assert "tradingview" in h.lower()
-    assert "youtube.com/embed" not in h
-    assert "embed/live_stream" not in h
-    h2 = u.tv_desk_html("Market News")
-    assert "timeline" in h2
-    h3 = u.tv_desk_html("Economic Calendar")
-    assert "events" in h3
+def test_tv_channels_include_bloomberg_and_playable_fallbacks():
+    assert "Bloomberg Markets" in u.TV_CHANNELS
+    assert "CNBC Live" in u.TV_CHANNELS
+    assert "Reuters TV" in u.TV_CHANNELS
+    bb = u.TV_CHANNELS["Bloomberg Markets"]
+    assert bb["youtube_channel"].startswith("UC")
+    assert bb["audio"]["urls"]
+    url = u.tv_static_url("Bloomberg Markets")
+    assert url.startswith("/app/static/tv.html?")
+    assert "UCIALMKvObZNtJ6AmdCLP7Lg" in url
+    assert "WBBRAMAAC48" in url
+    assert "stocktwits" in url
+    embed = u.tv_youtube_embed_url("Bloomberg Markets")
+    assert "embed/live_stream" in embed
+    assert "UCIALMKvObZNtJ6AmdCLP7Lg" in embed
 
 
-def test_tv_channel_card_is_open_on_youtube_only():
+def test_tv_channel_card_is_optional_external_link():
     h = u.tv_channel_card_html("Bloomberg Markets", "https://www.youtube.com/@markets/streams")
-    assert "Open on YouTube" in h
-    assert "youtube.com/embed" not in h
+    assert "Open channel" in h
     assert "@markets/streams" in h
 
 
-def test_app_uses_tv_desk_not_youtube_live_embed():
+def test_app_uses_channel_picker_not_tradingview_desk():
     src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py"), encoding="utf8").read()
-    assert "embed/live_stream" not in src
+    assert "TV_CHANNELS" in src
+    assert "tv_static_url" in src
+    assert "embed/live_stream" in src or "tv_youtube_embed_url" in src
     assert "STATIONS_YT" not in src
-    assert "tv_desk_html" in src
-    assert "TV_DESKS" in src
+    # TradingView desk clutter must not drive the Live TV sidebar
+    assert "tv_desk_html(" not in src
+    assert "Market Overview" not in src.split("LIVE FINANCIAL TV", 1)[-1].split("TRADING STATION", 1)[0]

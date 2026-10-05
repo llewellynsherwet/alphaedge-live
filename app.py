@@ -31,7 +31,8 @@ from strategy.config_loader import load_config as _load_strategy_config
 from strategy import outcomes as _outcomes
 from strategy.common import fmt_price as _fmt_price
 from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
-                        station_html, station_static_url, tv_desk_html, TV_DESKS, tv_chart_url)
+                        station_html, station_static_url, tv_static_url, tv_youtube_embed_url,
+                        TV_CHANNELS, tv_chart_url)
 
 from billing.ui import render_auth_sidebar, render_paywall, render_teaser_banner, require_access
 from billing.gate import is_paid as _billing_is_paid
@@ -1177,13 +1178,21 @@ with st.sidebar:
         st.subheader("📺 LIVE FINANCIAL TV")
         tv_channel = st.selectbox(
             "Select Channel:",
-            list(TV_DESKS.keys()),
+            list(TV_CHANNELS.keys()),
             label_visibility="collapsed",
             key="tv_sel",
         )
-        # In-page TradingView / news desk — YouTube Live embeds fail bot-checks in iframes.
-        st.iframe(tv_desk_html(tv_channel, height=450), height=450)
-        st.caption("Live TradingView desk · in-page (no YouTube bot-check)")
+        # Same-origin player: YouTube live_stream embed + radio/Twitch fallbacks.
+        # st.iframe(url) (not components.html/srcdoc) so YouTube gets a real Referer.
+        st.iframe(tv_static_url(tv_channel), height=340)
+        # Direct YouTube embed as a second path if the static player is blocked.
+        with st.expander("Direct YouTube embed", expanded=False):
+            st.iframe(tv_youtube_embed_url(tv_channel), height=220)
+        _tv_meta = TV_CHANNELS.get(tv_channel) or {}
+        st.caption(
+            f"In-page Live TV · muted autoplay · Radio/Twitch tabs inside player"
+            + (f" · [channel streams]({_tv_meta['streams_url']})" if _tv_meta.get("streams_url") else "")
+        )
 
         st.subheader("🎵 TRADING STATION")
         station = st.selectbox("Select Audio:", list(STATIONS.keys()), label_visibility="collapsed")

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AlphaEdge Live Financial TV</title>
+<style>
+  html,body{margin:0;background:#050505;color:#ccc;font:12px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+  .wrap{padding:8px 8px 6px;box-sizing:border-box;height:100vh;display:flex;flex-direction:column;gap:6px}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .title{color:#D4AF37;font-weight:700;font-size:12px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{font-size:9px;color:#00ff88;border:1px solid #00ff8855;border-radius:999px;padding:1px 7px;letter-spacing:.5px}
+  .modes{display:flex;gap:4px;flex-wrap:wrap}
+  button.mode,a.btn{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:3px;padding:4px 8px;font-size:10px;cursor:pointer;font-family:inherit;text-decoration:none}
+  button.mode.active{background:#D4AF37;color:#000;border-color:#D4AF37;font-weight:700}
+  .stage{flex:1;min-height:0;background:#0b0e14;border:1px solid #222;border-radius:6px;overflow:hidden;position:relative}
+  .stage iframe,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+  .radio{display:none;padding:10px;box-sizing:border-box;height:100%}
+  .radio.on{display:block}
+  .meta{color:#666;font-size:10px;margin:0 0 8px}
+  audio{width:100%;height:34px}
+  .row{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  #st{color:#888;font-size:10px;margin-top:6px;min-height:14px}
+  .ok{color:#00ff88}.err{color:#ff6b6b}
+  .hint{color:#666;font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="title" id="title">📺 Live Financial TV</div>
+    <span class="badge" id="badge">LIVE</span>
+  </div>
+  <div class="modes" id="modes"></div>
+  <div class="stage" id="stage">
+    <iframe id="yt" title="Live TV" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <iframe id="alt" title="Alt stream" style="display:none" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+    <video id="hls" controls playsinline style="display:none"></video>
+    <div class="radio" id="radio">
+      <div class="meta" id="radioMeta">Finance radio fallback · in-page audio</div>
+      <audio id="au" controls preload="auto" playsinline></audio>
+      <div class="row">
+        <button class="mode" id="play" type="button">▶ Play</button>
+        <button class="mode" id="next" type="button">Next stream</button>
+      </div>
+      <div id="st">Ready</div>
+    </div>
+  </div>
+  <div class="hint" id="hint">Muted autoplay · unmute in the player · radio fallback if video is offline</div>
+</div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var title = q.get('title') || 'Live Financial TV';
+  var ch = q.get('ch') || '';
+  var vid = q.get('vid') || ''; // optional concrete video id fallback
+  var streams = q.get('streams') || '';
+  var audioTitle = q.get('audio_title') || 'Finance radio';
+  var urls = [];
+  (q.get('audio') || '').split(',').forEach(function(u){ u=(u||'').trim(); if(u && urls.indexOf(u)<0) urls.push(u); });
+  var alt = q.get('alt') || '';
+  var altKind = (q.get('alt_kind') || '').toLowerCase(); // twitch | hls | iframe
+  var parentHost = location.hostname || 'localhost';
+
+  document.getElementById('title').textContent = '📺 ' + title;
+  document.getElementById('radioMeta').textContent = audioTitle + ' · in-page audio fallback';
+
+  var modes = [];
+  if (ch || vid) modes.push({id:'video', label:'Live TV'});
+  if (urls.length) modes.push({id:'radio', label:'Radio'});
+  if (alt) modes.push({id:'alt', label: altKind === 'twitch' ? 'Twitch' : (altKind === 'hls' ? 'HLS' : 'Alt')});
+  if (!modes.length) modes.push({id:'video', label:'Live TV'});
+
+  var modesEl = document.getElementById('modes');
+  modes.forEach(function(m, i){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'mode';
+    b.textContent = m.label; b.dataset.mode = m.id;
+    b.onclick = function(){ setMode(m.id); };
+    modesEl.appendChild(b);
+  });
+  if (streams) {
+    var a = document.createElement('a');
+    a.className = 'btn'; a.href = streams; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = 'Channel ↗';
+    modesEl.appendChild(a);
+  }
+
+  var yt = document.getElementById('yt');
+  var altF = document.getElementById('alt');
+  var hls = document.getElementById('hls');
+  var radio = document.getElementById('radio');
+  var au = document.getElementById('au');
+  var st = document.getElementById('st');
+  var idx = 0;
+  var want = (q.get('mode') || '').toLowerCase();
+  var current = (modes.some(function(m){ return m.id === want; }) ? want : modes[0].id);
+
+  function ytSrc(){
+    if (vid) return 'https://www.youtube.com/embed/' + encodeURIComponent(vid) + '?autoplay=1&mute=1&playsinline=1&rel=0';
+    if (ch) return 'https://www.youtube.com/embed/live_stream?channel=' + encodeURIComponent(ch) + '&autoplay=1&mute=1&playsinline=1&rel=0';
+    return '';
+  }
+  function altSrc(){
+    if (!alt) return '';
+    if (altKind === 'twitch') {
+      // Twitch requires parent= embedding site hostname
+      return 'https://player.twitch.tv/?channel=' + encodeURIComponent(alt) + '&parent=' + encodeURIComponent(parentHost) + '&parent=localhost&muted=true&autoplay=true';
+    }
+    return alt;
+  }
+  function setStatus(t, ok){
+    st.textContent = t;
+    st.className = ok===1 ? 'ok' : (ok===0 ? 'err' : '');
+  }
+  function loadAudio(i, autoplay){
+    if (!urls.length) { setStatus('No radio streams', 0); return; }
+    idx = ((i % urls.length) + urls.length) % urls.length;
+    au.src = urls[idx]; au.load();
+    setStatus('Radio ' + (idx+1) + '/' + urls.length + ' — loading…', 2);
+    if (autoplay) {
+      au.play().then(function(){ setStatus('Playing radio · stream ' + (idx+1), 1); })
+        .catch(function(){ setStatus('Ready — press ▶ to start radio', 2); });
+    }
+  }
+  function stopMedia(){
+    try { au.pause(); } catch(e) {}
+    try { hls.pause(); } catch(e) {}
+  }
+  function setMode(mode){
+    current = mode;
+    Array.prototype.forEach.call(modesEl.querySelectorAll('button.mode'), function(b){
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    yt.style.display = 'none'; altF.style.display = 'none'; hls.style.display = 'none';
+    radio.classList.remove('on');
+    stopMedia();
+    if (mode === 'video') {
+      yt.style.display = 'block';
+      var src = ytSrc();
+      if (src && yt.getAttribute('src') !== src) yt.setAttribute('src', src);
+      document.getElementById('hint').textContent = 'YouTube live embed · muted autoplay · switch to Radio if offline / blocked';
+      document.getElementById('badge').textContent = 'LIVE TV';
+    } else if (mode === 'radio') {
+      radio.classList.add('on');
+      loadAudio(idx, true);
+      document.getElementById('hint').textContent = 'In-page finance radio · auto-fallback streams';
+      document.getElementById('badge').textContent = 'RADIO';
+    } else if (mode === 'alt') {
+      document.getElementById('badge').textContent = 'ALT';
+      if (altKind === 'hls') {
+        hls.style.display = 'block';
+        if (hls.getAttribute('src') !== alt) { hls.src = alt; hls.load(); }
+        hls.muted = true;
+        hls.play().catch(function(){});
+        document.getElementById('hint').textContent = 'Public HLS stream · unmute in the player';
+      } else {
+        altF.style.display = 'block';
+        var asrc = altSrc();
+        if (asrc && altF.getAttribute('src') !== asrc) altF.setAttribute('src', asrc);
+        document.getElementById('hint').textContent = (altKind === 'twitch' ? 'Twitch finance embed' : 'Alternate embed') + ' · unmute in the player';
+      }
+    }
+  }
+
+  document.getElementById('play').onclick = function(){
+    au.play().then(function(){ setStatus('Playing radio · stream ' + (idx+1), 1); })
+      .catch(function(){ setStatus('Press play on the audio bar if blocked', 0); });
+  };
+  document.getElementById('next').onclick = function(){ loadAudio(idx + 1, true); };
+  au.addEventListener('playing', function(){ setStatus('Playing radio · stream ' + (idx+1), 1); });
+  au.addEventListener('error', function(){
+    if (idx + 1 < urls.length) {
+      setStatus('Radio failed — trying next…', 0);
+      setTimeout(function(){ loadAudio(idx + 1, true); }, 400);
+    } else setStatus('All radio streams failed — try Live TV / Alt', 0);
+  });
+
+  // Preload YouTube so first paint is the live embed.
+  var boot = ytSrc();
+  if (boot) yt.setAttribute('src', boot);
+  setMode(current);
+  window.AE_TV = {mode: function(){ return current; }, title: title, channel: ch};
+})();
+</script>
+</body>
+</html>
