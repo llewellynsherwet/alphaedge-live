@@ -9,8 +9,10 @@ and come back. The sidebar selection reaches the chart through a tiny "bridge" i
 frame (same origin) plus writes sessionStorage as a fallback.
 
 `station_html` is radio-first (HTML5 audio with multi-source fallback). Optional YouTube
-links open on youtube.com — we never scrape YouTube. `tv_desk_html` embeds TradingView /
-news widgets in-page (no YouTube Live embeds — those fail bot-checks inside iframes).
+links open on youtube.com — we never scrape YouTube for music. Live Financial TV uses
+`TV_CHANNELS` + same-origin `static/tv.html` (YouTube live_stream embed with radio / Twitch /
+HLS fallbacks). Prefer `st.iframe(tv_static_url(...))` so the player has a real origin
+(srcdoc YouTube iframes hit Error 153).
 """
 from __future__ import annotations
 
@@ -168,147 +170,182 @@ def popup_chart_html(tv_symbol: str, height: int = 640) -> str:
             f'<script>new TradingView.widget({json.dumps(o)});</script>')
 
 
-# ── Live Financial TV desk (TradingView / news embeds — not YouTube Live) ─────
+# ── Live Financial TV (channel picker + in-page playable embeds) ──────────────
 
-# Channel id → in-page embed that actually works inside Streamlit iframes.
-TV_DESKS = {
-    "Market Overview": {
-        "kind": "tv_script",
-        "blurb": "Live indices, FX, futures & crypto tape — TradingView market overview.",
-        "script": "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js",
-        "config": {
-            "colorTheme": "dark",
-            "dateRange": "1D",
-            "showChart": True,
-            "locale": "en",
-            "largeChartUrl": "",
-            "isTransparent": True,
-            "showSymbolLogo": True,
-            "showFloatingTooltip": True,
-            "width": "100%",
-            "height": "420",
-            "plotLineColorGrowing": "rgba(212, 175, 55, 1)",
-            "plotLineColorFalling": "rgba(255, 82, 82, 1)",
-            "gridLineColor": "rgba(42, 46, 57, 0)",
-            "scaleFontColor": "rgba(209, 212, 220, 1)",
-            "belowLineFillColorGrowing": "rgba(212, 175, 55, 0.12)",
-            "belowLineFillColorFalling": "rgba(255, 82, 82, 0.12)",
-            "symbolActiveColor": "rgba(212, 175, 55, 0.12)",
-            "tabs": [
-                {"title": "Indices", "symbols": [
-                    {"s": "FOREXCOM:SPXUSD", "d": "S&P 500"},
-                    {"s": "FOREXCOM:NSXUSD", "d": "US 100"},
-                    {"s": "FOREXCOM:DJI", "d": "Dow 30"},
-                    {"s": "INDEX:DEU40", "d": "DAX 40"},
-                    {"s": "FOREXCOM:UKXGBP", "d": "UK 100"},
-                ]},
-                {"title": "FX", "symbols": [
-                    {"s": "FX:EURUSD", "d": "EUR/USD"},
-                    {"s": "FX:GBPUSD", "d": "GBP/USD"},
-                    {"s": "FX:USDJPY", "d": "USD/JPY"},
-                    {"s": "FX:AUDUSD", "d": "AUD/USD"},
-                    {"s": "FX:USDZAR", "d": "USD/ZAR"},
-                ]},
-                {"title": "Commodities", "symbols": [
-                    {"s": "TVC:GOLD", "d": "Gold"},
-                    {"s": "TVC:SILVER", "d": "Silver"},
-                    {"s": "TVC:USOIL", "d": "WTI Crude"},
-                ]},
+# Channel id → YouTube live_stream (+ optional radio / Twitch / HLS fallbacks).
+# Use tv_static_url() → /app/static/tv.html so video plays in-page (not Open-on-YouTube only).
+TV_CHANNELS = {
+    "Bloomberg Markets": {
+        "youtube_channel": "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "streams_url": "https://www.youtube.com/@markets/streams",
+        "blurb": "Bloomberg Markets live on YouTube · Bloomberg Radio fallback",
+        "audio": {
+            "title": "Bloomberg Radio (WBBR)",
+            "urls": [
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC48.aac",
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC.aac",
             ],
         },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
     },
-    "Market News": {
-        "kind": "tv_script",
-        "blurb": "Live financial news timeline — TradingView feed (in-page).",
-        "script": "https://s3.tradingview.com/external-embedding/embed-widget-timeline.js",
-        "config": {
-            "feedMode": "all_symbols",
-            "colorTheme": "dark",
-            "isTransparent": True,
-            "displayMode": "regular",
-            "width": "100%",
-            "height": "420",
-            "locale": "en",
+    "CNBC Live": {
+        "youtube_channel": "UCvJJ_dzjViJCoLf5uKUTwoA",
+        "streams_url": "https://www.youtube.com/@CNBC/streams",
+        "blurb": "CNBC live on YouTube · radio/Twitch fallbacks",
+        "audio": {
+            "title": "News / markets radio fallback",
+            "urls": [
+                "https://npr-ice.streamguys1.com/live.mp3",
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC48.aac",
+            ],
         },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
     },
-    "Economic Calendar": {
-        "kind": "tv_script",
-        "blurb": "High-impact economic events — TradingView calendar (in-page).",
-        "script": "https://s3.tradingview.com/external-embedding/embed-widget-events.js",
-        "config": {
-            "colorTheme": "dark",
-            "isTransparent": True,
-            "width": "100%",
-            "height": "420",
-            "locale": "en",
-            "importanceFilter": "-1,0,1",
+    "Reuters TV": {
+        "youtube_channel": "UChqUTb7kYRX8-EiaN3XFrSQ",
+        "streams_url": "https://www.youtube.com/@Reuters/streams",
+        "blurb": "Reuters live on YouTube",
+        "audio": {
+            "title": "World news radio fallback",
+            "urls": [
+                "https://npr-ice.streamguys1.com/live.mp3",
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC48.aac",
+            ],
         },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
     },
-    "Forex Cross Rates": {
-        "kind": "tv_script",
-        "blurb": "Live FX cross-rate matrix — TradingView (in-page).",
-        "script": "https://s3.tradingview.com/external-embedding/embed-widget-forex-cross-rates.js",
-        "config": {
-            "colorTheme": "dark",
-            "isTransparent": True,
-            "width": "100%",
-            "height": "420",
-            "locale": "en",
-            "currencies": ["EUR", "USD", "JPY", "GBP", "CHF", "AUD", "CAD", "NZD", "ZAR"],
+    "Yahoo Finance": {
+        "youtube_channel": "UCEAZeUIeJs0IjQiqTCdVSIg",
+        "streams_url": "https://www.youtube.com/@YahooFinance/streams",
+        "blurb": "Yahoo Finance live on YouTube",
+        "audio": {
+            "title": "Markets radio fallback",
+            "urls": [
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC48.aac",
+                "https://npr-ice.streamguys1.com/live.mp3",
+            ],
         },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
     },
-    "Crypto Heatmap": {
-        "kind": "tv_iframe",
-        "blurb": "Live crypto sector heatmap — TradingView (in-page).",
-        "src": "https://www.tradingview-widget.com/embed-widget/crypto-coins-heatmap/?locale=en#%7B%22dataSource%22%3A%22Crypto%22%2C%22blockSize%22%3A%22market_cap_calc%22%2C%22blockColor%22%3A%22change%22%2C%22locale%22%3A%22en%22%2C%22symbolUrl%22%3A%22%22%2C%22colorTheme%22%3A%22dark%22%2C%22hasTopBar%22%3Atrue%2C%22isDataSetEnabled%22%3Atrue%2C%22isZoomEnabled%22%3Atrue%2C%22hasSymbolTooltip%22%3Atrue%2C%22width%22%3A%22100%25%22%2C%22height%22%3A420%7D",
+    "Sky News": {
+        "youtube_channel": "UCoMdktPbSTixAyNGwb-UYkQ",
+        "streams_url": "https://www.youtube.com/@SkyNews/streams",
+        "blurb": "Sky News live on YouTube",
+        "audio": {
+            "title": "News radio fallback",
+            "urls": ["https://npr-ice.streamguys1.com/live.mp3"],
+        },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
+    },
+    "DW News": {
+        "youtube_channel": "UCknLrEdhRCp1aegoMqRaCZg",
+        "streams_url": "https://www.youtube.com/@DWNews/streams",
+        "blurb": "Deutsche Welle News live on YouTube",
+        "audio": {
+            "title": "News radio fallback",
+            "urls": ["https://npr-ice.streamguys1.com/live.mp3"],
+        },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
+    },
+    "France 24": {
+        "youtube_channel": "UCCCPCZNChQdGa9EkATeye4g",
+        "streams_url": "https://www.youtube.com/@FRANCE24/streams",
+        "blurb": "France 24 English live on YouTube",
+        "audio": {
+            "title": "News radio fallback",
+            "urls": ["https://npr-ice.streamguys1.com/live.mp3"],
+        },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
+    },
+    "Bloomberg Radio": {
+        "youtube_channel": "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "streams_url": "https://www.youtube.com/@markets/streams",
+        "blurb": "Bloomberg Radio audio-first · TV still available",
+        "default_mode": "radio",
+        "audio": {
+            "title": "Bloomberg Radio (WBBR)",
+            "urls": [
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC48.aac",
+                "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC.aac",
+            ],
+        },
+        "alt": "stocktwits",
+        "alt_kind": "twitch",
     },
 }
 
 
+def tv_youtube_embed_url(channel: str) -> str:
+    """Direct YouTube live_stream embed URL (use with st.iframe, not srcdoc)."""
+    ch = TV_CHANNELS.get(channel) or TV_CHANNELS["Bloomberg Markets"]
+    cid = ch.get("youtube_channel") or ""
+    vid = ch.get("fallback_video") or ""
+    if vid:
+        return f"https://www.youtube.com/embed/{vid}?autoplay=1&mute=1&playsinline=1&rel=0"
+    return (
+        f"https://www.youtube.com/embed/live_stream?channel={cid}"
+        f"&autoplay=1&mute=1&playsinline=1&rel=0"
+    )
+
+
+def tv_static_url(channel: str) -> str:
+    """Same-origin Live TV player (YouTube + radio + alt). Requires static serving."""
+    from urllib.parse import urlencode
+    ch = TV_CHANNELS.get(channel) or TV_CHANNELS["Bloomberg Markets"]
+    q = {
+        "title": channel,
+        "ch": ch.get("youtube_channel") or "",
+        "streams": ch.get("streams_url") or "",
+    }
+    if ch.get("fallback_video"):
+        q["vid"] = ch["fallback_video"]
+    audio = ch.get("audio") or {}
+    urls = []
+    if audio.get("url"):
+        urls.append(str(audio["url"]))
+    for u in (audio.get("urls") or []) + (audio.get("fallback") or []):
+        if u and str(u) not in urls:
+            urls.append(str(u))
+    if urls:
+        q["audio"] = ",".join(urls)
+        q["audio_title"] = audio.get("title") or "Finance radio"
+    if ch.get("alt"):
+        q["alt"] = ch["alt"]
+        q["alt_kind"] = ch.get("alt_kind") or "iframe"
+    if ch.get("default_mode"):
+        q["mode"] = ch["default_mode"]
+    return "/app/static/tv.html?" + urlencode(q)
+
+
 def tv_desk_html(channel: str, height: int = 450) -> str:
-    """In-page financial TV desk (TradingView / news widgets). Never YouTube Live."""
-    desk = TV_DESKS.get(channel) or TV_DESKS["Market Overview"]
+    """Deprecated TradingView desk — kept so old imports don't crash; prefer tv_static_url."""
     title = _esc(channel)
-    blurb = _esc(desk.get("blurb") or "")
-    h = int(height)
-    if desk.get("kind") == "tv_iframe":
-        src = _esc(desk["src"])
-        body = (
-            f'<iframe src="{src}" title="{title}" '
-            f'style="width:100%;height:{h - 52}px;border:0;border-radius:6px;background:#0b0e14" '
-            f'allow="clipboard-write" loading="lazy"></iframe>'
-        )
-    else:
-        cfg = json.dumps(desk["config"])
-        script = _esc(desk["script"])
-        body = (
-            f'<div class="tradingview-widget-container" style="height:{h - 52}px">'
-            f'<div class="tradingview-widget-container__widget"></div>'
-            f'<script type="text/javascript" src="{script}" async>{cfg}</script>'
-            f'</div>'
-        )
     return f"""<!doctype html><html><head><meta charset="utf-8">
-<style>
-html,body{{margin:0;background:#050505;color:#ccc;font:12px -apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}}
-.wrap{{padding:8px 8px 4px;box-sizing:border-box;height:{h}px}}
-.head{{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}}
-.title{{color:#D4AF37;font-weight:700;font-size:12px;letter-spacing:.4px}}
-.meta{{color:#666;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-</style></head><body>
-<div class="wrap">
-  <div class="head"><div class="title">📺 {title}</div><div class="meta">{blurb}</div></div>
-  {body}
-</div>
+<style>html,body{{margin:0;background:#050505;color:#888;font:12px sans-serif;padding:16px}}</style>
+</head><body>
+<div style="color:#D4AF37;font-weight:700;margin-bottom:8px">📺 {title}</div>
+<p>TradingView desk widgets were removed from Live Financial TV (they duplicate other tabs).
+Use the channel picker with in-page YouTube / radio playback instead.</p>
 </body></html>"""
 
 
+# Back-compat alias so stale references don't break imports.
+TV_DESKS = {k: {"blurb": v.get("blurb", "")} for k, v in TV_CHANNELS.items()}
+
+
 def tv_channel_card_html(name: str, streams_url: str, blurb: str = "") -> str:
-    """Legacy Open-on-YouTube card — kept for tests / optional fallback links."""
+    """Optional external channel link card — not the primary player."""
     n = _esc(name)
     u = _esc(streams_url)
     b = _esc(blurb or (
-        "Optional YouTube channel link (opens in a new tab). "
-        "In-app Financial TV uses TradingView embeds instead."
+        "Optional external channel link. Primary playback is the in-page Live TV player."
     ))
     return f"""
 <div style="background:#0b0b0b;border:1px solid #333;border-radius:8px;padding:14px 14px 12px;margin:4px 0 10px 0;">
@@ -316,9 +353,10 @@ def tv_channel_card_html(name: str, streams_url: str, blurb: str = "") -> str:
   <div style="color:#888;font-size:12px;line-height:1.5;margin-bottom:12px;">{b}</div>
   <a href="{u}" target="_blank" rel="noopener"
      style="display:inline-block;background:#D4AF37;color:#000;font-weight:700;text-decoration:none;
-            padding:10px 14px;border-radius:5px;font-size:13px;">Open on YouTube ↗</a>
+            padding:10px 14px;border-radius:5px;font-size:13px;">Open channel ↗</a>
 </div>
 """
+
 
 
 def station_html(radio_or_videos=None, audio: dict | None = None, height: int = 200,

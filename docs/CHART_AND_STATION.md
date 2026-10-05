@@ -32,9 +32,14 @@ HTML), so switching pairs destroyed the chart and everything drawn on it.
 For permanent drawings use **Open full chart on TradingView ↗** (saved to the user's TradingView account).
 
 ## Live Financial TV
-**In-page TradingView desk** (`tv_desk_html` / `TV_DESKS`): Market Overview, Market News timeline,
-Economic Calendar, Forex Cross Rates, Crypto Heatmap. These load inside the sidebar iframe — no
-YouTube Live embeds (those hit “Sign in to confirm you're not a bot” / Error 153 in Streamlit).
+**Channel picker** (`TV_CHANNELS` + `tv_static_url` → `/app/static/tv.html`): Bloomberg Markets,
+CNBC Live, Reuters TV, Yahoo Finance, Sky News, DW News, France 24, Bloomberg Radio.
+
+The same-origin player embeds YouTube `live_stream?channel=…` in-page (muted autoplay) with
+**Radio** and **Twitch/Alt** tabs as playable fallbacks — never Open-on-YouTube-only. Prefer
+`st.iframe(tv_static_url(...))` / `st.iframe(tv_youtube_embed_url(...))` over `components.html`
+srcdoc (srcdoc YouTube iframes hit Error 153). TradingView Market Overview / News / Calendar
+widgets stay in their own tabs — not duplicated in the Live TV sidebar.
 
 ## Trading Station
 **Radio-first, multi-source.** `station_html()` plays HTML5 audio with auto-fallback URLs (laut.fm,
