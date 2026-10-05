@@ -3,3 +3,6 @@ __pycache__/
 monitor_state.json
 startup_ping.flag
 chat.db
+billing.db
+billing.db-*
+.env

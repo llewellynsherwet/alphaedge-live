@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AlphaEdge Trading Station</title>
+<style>
+  html,body{margin:0;background:#050505;color:#ccc;font:12px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{padding:14px 12px 10px;box-sizing:border-box}
+  .title{color:#D4AF37;font-weight:700;font-size:13px;letter-spacing:.3px;margin-bottom:8px}
+  .meta{color:#888;font-size:11px;margin-bottom:10px}
+  audio{width:100%;height:36px}
+  .row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  a.btn,button.btn{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:4px;padding:6px 10px;text-decoration:none;font-size:11px;cursor:pointer}
+  a.btn.gold{background:#D4AF37;color:#000;border-color:#D4AF37;font-weight:700}
+  .ok{color:#00ff88}
+  .err{color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title" id="title">♪ Trading Station</div>
+  <div class="meta" id="meta">Radio-first · same-origin player</div>
+  <audio id="au" controls preload="none"></audio>
+  <div class="row">
+    <button class="btn" id="play" type="button">▶ Play</button>
+    <a class="btn gold" id="yt" href="#" target="_blank" rel="noopener" style="display:none">Open on YouTube ↗</a>
+  </div>
+  <div class="meta" id="status" style="margin-top:8px">Idle</div>
+</div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var url = q.get('url') || '';
+  var title = q.get('title') || 'Radio';
+  var yt = q.get('yt') || '';
+  document.getElementById('title').textContent = '♪ ' + title;
+  document.getElementById('meta').textContent = 'Radio stream · no YouTube embed';
+  var au = document.getElementById('au');
+  var st = document.getElementById('status');
+  if (!url) { st.textContent = 'Missing stream URL'; st.className = 'meta err'; return; }
+  au.src = url;
+  var yta = document.getElementById('yt');
+  if (yt) { yta.href = yt; yta.style.display = ''; }
+  document.getElementById('play').onclick = function(){
+    au.play().then(function(){ st.textContent = 'Playing'; st.className = 'meta ok'; })
+      .catch(function(e){ st.textContent = 'Tap play on the audio bar if blocked: ' + (e && e.message ? e.message : e); st.className = 'meta err'; });
+  };
+  au.addEventListener('playing', function(){ st.textContent = 'Playing'; st.className = 'meta ok'; });
+  au.addEventListener('error', function(){ st.textContent = 'Stream error — try another station'; st.className = 'meta err'; });
+  // Attempt autoplay; browsers may require a click.
+  au.play().then(function(){ st.textContent = 'Playing'; st.className = 'meta ok'; })
+    .catch(function(){ st.textContent = 'Ready — press ▶ to start'; });
+})();
+</script>
+</body>
+</html>

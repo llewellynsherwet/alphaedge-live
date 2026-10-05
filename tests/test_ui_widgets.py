@@ -25,14 +25,32 @@ def test_tv_chart_url_encodes_symbol():
     assert u.tv_chart_url("OANDA:US30USD").startswith("https://www.tradingview.com/chart/?symbol=OANDA%3AUS30USD")
 
 
-def test_station_has_fallbacks():
-    h = u.station_html([{"id": "rFZHOHl-L8A", "title": "a"}, {"id": "JD-kMIpDfnY", "title": "b"}],
+def test_station_is_radio_first_no_youtube_embed():
+    h = u.station_html({"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi"},
+                       youtube_url="https://www.youtube.com/@LofiGirl")
+    assert "stream.laut.fm/lofi" in h
+    assert "Open on YouTube" in h
+    assert "iframe_api" not in h
+    assert "youtube.com/embed" not in h
+    assert "mode:'radio'" in h or 'mode:"radio"' in h or "mode:'radio'" in h.replace('"', "'")
+
+
+def test_station_legacy_videos_audio_shape():
+    h = u.station_html([{"id": "rFZHOHl-L8A", "title": "a"}],
                        {"url": "https://stream.laut.fm/lofi", "title": "r"})
-    assert "rFZHOHl-L8A" in h and "JD-kMIpDfnY" in h and "stream.laut.fm/lofi" in h
-    assert "onError" in h and "iframe_api" in h
+    assert "stream.laut.fm/lofi" in h
+    assert "iframe_api" not in h
 
 
-def test_app_uses_verified_lofi_ids():
+def test_tv_channel_card_is_open_on_youtube_only():
+    h = u.tv_channel_card_html("Bloomberg Markets", "https://www.youtube.com/@markets/streams")
+    assert "Open on YouTube" in h
+    assert "youtube.com/embed" not in h
+    assert "@markets/streams" in h
+
+
+def test_app_has_no_youtube_live_embed():
     src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py"), encoding="utf8").read()
-    assert "jfKfPfyJRdk" not in src           # ended stream (YouTube error 150)
-    assert "rFZHOHl-L8A" in src
+    assert "embed/live_stream" not in src
+    assert "STATIONS_YT" not in src
+    assert "Open on YouTube" in src or "tv_channel_card_html" in src

@@ -1,0 +1,100 @@
+{
+  "generated_utc": "2026-10-05T17:10:56.895966+00:00",
+  "overrides": [],
+  "days": 30,
+  "day_range": [
+    "2026-08-25",
+    "2026-10-05"
+  ],
+  "alerts": 5,
+  "alerts_per_day_mean": 0.17,
+  "alerts_per_day_median": 0.0,
+  "alerts_per_day_max": 1,
+  "raw_candidates_per_day_mean": 0.17,
+  "histogram": {
+    "0": 25,
+    "1": 5
+  },
+  "wins": 2,
+  "losses": 3,
+  "open": 0,
+  "win_rate_pct": 40.0,
+  "breakeven_win_rate_pct": 33.3,
+  "expectancy_R": 0.2,
+  "by_setup": {
+    "smc_sweep": {
+      "n": 5,
+      "win": 2,
+      "loss": 3,
+      "open": 0,
+      "win_rate_pct": 40.0
+    }
+  },
+  "trades": [
+    {
+      "day": "2026-08-25",
+      "time_utc": "14:30",
+      "symbol": "GBP/USD",
+      "setup": "smc_sweep",
+      "side": "BUY",
+      "score": "6/6",
+      "rr": 2.0,
+      "entry": 1.3635309934616089,
+      "sl": 1.3626416072135783,
+      "tp": 1.36530976595767,
+      "outcome": "win"
+    },
+    {
+      "day": "2026-09-18",
+      "time_utc": "09:15",
+      "symbol": "US 30",
+      "setup": "smc_sweep",
+      "side": "SELL",
+      "score": "6/6",
+      "rr": 2.0,
+      "entry": 52308.0,
+      "sl": 52385.18305081794,
+      "tp": 52153.63389836412,
+      "outcome": "win"
+    },
+    {
+      "day": "2026-09-21",
+      "time_utc": "12:30",
+      "symbol": "GOLD",
+      "setup": "smc_sweep",
+      "side": "BUY",
+      "score": "6/6",
+      "rr": 2.0,
+      "entry": 4393.0,
+      "sl": 4376.1418110077875,
+      "tp": 4426.716377984425,
+      "outcome": "loss"
+    },
+    {
+      "day": "2026-09-28",
+      "time_utc": "07:00",
+      "symbol": "GBP/USD",
+      "setup": "smc_sweep",
+      "side": "SELL",
+      "score": "6/6",
+      "rr": 2.0,
+      "entry": 1.3242051601409912,
+      "sl": 1.3248641902520968,
+      "tp": 1.32288709991878,
+      "outcome": "loss"
+    },
+    {
+      "day": "2026-09-30",
+      "time_utc": "12:30",
+      "symbol": "S&P 500",
+      "setup": "smc_sweep",
+      "side": "SELL",
+      "score": "6/6",
+      "rr": 2.0,
+      "entry": 7744.0,
+      "sl": 7757.627313884936,
+      "tp": 7716.745372230129,
+      "outcome": "loss"
+    }
+  ]
+}

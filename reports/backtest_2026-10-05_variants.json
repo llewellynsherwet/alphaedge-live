@@ -1,0 +1,202 @@
+{
+  "A_shipped_tight": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 5,
+    "alerts_per_day_mean": 0.17,
+    "alerts_per_day_median": 0.0,
+    "alerts_per_day_max": 1,
+    "raw_candidates_per_day_mean": 0.17,
+    "histogram": {
+      "0": 25,
+      "1": 5
+    },
+    "wins": 2,
+    "losses": 3,
+    "open": 0,
+    "win_rate_pct": 40.0,
+    "breakeven_win_rate_pct": 33.3,
+    "expectancy_R": 0.2,
+    "by_setup": {
+      "smc_sweep": {
+        "n": 5,
+        "win": 2,
+        "loss": 3,
+        "open": 0,
+        "win_rate_pct": 40.0
+      }
+    }
+  },
+  "B_pd_optional": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 17,
+    "alerts_per_day_mean": 0.57,
+    "alerts_per_day_median": 0.0,
+    "alerts_per_day_max": 2,
+    "raw_candidates_per_day_mean": 0.57,
+    "histogram": {
+      "0": 17,
+      "1": 9,
+      "2": 4
+    },
+    "wins": 5,
+    "losses": 12,
+    "open": 0,
+    "win_rate_pct": 29.4,
+    "breakeven_win_rate_pct": 33.3,
+    "expectancy_R": -0.118,
+    "by_setup": {
+      "smc_sweep": {
+        "n": 17,
+        "win": 5,
+        "loss": 12,
+        "open": 0,
+        "win_rate_pct": 29.4
+      }
+    }
+  },
+  "C_pd_opt_tp25": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 17,
+    "alerts_per_day_mean": 0.57,
+    "alerts_per_day_median": 0.0,
+    "alerts_per_day_max": 2,
+    "raw_candidates_per_day_mean": 0.57,
+    "histogram": {
+      "0": 17,
+      "1": 9,
+      "2": 4
+    },
+    "wins": 4,
+    "losses": 13,
+    "open": 0,
+    "win_rate_pct": 23.5,
+    "breakeven_win_rate_pct": 28.6,
+    "expectancy_R": -0.176,
+    "by_setup": {
+      "smc_sweep": {
+        "n": 17,
+        "win": 4,
+        "loss": 13,
+        "open": 0,
+        "win_rate_pct": 23.5
+      }
+    }
+  },
+  "D_ema_loose": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 19,
+    "alerts_per_day_mean": 0.63,
+    "alerts_per_day_median": 0.0,
+    "alerts_per_day_max": 3,
+    "raw_candidates_per_day_mean": 0.63,
+    "histogram": {
+      "0": 16,
+      "1": 10,
+      "2": 3,
+      "3": 1
+    },
+    "wins": 5,
+    "losses": 14,
+    "open": 0,
+    "win_rate_pct": 26.3,
+    "breakeven_win_rate_pct": 33.3,
+    "expectancy_R": -0.211,
+    "by_setup": {
+      "ema_vwap_kz": {
+        "n": 2,
+        "win": 0,
+        "loss": 2,
+        "open": 0,
+        "win_rate_pct": 0.0
+      },
+      "smc_sweep": {
+        "n": 17,
+        "win": 5,
+        "loss": 12,
+        "open": 0,
+        "win_rate_pct": 29.4
+      }
+    }
+  },
+  "E_morning_focus": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 17,
+    "alerts_per_day_mean": 0.57,
+    "alerts_per_day_median": 0.0,
+    "alerts_per_day_max": 2,
+    "raw_candidates_per_day_mean": 0.57,
+    "histogram": {
+      "0": 17,
+      "1": 9,
+      "2": 4
+    },
+    "wins": 5,
+    "losses": 12,
+    "open": 0,
+    "win_rate_pct": 29.4,
+    "breakeven_win_rate_pct": 33.3,
+    "expectancy_R": -0.118,
+    "by_setup": {
+      "smc_sweep": {
+        "n": 17,
+        "win": 5,
+        "loss": 12,
+        "open": 0,
+        "win_rate_pct": 29.4
+      }
+    }
+  },
+  "F_score4_smc": {
+    "days": 30,
+    "day_range": [
+      "2026-08-25",
+      "2026-10-05"
+    ],
+    "alerts": 20,
+    "alerts_per_day_mean": 0.67,
+    "alerts_per_day_median": 0.5,
+    "alerts_per_day_max": 3,
+    "raw_candidates_per_day_mean": 0.7,
+    "histogram": {
+      "0": 15,
+      "1": 11,
+      "2": 3,
+      "3": 1
+    },
+    "wins": 5,
+    "losses": 15,
+    "open": 0,
+    "win_rate_pct": 25.0,
+    "breakeven_win_rate_pct": 33.3,
+    "expectancy_R": -0.25,
+    "by_setup": {
+      "smc_sweep": {
+        "n": 20,
+        "win": 5,
+        "loss": 15,
+        "open": 0,
+        "win_rate_pct": 25.0
+      }
+    }
+  }
+}
