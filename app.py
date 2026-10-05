@@ -1267,6 +1267,160 @@ with tab_dash:
         st.iframe(chart_bridge_html(TV_MAP.get(focus_ticker, "FX:EURUSD")), height=1)
         st.markdown(f'<a href="{tv_chart_url(TV_MAP.get(focus_ticker, "FX:EURUSD"))}" target="_blank" style="font-size:11px;color:#787b86;">Want drawings saved permanently? Open {focus_ticker} on TradingView ↗ (saves to your TradingView account)</a>', unsafe_allow_html=True)
 
+    # ══════════════════════════════════════════════════════════════════════════
+    # NOVA & INK · ETSY PRINTABLES SHOP
+    # ══════════════════════════════════════════════════════════════════════════
+    _ETSY_SHOP_URL = "https://novaandinkbycharl.etsy.com"
+    _ETSY_PRODUCTS = [
+        {
+            "title": "Power Outage Checklist",
+            "blurb": "Printable before/during/after blackout checklist.",
+            "url": "https://www.etsy.com/listing/4580438621/power-outage-checklist-printable",
+            "img": "static/etsy/01_power_outage_checklist.jpg",
+        },
+        {
+            "title": "Before You Leave Home Checklist",
+            "blurb": "Security walkthrough before travel.",
+            "url": "https://www.etsy.com/listing/4572540421/before-you-leave-home-checklist-security",
+            "img": "static/etsy/02_before_you_leave_home.jpg",
+        },
+        {
+            "title": "Home Maintenance Checklist",
+            "blurb": "Monthly systems checklist.",
+            "url": "https://www.etsy.com/listing/4574337895/home-maintenance-checklist-monthly",
+            "img": "static/etsy/03_home_maintenance_checklist.jpg",
+        },
+        {
+            "title": "Fridge Food Safety (Keep or Toss)",
+            "blurb": "Power-outage fridge rules.",
+            "url": "https://www.etsy.com/listing/4582432373/fridge-food-safety-printable-power",
+            "img": "static/etsy/04_fridge_food_safety.jpg",
+        },
+        {
+            "title": "Home Shut-Off Guide",
+            "blurb": "Water/gas/electric mains.",
+            "url": "https://www.etsy.com/listing/4577212387/home-shut-off-guide-printable-utility",
+            "img": "static/etsy/05_home_shut_off_guide.jpg",
+        },
+        {
+            "title": "Building Contacts (Apartment)",
+            "blurb": "Neighbour/caretaker/utility numbers.",
+            "url": "https://www.etsy.com/listing/4584957634/building-contacts-printable-apartment",
+            "img": "static/etsy/06_building_contacts.jpg",
+        },
+        {
+            "title": "Services Contact Sheet",
+            "blurb": "Electrician/plumber/locksmith.",
+            "url": "https://www.etsy.com/listing/4574340653/services-contact-sheet-household",
+            "img": "static/etsy/07_services_contact_sheet.jpg",
+        },
+        {
+            "title": "Emergency Grab Bag Checklist",
+            "blurb": "Go-bag packing list.",
+            "url": "https://www.etsy.com/listing/4572701211/emergency-grab-bag-checklist-emergency",
+            "img": "static/etsy/08_emergency_grab_bag.jpg",
+        },
+        {
+            "title": "Family Emergency Plan",
+            "blurb": "Meeting points/contacts/roles.",
+            "url": "https://www.etsy.com/listing/4572030290/family-emergency-plan-printable",
+            "img": "static/etsy/09_family_emergency_plan.jpg",
+        },
+        {
+            "title": "Home Emergency Numbers",
+            "blurb": "Fridge-ready numbers.",
+            "url": "https://www.etsy.com/listing/4574968184/home-emergency-numbers-printable",
+            "img": "static/etsy/10_home_emergency_numbers.jpg",
+        },
+        {
+            "title": "Travel Emergency Card",
+            "blurb": "Wallet travel ICE card.",
+            "url": "https://www.etsy.com/listing/4567948436/travel-emergency-card-printable-travel",
+            "img": "static/etsy/11_travel_emergency_card.jpg",
+        },
+        {
+            "title": "Vehicle Emergency Card",
+            "blurb": "Car roadside contacts.",
+            "url": "https://www.etsy.com/listing/4568749183/vehicle-emergency-card-printable-car",
+            "img": "static/etsy/12_vehicle_emergency_card.jpg",
+        },
+        {
+            "title": "Medical Alert Wallet Card",
+            "blurb": "Medical + contacts.",
+            "url": "https://www.etsy.com/listing/4571277814/medical-alert-wallet-card-printable",
+            "img": "static/etsy/13_medical_alert_wallet_card.jpg",
+        },
+        {
+            "title": "Family ICE Card",
+            "blurb": "Family ICE wallet card.",
+            "url": "https://www.etsy.com/listing/4570620103/family-ice-card-printable-in-case-of",
+            "img": "static/etsy/14_family_ice_card.jpg",
+        },
+        {
+            "title": "Home Fire Escape Plan",
+            "blurb": "Family fire escape map.",
+            "url": "https://www.etsy.com/listing/4574960682/home-fire-escape-plan-family-fire-safety",
+            "img": "static/etsy/15_home_fire_escape_plan.jpg",
+        },
+    ]
+
+    st.markdown(
+        (
+            '<div style="margin:28px 0 12px 0;padding:14px 16px;border:1px solid #2a2a2a;'
+            'border-left:3px solid #D4AF37;border-radius:8px;background:#0a0a0f;">'
+            '<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;">'
+            '<span style="color:#D4AF37;font-size:15px;font-weight:700;letter-spacing:1.5px;">'
+            'NOVA &amp; INK · Printables from our shop</span>'
+            f'<a href="{_ETSY_SHOP_URL}" target="_blank" rel="noopener" '
+            'style="color:#aaa;font-size:12px;text-decoration:none;border-bottom:1px solid #444;">'
+            'novaandinkbycharl.etsy.com ↗</a></div>'
+            '<p style="margin:8px 0 0 0;color:#666;font-size:12px;">'
+            'Emergency &amp; home printables · R30 each · instant download on Etsy</p></div>'
+        ),
+        unsafe_allow_html=True,
+    )
+
+    def _etsy_img_data_uri(path):
+        """Inline local product image so the shop grid does not depend on CDN hotlinking."""
+        try:
+            with open(path, "rb") as f:
+                return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+        except OSError:
+            return ""
+
+    _cols_per_row = 3
+    for _row_start in range(0, len(_ETSY_PRODUCTS), _cols_per_row):
+        _row = _ETSY_PRODUCTS[_row_start:_row_start + _cols_per_row]
+        _cols = st.columns(len(_row), gap="medium")
+        for _col, _p in zip(_cols, _row):
+            with _col:
+                _src = _etsy_img_data_uri(_p["img"]) if os.path.exists(_p["img"]) else ""
+                _img_html = (
+                    f'<img src="{_src}" alt="{html.escape(_p["title"])}" '
+                    'style="width:100%;height:210px;object-fit:cover;border-radius:6px;'
+                    'display:block;background:#1a1a1a;margin-bottom:8px;">'
+                    if _src else
+                    '<div style="height:210px;border-radius:6px;background:#1a1a1a;margin-bottom:8px;"></div>'
+                )
+                st.markdown(
+                    (
+                        '<div style="background:#111;border:1px solid #222;border-radius:10px;'
+                        'padding:10px;height:100%;">'
+                        + _img_html
+                        + '<div style="color:#D4AF37;font-weight:700;font-size:13px;line-height:1.35;'
+                        f'margin-bottom:4px;">{html.escape(_p["title"])}</div>'
+                        '<div style="color:#888;font-size:11px;line-height:1.4;min-height:32px;'
+                        f'margin-bottom:10px;">{html.escape(_p["blurb"])}</div>'
+                        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+                        '<span style="color:#fff;font-weight:700;font-size:14px;">R30</span>'
+                        f'<a href="{html.escape(_p["url"])}" target="_blank" rel="noopener" '
+                        'style="background:#D4AF37;color:#000;text-decoration:none;font-size:11px;'
+                        'font-weight:700;padding:6px 10px;border-radius:4px;white-space:nowrap;">'
+                        'View on Etsy ↗</a></div></div>'
+                    ),
+                    unsafe_allow_html=True,
+                )
+
 
 # ================= TAB 2: COT DATA =================
 with tab_cot:
