@@ -11,7 +11,7 @@
   .meta{color:#888;font-size:11px;margin-bottom:10px}
   audio{width:100%;height:36px}
   .row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
-  a.btn,button.btn{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:4px;padding:6px 10px;text-decoration:none;font-size:11px;cursor:pointer}
+  a.btn,button.btn{background:#1c1c1c;color:#D4AF37;border:1px solid #333;border-radius:4px;padding:6px 10px;text-decoration:none;font-size:11px;cursor:pointer;font-family:inherit}
   a.btn.gold{background:#D4AF37;color:#000;border-color:#D4AF37;font-weight:700}
   .ok{color:#00ff88}
   .err{color:#ff6b6b}
@@ -20,10 +20,11 @@
 <body>
 <div class="wrap">
   <div class="title" id="title">♪ Trading Station</div>
-  <div class="meta" id="meta">Radio-first · same-origin player</div>
-  <audio id="au" controls preload="none"></audio>
+  <div class="meta" id="meta">In-page radio · multi-stream fallback</div>
+  <audio id="au" controls preload="auto" playsinline></audio>
   <div class="row">
     <button class="btn" id="play" type="button">▶ Play</button>
+    <button class="btn" id="next" type="button">Next stream</button>
     <a class="btn gold" id="yt" href="#" target="_blank" rel="noopener" style="display:none">Open on YouTube ↗</a>
   </div>
   <div class="meta" id="status" style="margin-top:8px">Idle</div>
@@ -31,26 +32,49 @@
 <script>
 (function(){
   var q = new URLSearchParams(location.search);
-  var url = q.get('url') || '';
+  var urls = [];
+  var primary = q.get('url') || '';
+  if (primary) urls.push(primary);
+  (q.get('alts') || '').split(',').forEach(function(u){
+    u = (u || '').trim();
+    if (u && urls.indexOf(u) < 0) urls.push(u);
+  });
   var title = q.get('title') || 'Radio';
   var yt = q.get('yt') || '';
   document.getElementById('title').textContent = '♪ ' + title;
-  document.getElementById('meta').textContent = 'Radio stream · no YouTube embed';
+  document.getElementById('meta').textContent = 'Radio stream · ' + urls.length + ' source(s)';
   var au = document.getElementById('au');
   var st = document.getElementById('status');
-  if (!url) { st.textContent = 'Missing stream URL'; st.className = 'meta err'; return; }
-  au.src = url;
+  var idx = 0;
+  if (!urls.length) { st.textContent = 'Missing stream URL'; st.className = 'meta err'; return; }
+  function set(t, cls){ st.textContent = t; st.className = 'meta ' + (cls || ''); }
+  function load(i, autoplay){
+    idx = ((i % urls.length) + urls.length) % urls.length;
+    au.src = urls[idx];
+    au.load();
+    set('Stream ' + (idx+1) + '/' + urls.length + ' — loading…');
+    if (autoplay) {
+      au.play().then(function(){ set('Playing · stream ' + (idx+1), 'ok'); })
+        .catch(function(){ set('Ready — press ▶ to start'); });
+    }
+  }
   var yta = document.getElementById('yt');
   if (yt) { yta.href = yt; yta.style.display = ''; }
   document.getElementById('play').onclick = function(){
-    au.play().then(function(){ st.textContent = 'Playing'; st.className = 'meta ok'; })
-      .catch(function(e){ st.textContent = 'Tap play on the audio bar if blocked: ' + (e && e.message ? e.message : e); st.className = 'meta err'; });
+    au.play().then(function(){ set('Playing · stream ' + (idx+1), 'ok'); })
+      .catch(function(e){ set('Tap play on the audio bar if blocked: ' + (e && e.message ? e.message : e), 'err'); });
   };
-  au.addEventListener('playing', function(){ st.textContent = 'Playing'; st.className = 'meta ok'; });
-  au.addEventListener('error', function(){ st.textContent = 'Stream error — try another station'; st.className = 'meta err'; });
-  // Attempt autoplay; browsers may require a click.
-  au.play().then(function(){ st.textContent = 'Playing'; st.className = 'meta ok'; })
-    .catch(function(){ st.textContent = 'Ready — press ▶ to start'; });
+  document.getElementById('next').onclick = function(){ load(idx + 1, true); };
+  au.addEventListener('playing', function(){ set('Playing · stream ' + (idx+1), 'ok'); });
+  au.addEventListener('error', function(){
+    if (idx + 1 < urls.length) {
+      set('Stream failed — trying next…', 'err');
+      setTimeout(function(){ load(idx + 1, true); }, 400);
+    } else {
+      set('All streams failed — try Next stream', 'err');
+    }
+  });
+  load(0, true);
 })();
 </script>
 </body>

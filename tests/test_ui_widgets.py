@@ -26,12 +26,15 @@ def test_tv_chart_url_encodes_symbol():
 
 
 def test_station_is_radio_first_no_youtube_embed():
-    h = u.station_html({"url": "https://stream.laut.fm/lofi", "title": "laut.fm lofi"},
+    h = u.station_html({"url": "https://lofi.stream.laut.fm/lofi", "title": "laut.fm lofi",
+                        "fallback": ["https://ice1.somafm.com/dronezone-128-mp3"]},
                        youtube_url="https://www.youtube.com/@LofiGirl")
-    assert "stream.laut.fm/lofi" in h
+    assert "lofi.stream.laut.fm/lofi" in h
     assert "Open on YouTube" in h
     assert "iframe_api" not in h
     assert "youtube.com/embed" not in h
+    assert "Next stream" in h
+    assert "dronezone" in h
     assert "mode:'radio'" in h or 'mode:"radio"' in h or "mode:'radio'" in h.replace('"', "'")
 
 
@@ -42,6 +45,18 @@ def test_station_legacy_videos_audio_shape():
     assert "iframe_api" not in h
 
 
+def test_tv_desk_embeds_tradingview_not_youtube_live():
+    assert "Market Overview" in u.TV_DESKS
+    h = u.tv_desk_html("Market Overview", height=450)
+    assert "tradingview" in h.lower()
+    assert "youtube.com/embed" not in h
+    assert "embed/live_stream" not in h
+    h2 = u.tv_desk_html("Market News")
+    assert "timeline" in h2
+    h3 = u.tv_desk_html("Economic Calendar")
+    assert "events" in h3
+
+
 def test_tv_channel_card_is_open_on_youtube_only():
     h = u.tv_channel_card_html("Bloomberg Markets", "https://www.youtube.com/@markets/streams")
     assert "Open on YouTube" in h
@@ -49,8 +64,9 @@ def test_tv_channel_card_is_open_on_youtube_only():
     assert "@markets/streams" in h
 
 
-def test_app_has_no_youtube_live_embed():
+def test_app_uses_tv_desk_not_youtube_live_embed():
     src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py"), encoding="utf8").read()
     assert "embed/live_stream" not in src
     assert "STATIONS_YT" not in src
-    assert "Open on YouTube" in src or "tv_channel_card_html" in src
+    assert "tv_desk_html" in src
+    assert "TV_DESKS" in src

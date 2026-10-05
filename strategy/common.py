@@ -47,17 +47,33 @@ class Candidate:
 
 def parse_hhmm(s: str) -> dtime:
     hh, mm = str(s).split(":")
-    return dtime(int(hh), int(mm))
+    h, m = int(hh), int(mm)
+    if h == 24 and m == 0:
+        # Sentinel for end-of-day; minutes_of maps 24:00 → 1440.
+        return dtime(0, 0)
+    return dtime(h, m)
 
 
 def minutes_of(t) -> int:
     return t.hour * 60 + t.minute
 
 
+def hhmm_to_minutes(s: str) -> int:
+    """Parse HH:MM to minutes since midnight; accepts 24:00 as 1440."""
+    hh, mm = str(s).split(":")
+    h, m = int(hh), int(mm)
+    if h == 24 and m == 0:
+        return 1440
+    return h * 60 + m
+
+
 def in_window(ts_utc: pd.Timestamp, start: str, end: str) -> bool:
     m = minutes_of(ts_utc)
-    a, b = minutes_of(parse_hhmm(start)), minutes_of(parse_hhmm(end))
-    return a <= m < b
+    a, b = hhmm_to_minutes(start), hhmm_to_minutes(end)
+    if a <= b:
+        return a <= m < b
+    # Wrap past midnight (e.g. 21:00–04:00)
+    return m >= a or m < b
 
 
 def in_any(ts_utc, windows) -> bool:

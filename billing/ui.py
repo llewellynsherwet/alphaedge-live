@@ -8,6 +8,7 @@ from .gate import (
     PLANS, SEAT_CAP, access_status, is_paid, seats_remaining,
     paywall_enabled, set_paywall_enabled, clear_paywall_override, paywall_source,
 )
+from .owner import is_owner, try_unlock, lock_owner, owner_pin
 
 
 SESSION_KEY = "ae_session_token"
@@ -101,32 +102,63 @@ def render_auth_sidebar():
     if flash_err:
         st.error(flash_err)
 
-    # ── Paywall owner toggle (default OFF = full Pro for everyone) ──────────
-    st.markdown("### 🎚️ Paywall")
-    _pw_on = paywall_enabled()
-    _new = st.toggle(
-        "Require Pro subscription",
-        value=_pw_on,
-        key="ae_paywall_toggle",
-        help="OFF (default): full dashboard free for everyone. ON: teaser for unpaid.",
-    )
-    if _new != _pw_on:
-        set_paywall_enabled(bool(_new))
-        st.rerun()
-    st.caption(
-        f"{'🔒 ON — unpaid see teaser' if paywall_enabled() else '✅ OFF — full Pro for everyone'}"
-        f" · source: {paywall_source()}"
-    )
-    if st.button("Reset to env / default", key="ae_paywall_reset"):
-        clear_paywall_override()
-        st.rerun()
-    st.markdown("---")
+    owner = is_owner()
+    pw_on = paywall_enabled()
+
+    # ── Owner controls (hidden from visitors) ───────────────────────────────
+    # Unlock via ?owner_pin=<OWNER_PIN> or ?owner=1 + PIN form. Never shown otherwise.
+    if owner:
+        st.markdown("### 🛠️ Owner")
+        st.caption("Owner session unlocked · visitors never see this panel")
+        _pw_on = pw_on
+        _new = st.toggle(
+            "Require Pro subscription",
+            value=_pw_on,
+            key="ae_paywall_toggle",
+            help="OFF (default): full dashboard free for everyone. ON: teaser for unpaid.",
+        )
+        if _new != _pw_on:
+            set_paywall_enabled(bool(_new))
+            st.rerun()
+        st.caption(
+            f"{'🔒 ON — unpaid see teaser' if paywall_enabled() else '✅ OFF — full Pro for everyone'}"
+            f" · source: {paywall_source()}"
+        )
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Reset to env", key="ae_paywall_reset"):
+                clear_paywall_override()
+                st.rerun()
+        with c2:
+            if st.button("Lock owner", key="ae_owner_lock"):
+                lock_owner()
+                st.rerun()
+        rem = seats_remaining()
+        st.caption(f"Paid seats: {SEAT_CAP - rem}/{SEAT_CAP} · {rem} left")
+        st.markdown("---")
+    elif _qp_get("owner") in ("1", "true", "yes") and owner_pin():
+        # Quiet unlock form — only if operator explicitly opens ?owner=1
+        with st.expander("Owner unlock", expanded=True):
+            pin_in = st.text_input("Owner PIN", type="password", key="ae_owner_pin_in")
+            if st.button("Unlock", key="ae_owner_unlock_btn"):
+                if try_unlock(pin_in or ""):
+                    _qp_del("owner")
+                    st.rerun()
+                else:
+                    st.error("Invalid PIN")
+        st.markdown("---")
+
+    # ── Visitor-facing auth (only when paywall is ON, or owner is testing) ───
+    if not pw_on and not owner:
+        # Clean free-open site: no seats, no Dev UI, no checkout chrome.
+        return access_status(user)
 
     st.markdown("### 🔐 AlphaEdge Pro")
-    rem = seats_remaining()
-    st.caption(f"Paid seats: {SEAT_CAP - rem}/{SEAT_CAP} · {rem} left")
-    if not paywall_enabled():
-        st.success("Paywall off — full platform unlocked (no checkout needed).")
+    if pw_on:
+        rem = seats_remaining()
+        st.caption(f"Paid seats: {SEAT_CAP - rem}/{SEAT_CAP} · {rem} left")
+    elif owner:
+        st.caption("Paywall off — checkout UI shown for owner testing only.")
 
     if user:
         label = user.get("email") or user.get("telegram_username") or user.get("display_name") or f"user #{user['id']}"
@@ -161,8 +193,8 @@ def render_auth_sidebar():
 
     st.markdown("**Or Telegram**")
     st.markdown(auth.telegram_login_widget_html(), unsafe_allow_html=True)
-    # Dev helper when Telegram widget not configured
-    if not auth.telegram_bot_username():
+    # Dev helper — owner only, and only when Telegram widget not configured
+    if owner and not auth.telegram_bot_username():
         with st.expander("Dev: simulate Telegram login"):
             tg_id = st.text_input("Telegram user id", key="ae_tg_dev_id", value="10001")
             tg_user = st.text_input("Username", key="ae_tg_dev_user", value="demo_trader")
@@ -176,6 +208,8 @@ def render_auth_sidebar():
 
 def render_paywall(user: dict | None):
     """CTA + plan picker. Call when authenticated but unpaid (or to upsell)."""
+    if not paywall_enabled():
+        return
     rem = seats_remaining()
     preferred = next(p for p in PLANS.values() if p.get("preferred"))
     st.markdown(
@@ -231,6 +265,8 @@ def render_paywall(user: dict | None):
 
 
 def render_teaser_banner():
+    if not paywall_enabled():
+        return
     st.markdown(
         """
 <div style="background:#1a0a0a;border:1px solid #FF6B35;border-radius:6px;padding:12px 16px;margin-bottom:14px;">
