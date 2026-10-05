@@ -1267,265 +1267,159 @@ with tab_dash:
         st.iframe(chart_bridge_html(TV_MAP.get(focus_ticker, "FX:EURUSD")), height=1)
         st.markdown(f'<a href="{tv_chart_url(TV_MAP.get(focus_ticker, "FX:EURUSD"))}" target="_blank" style="font-size:11px;color:#787b86;">Want drawings saved permanently? Open {focus_ticker} on TradingView ↗ (saves to your TradingView account)</a>', unsafe_allow_html=True)
 
-
-
     # ══════════════════════════════════════════════════════════════════════════
-    # AMAZON AFFILIATE SCROLLER
+    # NOVA & INK · ETSY PRINTABLES SHOP
     # ══════════════════════════════════════════════════════════════════════════
-    # HOW TO ADD YOUR AFFILIATE LINKS:
-    #   1. Go to affiliate-program.amazon.com and sign in
-    #   2. Search each product → click "Get Link" → copy the short URL
-    #   3. Paste it into the matching "url" field below
-    #   4. For product images: save a product image to static/amz_img/monitor1.jpg etc
-    #      then set "img": "app/static/amz_img/monitor1.jpg"
-    #      OR leave "img": "" to show the emoji instead
-    # ══════════════════════════════════════════════════════════════════════════
-    #
-    # Each product has 3 variants — replace the placeholder URLs with real ones:
-    #   variant 1 = budget option
-    #   variant 2 = mid-range (recommended)
-    #   variant 3 = premium option
-    # ══════════════════════════════════════════════════════════════════════════
-
-    _AMZ_PRODUCTS = [
+    _ETSY_SHOP_URL = "https://novaandinkbycharl.etsy.com"
+    _ETSY_PRODUCTS = [
         {
-            "name": "LG UltraWide Monitor",
-            "desc": "View multiple charts at once without multiple screens",
-            "emoji": "🖥️",
-            "img": "",
-            "variants": [
-                {"label": '29" UltraWide', "url": "https://amzn.to/4uCHhwO"},
-                {"label": '34" UltraWide', "url": "https://amzn.to/4bPPjev"},
-                {"label": '38" Premium',   "url": "https://amzn.to/3NoFzP8"},
-            ]
+            "title": "Power Outage Checklist",
+            "blurb": "Printable before/during/after blackout checklist.",
+            "url": "https://www.etsy.com/listing/4580438621/power-outage-checklist-printable",
+            "img": "static/etsy/01_power_outage_checklist.jpg",
         },
         {
-            "name": "Logitech MX Master 3S",
-            "desc": "Ergonomic mouse for traders who spend hours on charts",
-            "emoji": "🖱️",
-            "img": "",
-            "variants": [
-                {"label": "MX Master 3",   "url": "https://amzn.to/4rEaTHK"},
-                {"label": "MX Master 3S",  "url": "https://amzn.to/4lE8KKP"},
-                {"label": "MX Master 3S Mac", "url": "https://amzn.to/4bBw4nH"},
-            ]
+            "title": "Before You Leave Home Checklist",
+            "blurb": "Security walkthrough before travel.",
+            "url": "https://www.etsy.com/listing/4572540421/before-you-leave-home-checklist-security",
+            "img": "static/etsy/02_before_you_leave_home.jpg",
         },
         {
-            "name": "Keychron K4 Keyboard",
-            "desc": "Fast responsive keyboard for executing trades quickly",
-            "emoji": "⌨️",
-            "img": "",
-            "variants": [
-                {"label": "K4 Brown Switch",  "url": "https://amzn.to/4rC9qla"},
-                {"label": "K4 Red Switch",    "url": "https://amzn.to/4bj18K9"},
-                {"label": "K4 RGB Backlit",   "url": "https://amzn.to/4sipw4z"},
-            ]
+            "title": "Home Maintenance Checklist",
+            "blurb": "Monthly systems checklist.",
+            "url": "https://www.etsy.com/listing/4574337895/home-maintenance-checklist-monthly",
+            "img": "static/etsy/03_home_maintenance_checklist.jpg",
         },
         {
-            "name": "Dell XPS 15 Laptop",
-            "desc": "Run multiple trading platforms simultaneously",
-            "emoji": "💻",
-            "img": "",
-            "variants": [
-                {"label": "XPS 15 i5",    "url": "https://amzn.to/4lAG5pV"},
-                {"label": "XPS 15 i7",    "url": "https://amzn.to/4beKc7u"},
-                {"label": "XPS 15 i9",    "url": "https://amzn.to/3PjBImY"},
-            ]
+            "title": "Fridge Food Safety (Keep or Toss)",
+            "blurb": "Power-outage fridge rules.",
+            "url": "https://www.etsy.com/listing/4582432373/fridge-food-safety-printable-power",
+            "img": "static/etsy/04_fridge_food_safety.jpg",
         },
         {
-            "name": "Electric Standing Desk",
-            "desc": "Switch between sitting and standing during long sessions",
-            "emoji": "🪑",
-            "img": "",
-            "variants": [
-                {"label": '48" Basic',    "url": "https://amzn.to/4rIbd85"},
-                {"label": '55" Mid',      "url": "https://amzn.to/4lGJuUg"},
-                {"label": '60" Premium',  "url": "https://amzn.to/4skcdk9"},
-            ]
+            "title": "Home Shut-Off Guide",
+            "blurb": "Water/gas/electric mains.",
+            "url": "https://www.etsy.com/listing/4577212387/home-shut-off-guide-printable-utility",
+            "img": "static/etsy/05_home_shut_off_guide.jpg",
         },
         {
-            "name": "Ergonomic Office Chair",
-            "desc": "Designed for comfort during long trading sessions",
-            "emoji": "💺",
-            "img": "",
-            "variants": [
-                {"label": "Basic Lumbar",    "url": "https://amzn.to/4byJ1yw"},
-                {"label": "Mesh Ergonomic",  "url": "https://amzn.to/4uJaiHx"},
-                {"label": "Executive Pro",   "url": "https://amzn.to/4sf7yjh"},
-            ]
+            "title": "Building Contacts (Apartment)",
+            "blurb": "Neighbour/caretaker/utility numbers.",
+            "url": "https://www.etsy.com/listing/4584957634/building-contacts-printable-apartment",
+            "img": "static/etsy/06_building_contacts.jpg",
         },
         {
-            "name": "Mini UPS Backup Battery",
-            "desc": "Keep your internet running during power outages",
-            "emoji": "🔋",
-            "img": "",
-            "variants": [
-                {"label": "600VA Compact",  "url": "https://amzn.to/3Pg5yJe"},
-                {"label": "1000VA Mid",     "url": "https://amzn.to/476Hsqe"},
-                {"label": "1500VA Pro",     "url": "https://amzn.to/3Pg6cq8"},
-            ]
+            "title": "Services Contact Sheet",
+            "blurb": "Electrician/plumber/locksmith.",
+            "url": "https://www.etsy.com/listing/4574340653/services-contact-sheet-household",
+            "img": "static/etsy/07_services_contact_sheet.jpg",
         },
         {
-            "name": "Triple Monitor Mount",
-            "desc": "Mount three screens for full chart coverage",
-            "emoji": "🖥️",
-            "img": "",
-            "variants": [
-                {"label": "Clamp Mount",    "url": "https://amzn.to/4lED7AP"},
-                {"label": "Freestanding",   "url": "https://amzn.to/3Neer5n"},
-                {"label": "Full Motion",    "url": "https://amzn.to/4rF8BYG"},
-            ]
+            "title": "Emergency Grab Bag Checklist",
+            "blurb": "Go-bag packing list.",
+            "url": "https://www.etsy.com/listing/4572701211/emergency-grab-bag-checklist-emergency",
+            "img": "static/etsy/08_emergency_grab_bag.jpg",
         },
         {
-            "name": "Blue Light Glasses",
-            "desc": "Reduce eye strain from long hours on screens",
-            "emoji": "🕶️",
-            "img": "",
-            "variants": [
-                {"label": "Classic Frame",  "url": "https://amzn.to/4buKs10"},
-                {"label": "Sport Frame",    "url": "https://amzn.to/3NrsqVu"},
-                {"label": "Premium Anti-UV","url": "https://amzn.to/4cURVZG"},
-            ]
+            "title": "Family Emergency Plan",
+            "blurb": "Meeting points/contacts/roles.",
+            "url": "https://www.etsy.com/listing/4572030290/family-emergency-plan-printable",
+            "img": "static/etsy/09_family_emergency_plan.jpg",
         },
         {
-            "name": "Logitech C920 Webcam",
-            "desc": "Stream trading content or record your analysis",
-            "emoji": "📷",
-            "img": "",
-            "variants": [
-                {"label": "C920 HD",        "url": "https://amzn.to/4rzTuQh"},
-                {"label": "C920s Privacy",  "url": "https://amzn.to/3NLroUj"},
-                {"label": "C922 Pro",       "url": "https://amzn.to/47Uk6Ey"},
-            ]
+            "title": "Home Emergency Numbers",
+            "blurb": "Fridge-ready numbers.",
+            "url": "https://www.etsy.com/listing/4574968184/home-emergency-numbers-printable",
+            "img": "static/etsy/10_home_emergency_numbers.jpg",
         },
         {
-            "name": "Blue Yeti Microphone",
-            "desc": "Record trading videos or host live sessions",
-            "emoji": "🎙️",
-            "img": "",
-            "variants": [
-                {"label": "Yeti Nano",      "url": "https://amzn.to/4sQNoMr"},
-                {"label": "Yeti USB",       "url": "https://amzn.to/4rIGpnH"},
-                {"label": "Yeti X Pro",     "url": "https://amzn.to/40AujlJ"},
-            ]
+            "title": "Travel Emergency Card",
+            "blurb": "Wallet travel ICE card.",
+            "url": "https://www.etsy.com/listing/4567948436/travel-emergency-card-printable-travel",
+            "img": "static/etsy/11_travel_emergency_card.jpg",
         },
         {
-            "name": "Forex Trading Book",
-            "desc": "Learn forex fundamentals from scratch",
-            "emoji": "📘",
-            "img": "",
-            "variants": [
-                {"label": "Basics Explained", "url": "https://amzn.to/3PJ8n5u"},
-                {"label": "Trading in the Zone","url": "https://amzn.to/4791UHb"},
-                {"label": "Market Wizards",   "url": "https://amzn.to/4biJrKB"},
-            ]
+            "title": "Vehicle Emergency Card",
+            "blurb": "Car roadside contacts.",
+            "url": "https://www.etsy.com/listing/4568749183/vehicle-emergency-card-printable-car",
+            "img": "static/etsy/12_vehicle_emergency_card.jpg",
+        },
+        {
+            "title": "Medical Alert Wallet Card",
+            "blurb": "Medical + contacts.",
+            "url": "https://www.etsy.com/listing/4571277814/medical-alert-wallet-card-printable",
+            "img": "static/etsy/13_medical_alert_wallet_card.jpg",
+        },
+        {
+            "title": "Family ICE Card",
+            "blurb": "Family ICE wallet card.",
+            "url": "https://www.etsy.com/listing/4570620103/family-ice-card-printable-in-case-of",
+            "img": "static/etsy/14_family_ice_card.jpg",
+        },
+        {
+            "title": "Home Fire Escape Plan",
+            "blurb": "Family fire escape map.",
+            "url": "https://www.etsy.com/listing/4574960682/home-fire-escape-plan-family-fire-safety",
+            "img": "static/etsy/15_home_fire_escape_plan.jpg",
         },
     ]
 
-    # Build cards HTML — each card shows product + 3 variant buttons
-    def _build_amz_cards(products):
-        cards = []
-        for p in products:
-            # Image or emoji header
-            if p["img"]:
-                top = ('<img src="' + p["img"] + '" style="width:100%;height:90px;'
-                       'object-fit:cover;border-radius:4px;margin-bottom:8px;" '
-                       'onerror="this.style.display:none">')
-            else:
-                top = '<div style="font-size:32px;margin-bottom:8px;">' + p["emoji"] + '</div>'
-            # Variant buttons
-            vbtns = ""
-            for v in p["variants"]:
-                vbtns += (
-                    '<a href="' + v["url"] + '" target="_blank" style="text-decoration:none;">'
-                    '<div style="background:#1a1a1a;border:1px solid #333;border-radius:3px;'
-                    'padding:3px 6px;font-size:9px;color:#aaa;margin-bottom:3px;'
-                    'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
-                    "🛒 " + v["label"] + "</div></a>"
+    st.markdown(
+        (
+            '<div style="margin:28px 0 12px 0;padding:14px 16px;border:1px solid #2a2a2a;'
+            'border-left:3px solid #D4AF37;border-radius:8px;background:#0a0a0f;">'
+            '<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;">'
+            '<span style="color:#D4AF37;font-size:15px;font-weight:700;letter-spacing:1.5px;">'
+            'NOVA &amp; INK · Printables from our shop</span>'
+            f'<a href="{_ETSY_SHOP_URL}" target="_blank" rel="noopener" '
+            'style="color:#aaa;font-size:12px;text-decoration:none;border-bottom:1px solid #444;">'
+            'novaandinkbycharl.etsy.com ↗</a></div>'
+            '<p style="margin:8px 0 0 0;color:#666;font-size:12px;">'
+            'Emergency &amp; home printables · R30 each · instant download on Etsy</p></div>'
+        ),
+        unsafe_allow_html=True,
+    )
+
+    def _etsy_img_data_uri(path):
+        """Inline local product image so the shop grid does not depend on CDN hotlinking."""
+        try:
+            with open(path, "rb") as f:
+                return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+        except OSError:
+            return ""
+
+    _cols_per_row = 3
+    for _row_start in range(0, len(_ETSY_PRODUCTS), _cols_per_row):
+        _row = _ETSY_PRODUCTS[_row_start:_row_start + _cols_per_row]
+        _cols = st.columns(len(_row), gap="medium")
+        for _col, _p in zip(_cols, _row):
+            with _col:
+                _src = _etsy_img_data_uri(_p["img"]) if os.path.exists(_p["img"]) else ""
+                _img_html = (
+                    f'<img src="{_src}" alt="{html.escape(_p["title"])}" '
+                    'style="width:100%;height:210px;object-fit:cover;border-radius:6px;'
+                    'display:block;background:#1a1a1a;margin-bottom:8px;">'
+                    if _src else
+                    '<div style="height:210px;border-radius:6px;background:#1a1a1a;margin-bottom:8px;"></div>'
                 )
-            cards.append(
-                '<div class="amz-card">'
-                + top
-                + '<div style="font-weight:bold;color:#D4AF37;font-size:11px;'
-                + 'margin-bottom:4px;line-height:1.3;">' + p["name"] + "</div>"
-                + '<div style="color:#666;font-size:9px;margin-bottom:8px;'
-                + 'line-height:1.4;">' + p["desc"] + "</div>"
-                + vbtns
-                + "</div>"
-            )
-        return "".join(cards)
-
-    _cards_html = _build_amz_cards(_AMZ_PRODUCTS)
-
-    st.iframe(f"""
-    <style>
-    .amz-track {{
-        display: flex;
-        gap: 14px;
-        width: max-content;
-        align-items: flex-start;
-    }}
-    .amz-card {{
-        background: #111;
-        border: 1px solid #222;
-        border-radius: 8px;
-        padding: 12px;
-        width: 170px;
-        flex-shrink: 0;
-        cursor: default;
-        transition: border-color 0.3s;
-    }}
-    .amz-card:hover {{ border-color: #FF9900; }}
-    #amz-wrapper {{
-        overflow: hidden;
-        width: 100%;
-        background: #0a0a0a;
-        border-top: 1px solid #D4AF37;
-        border-bottom: 1px solid #1a1a1a;
-        padding: 12px 0;
-    }}
-    #amz-label {{
-        color: #FF9900;
-        font-size: 10px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        padding: 0 0 8px 4px;
-        font-family: monospace;
-    }}
-    </style>
-    <div id="amz-label">🛒 TRADER GEAR — AMAZON PICKS</div>
-    <div id="amz-wrapper">
-        <div class="amz-track" id="amz-track">
-            {_cards_html}
-            {_cards_html}
-        </div>
-    </div>
-    <script>
-    (function() {{
-        const track   = document.getElementById('amz-track');
-        const wrapper = document.getElementById('amz-wrapper');
-        let pos    = 0;
-        let paused = false;
-        const speed = 0.5;
-
-        function halfWidth() {{ return track.scrollWidth / 2; }}
-
-        function step() {{
-            if (!paused) {{
-                pos += speed;
-                if (pos >= halfWidth()) pos = 0;
-                track.style.transform = 'translateX(-' + pos + 'px)';
-            }}
-            requestAnimationFrame(step);
-        }}
-
-        wrapper.addEventListener('mouseenter', function() {{ paused = true; }});
-        wrapper.addEventListener('mouseleave', function() {{ paused = false; }});
-
-        requestAnimationFrame(step);
-    }})();
-    </script>
-    """, height=260)
+                st.markdown(
+                    (
+                        '<div style="background:#111;border:1px solid #222;border-radius:10px;'
+                        'padding:10px;height:100%;">'
+                        + _img_html
+                        + '<div style="color:#D4AF37;font-weight:700;font-size:13px;line-height:1.35;'
+                        f'margin-bottom:4px;">{html.escape(_p["title"])}</div>'
+                        '<div style="color:#888;font-size:11px;line-height:1.4;min-height:32px;'
+                        f'margin-bottom:10px;">{html.escape(_p["blurb"])}</div>'
+                        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+                        '<span style="color:#fff;font-weight:700;font-size:14px;">R30</span>'
+                        f'<a href="{html.escape(_p["url"])}" target="_blank" rel="noopener" '
+                        'style="background:#D4AF37;color:#000;text-decoration:none;font-size:11px;'
+                        'font-weight:700;padding:6px 10px;border-radius:4px;white-space:nowrap;">'
+                        'View on Etsy ↗</a></div></div>'
+                    ),
+                    unsafe_allow_html=True,
+                )
 
 
 # ================= TAB 2: COT DATA =================
