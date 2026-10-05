@@ -4,7 +4,10 @@ from __future__ import annotations
 import streamlit as st
 
 from . import auth, db, paystack
-from .gate import PLANS, SEAT_CAP, access_status, is_paid, seats_remaining
+from .gate import (
+    PLANS, SEAT_CAP, access_status, is_paid, seats_remaining,
+    paywall_enabled, set_paywall_enabled, clear_paywall_override, paywall_source,
+)
 
 
 SESSION_KEY = "ae_session_token"
@@ -98,9 +101,32 @@ def render_auth_sidebar():
     if flash_err:
         st.error(flash_err)
 
+    # ── Paywall owner toggle (default OFF = full Pro for everyone) ──────────
+    st.markdown("### 🎚️ Paywall")
+    _pw_on = paywall_enabled()
+    _new = st.toggle(
+        "Require Pro subscription",
+        value=_pw_on,
+        key="ae_paywall_toggle",
+        help="OFF (default): full dashboard free for everyone. ON: teaser for unpaid.",
+    )
+    if _new != _pw_on:
+        set_paywall_enabled(bool(_new))
+        st.rerun()
+    st.caption(
+        f"{'🔒 ON — unpaid see teaser' if paywall_enabled() else '✅ OFF — full Pro for everyone'}"
+        f" · source: {paywall_source()}"
+    )
+    if st.button("Reset to env / default", key="ae_paywall_reset"):
+        clear_paywall_override()
+        st.rerun()
+    st.markdown("---")
+
     st.markdown("### 🔐 AlphaEdge Pro")
     rem = seats_remaining()
     st.caption(f"Paid seats: {SEAT_CAP - rem}/{SEAT_CAP} · {rem} left")
+    if not paywall_enabled():
+        st.success("Paywall off — full platform unlocked (no checkout needed).")
 
     if user:
         label = user.get("email") or user.get("telegram_username") or user.get("display_name") or f"user #{user['id']}"

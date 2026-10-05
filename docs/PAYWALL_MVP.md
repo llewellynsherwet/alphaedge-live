@@ -1,6 +1,21 @@
 # AlphaEdge Pro — paid gate MVP
 
-## Pricing (ZAR, Paystack)
+## Paywall toggle (default OFF)
+
+The paywall is **not deleted** — it is a switch:
+
+| Setting | Effect |
+|---|---|
+| **OFF (default)** | Full dashboard / Pro for everyone — no sign-in or Paystack checkout required |
+| **ON** | Unpaid visitors see teaser; paid subscribers get full Pro |
+
+Control:
+1. **Env** `PAYWALL_ENABLED` — unset or `false`/`0`/`off` → OFF; `true`/`1`/`on` → ON
+2. **Sidebar** — Streamlit toggle "Require Pro subscription" writes `paywall_override.json` (durable for all visitors). "Reset to env / default" clears the override.
+
+`render.yaml` ships `PAYWALL_ENABLED=false`.
+
+## Pricing (ZAR, Paystack) — only when paywall ON
 | Plan | Price | Notes |
 |---|---|---|
 | Weekly | **R35** | ~R5/day |
@@ -18,11 +33,12 @@ Env (never commit secrets):
 - `PAYSTACK_PUBLIC_KEY`, `PAYSTACK_SECRET_KEY`
 - `APP_BASE_URL` (callback base)
 - Optional: `MAGIC_LINK_SECRET`, `TELEGRAM_LOGIN_BOT_*`, `SMTP_*`
+- `PAYWALL_ENABLED` (default false)
 
 Without Paystack keys the app runs a **demo checkout** that activates a subscription on return
-(`?ae_pay_ref=…&ae_pay_demo=1`) so the gate can be tested end-to-end.
+(`?ae_pay_ref=…&ae_pay_demo=1`) so the gate can be tested end-to-end when the paywall is ON.
 
-## Teaser vs Pro
+## Teaser vs Pro (only when paywall ON)
 | | Teaser (free) | Pro (paid) |
 |---|---|---|
 | Live Media (TV open-on-YT + radio station) | ✅ | ✅ |
@@ -31,6 +47,9 @@ Without Paystack keys the app runs a **demo checkout** that activates a subscrip
 | Chart | ✅ (teaser) | ✅ |
 | COT / Sentiment / Indices / FX / News / Calendar / Chat | 🔒 | ✅ |
 
+When paywall is **OFF**, every visitor gets the Pro column with no checkout.
+
 ## Files
 `billing/` — `db.py`, `auth.py`, `paystack.py`, `gate.py`, `ui.py`, `plans.py`  
-SQLite: `billing.db` (gitignored).
+SQLite: `billing.db` (gitignored).  
+Override: `paywall_override.json` (gitignored).

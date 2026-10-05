@@ -6,3 +6,4 @@ chat.db
 billing.db
 billing.db-*
 .env
+paywall_override.json

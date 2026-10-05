@@ -4,8 +4,15 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 os.environ["AE_BILLING_DB"] = "/tmp/alphaedge_billing_test.db"
+os.environ["AE_PAYWALL_OVERRIDE"] = "/tmp/alphaedge_paywall_override_test.json"
+# Force gate ON for subscription-flow assertions (default is OFF = free Pro).
+os.environ["PAYWALL_ENABLED"] = "true"
 try:
     os.remove("/tmp/alphaedge_billing_test.db")
+except FileNotFoundError:
+    pass
+try:
+    os.remove("/tmp/alphaedge_paywall_override_test.json")
 except FileNotFoundError:
     pass
 
@@ -20,7 +27,36 @@ def test_plans_and_cap():
     assert PLANS["monthly"]["preferred"] is True
 
 
+def test_paywall_defaults_off_grants_pro():
+    # Clear override + unset env → default OFF → everyone is Pro.
+    gate.clear_paywall_override()
+    os.environ.pop("PAYWALL_ENABLED", None)
+    assert gate.paywall_enabled() is False
+    assert gate.is_paid(None) is True
+    status = gate.access_status(None)
+    assert status["paid"] is True
+    assert status["paywall_enabled"] is False
+    # Restore for other tests
+    os.environ["PAYWALL_ENABLED"] = "true"
+
+
+def test_paywall_toggle_override():
+    os.environ["PAYWALL_ENABLED"] = "true"
+    gate.clear_paywall_override()
+    assert gate.paywall_enabled() is True
+    gate.set_paywall_enabled(False)
+    assert gate.paywall_enabled() is False
+    assert gate.is_paid(None) is True
+    gate.set_paywall_enabled(True)
+    assert gate.paywall_enabled() is True
+    assert gate.is_paid(None) is False
+    gate.clear_paywall_override()
+    assert gate.paywall_enabled() is True  # back to env
+
+
 def test_magic_link_login_and_demo_pay():
+    os.environ["PAYWALL_ENABLED"] = "true"
+    gate.clear_paywall_override()
     res = auth.issue_magic_link("trader@example.com")
     assert res["ok"] and res["link"]
     token = res["link"].split("ae_magic=")[1]

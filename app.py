@@ -1121,10 +1121,12 @@ with st.sidebar:
     _access = render_auth_sidebar()
     _user_paid = bool(_access.get("paid"))
     st.session_state["ae_access"] = _access
-    if _access.get("authenticated") and not _user_paid:
+    if _access.get("paywall_enabled") and _access.get("authenticated") and not _user_paid:
         render_paywall(_access.get("user"))
-    elif not _access.get("authenticated"):
+    elif _access.get("paywall_enabled") and not _access.get("authenticated"):
         st.caption("Sign in to subscribe · teaser dashboard is free")
+    elif not _access.get("paywall_enabled"):
+        st.caption("Paywall off · full platform free for everyone")
     st.markdown("---")
 
     with st.expander("🔴 LIVE MEDIA", expanded=True):
