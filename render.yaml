@@ -11,6 +11,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: PAYWALL_ENABLED
+        value: "false"
       - key: TG_TOKEN
         sync: false
       - key: TG_CHAT_ID
