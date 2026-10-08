@@ -1307,10 +1307,16 @@ with tab_dash:
             st.caption("Teaser shows 5 symbols — Pro unlocks the full heatmap + live signals.")
         st.markdown("---")
 
-        st.markdown("""
+        try:
+            _risk_hdr = _load_strategy_config().get("risk", {})
+            _cap_hdr = int(_risk_hdr.get("daily_max_signals", 6))
+            _rr_hdr = float(_risk_hdr.get("tp_rr", 1.5))
+        except Exception:
+            _cap_hdr, _rr_hdr = 6, 1.5
+        st.markdown(f"""
         <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
             <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS (+ PD) / morning VWAP • Mon–Fri 07–17 UTC • daily cap 4 • 2.0R • Pro gated</p>
+            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS (+ PD) / morning VWAP • 24/7 global scan • daily cap {_cap_hdr} • {_rr_hdr:g}R • Pro gated</p>
         </div>
         """, unsafe_allow_html=True)
 
