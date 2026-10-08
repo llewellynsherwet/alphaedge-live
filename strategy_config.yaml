@@ -1,11 +1,14 @@
 # ════════════════════════════════════════════════════════════════════════════
-# AlphaEdge — Confluence Day Template (2026-10-05 tune)
+# AlphaEdge — Confluence Day Template (2026-10-08 tune: "more signals")
 # Reloaded every monitor loop (~5 min). Edit and the next scan picks it up.
 #
-# Goal: useful alerts without spam. Honest 30d replay (to 2026-10-05): requiring
-# premium/discount on SMC + tp_rr 2.0 → 5 alerts (0.17/day), 40% WR, +0.20R.
-# Looser configs (~0.6/day) went negative on the same window — we keep quality.
-# ema_vwap_kz stays in code but disabled (no edge in sample). orb_open disabled.
+# 51-day replay (2026-08-18 → 2026-10-08, 13 symbols, same gates as live):
+#   previous config (all 6 SMC items required, 2.0R, cap 4)  → 0.49/day, 24% WR, −7.0R
+#   THIS config (SMC: PD required, HTF + kill-zone score-only;
+#                1.5R; cap 6 / 2 per symbol)                → 1.59/day (2.16 per weekday),
+#                                                              42% WR, +0.05R avg, +4.0R net, max DD 10.5R
+# Edge is thin (≈ breakeven) — see docs/STRATEGY_TUNE_2026-10-08.md.
+# ema_vwap_kz / orb_open stay disabled (negative in the same replay).
 # ════════════════════════════════════════════════════════════════════════════
 
 session:
@@ -51,10 +54,10 @@ symbols:
   - {name: "USD/CHF",    yf: "CHF=X",    priority: 13, setups: [smc_sweep]}
 
 risk:
-  min_rr: 2.0
-  tp_rr: 2.0                  # 2R — historically higher WR than 2.5R on this feed
-  daily_max_signals: 4        # few/day ceiling (not a target)
-  per_symbol_max: 1
+  min_rr: 1.5
+  tp_rr: 1.5                  # 1.5R — beat 2.0R on every variant in the 51d replay (2026-10-08)
+  daily_max_signals: 6        # ceiling, not a target (replay: ~2/weekday, max 5 in a day)
+  per_symbol_max: 2
   cooldown_minutes: 40
   symbol_cooldown_minutes: 120
   max_signal_age_minutes: 20
@@ -90,7 +93,7 @@ setups:
     enabled: true
     label: "Liquidity Sweep + BOS"
     entry_tf: "15m"
-    min_score: 5
+    min_score: 4              # core 3 + premium/discount; HTF + kill zone add score only
     swing_strength: 2
     sweep_lookback_bars: 28
     displacement_atr: 0.6
@@ -99,12 +102,12 @@ setups:
     min_risk_atr: 0.3
     sl_buffer_atr: 0.15
     checklist:
-      htf_bias:         {weight: 1, required: true}
-      premium_discount: {weight: 1, required: true}   # tightened vs prior (was optional)
+      htf_bias:         {weight: 1, required: false}  # score-only (2026-10-08): requiring it cut alerts with no WR gain
+      premium_discount: {weight: 1, required: true}   # the one context filter that helped sweeps in replay
       liquidity_sweep:  {weight: 1, required: true}
       mss_bos:          {weight: 1, required: true}
       pd_array:         {weight: 1, required: true}
-      kill_zone:        {weight: 1, required: true}
+      kill_zone:        {weight: 1, required: false}  # score-only: bot is 24/7 now
 
   orb_open:
     enabled: false
