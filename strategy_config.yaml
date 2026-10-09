@@ -43,14 +43,16 @@ symbols:
      quote: {source: yf, ticker: "^GSPC", label: "SPX500 cash (^GSPC)"}}
   - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
      quote: {source: gold_api, ticker: "XAU", label: "XAUUSD spot"}}
-  - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep]}
-  - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep]}
-  - {name: "USD/JPY",    yf: "USDJPY=X", priority: 7, setups: [smc_sweep]}
+  - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep, pip_builder]}
+  - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep, pip_builder]}
+  - {name: "USD/JPY",    yf: "USDJPY=X", priority: 7, setups: [smc_sweep, pip_builder]}
   - {name: "AUD/USD",    yf: "AUDUSD=X", priority: 8, setups: [smc_sweep]}
-  - {name: "GBP/JPY",    yf: "GBPJPY=X", priority: 9, setups: [smc_sweep]}
-  - {name: "EUR/JPY",    yf: "EURJPY=X", priority: 10, setups: [smc_sweep]}
+  - {name: "GBP/JPY",    yf: "GBPJPY=X", priority: 9, setups: [smc_sweep, pip_builder]}
+  - {name: "EUR/JPY",    yf: "EURJPY=X", priority: 10, setups: [smc_sweep, pip_builder]}
   - {name: "CAD/JPY",    yf: "CADJPY=X", priority: 11, setups: [smc_sweep]}
-  - {name: "USD/CAD",    yf: "CAD=X",    priority: 12, setups: [smc_sweep]}
+  - {name: "USD/CAD",    yf: "CAD=X",    priority: 12, setups: [smc_sweep, pip_builder]}
+  # NZD/USD is only watched by the experimental pip_builder setup (disabled → never fetched).
+  - {name: "NZD/USD",    yf: "NZDUSD=X", priority: 14, setups: [pip_builder]}
   - {name: "USD/CHF",    yf: "CHF=X",    priority: 13, setups: [smc_sweep]}
 
 risk:
@@ -174,6 +176,51 @@ setups:
       confirm_close:    {weight: 1, required: true}
       volume_signature: {weight: 1, required: false}
       morning_kz:       {weight: 1, required: true}
+
+  pip_builder:
+    # ── "1000 Pip Builder" — EXPERIMENTAL, DISABLED. Research backtest + caveats:
+    #    docs/STRATEGY_1000PIP_BUILDER.md. Parameters marked (assumed) are guesses.
+    enabled: false
+    label: "1000 Pip Builder (experimental)"
+    trigger_tfs: ["5m", "15m"]   # double top/bottom or engulfing trigger charts
+    zone_width_atr: 0.3          # (assumed) S/R zone width × 1H ATR(14)
+    min_touches: 2               # swing points needed to form a zone
+    sl_buffer_pips: 1.5          # (assumed) 1–2 pips beyond the pattern extreme
+    sl_max_atr: 0.5              # reject if SL wider than 0.5 × 1H ATR
+    min_tp_pips: 10
+    min_rr: 1.0                  # (assumed) skip if R:R below this
+    tp_max_atr: 2.5              # (assumed) ATR sanity: TP ≤ this × 1H ATR
+    tp1_pips: null               # optional partial target, e.g. 10
+    active_hours_utc: null       # e.g. ["07:00", "20:00"]
+    checklist:
+      trend_agree:     {weight: 1, required: true}
+      at_zone_or_band: {weight: 1, required: true}
+      trigger_pattern: {weight: 1, required: true}
+      sl_within_atr:   {weight: 1, required: true}
+      tp_min_rr:       {weight: 1, required: true}
+      news_clear:      {weight: 1, required: true}
+
+# High-impact-news blackout for pip_builder. No free historical calendar exists, so a STATIC
+# RULE is used (US NFP = first Friday 08:30 New York) + optional extra events + optional live feed.
+news:
+  enabled: true
+  window_minutes: 30
+  use_feed: false              # live only: also block this week's "High" events from a public JSON feed
+  events_utc: []               # e.g. ["2026-10-28T18:00:00Z"] (FOMC)
+
+# Position-size suggestion shown in alerts / signal log (FX only). Illustrative, not advice.
+risk_per_trade:
+  enabled: false               # off until you set your own account numbers
+  account_size: 1000
+  currency: "USD"
+  risk_pct: 1.0
+  lot_step: 0.01
+  usdjpy_ref: 150.0            # used for the pip value of JPY crosses
+
+# Persistent CSV of every alert + its TP/SL outcome (viewable in the app).
+signal_log:
+  enabled: true
+  path: "signal_log.csv"
 
 outcomes:
   enabled: true

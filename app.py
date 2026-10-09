@@ -29,6 +29,8 @@ from strategy.engine import (
 )
 from strategy.config_loader import load_config as _load_strategy_config
 from strategy import outcomes as _outcomes
+from strategy import signal_log as _signal_log
+from signal_log_ui import render_signal_log, render_disclaimer
 from strategy.common import fmt_price as _fmt_price
 from ui_widgets import (persistent_chart_html, chart_bridge_html, popup_chart_html,
                         station_html, station_static_url, tv_static_url, tv_youtube_embed_url,
@@ -922,6 +924,12 @@ def _track_outcomes(state: dict, cfg: dict, now) -> dict:
     if not ocfg.get("enabled", True) or not (_TG_TOKEN and _TG_CHAT_ID):
         return state
     newly = _outcomes.check_open_trades(state, cfg, now)
+    if _signal_log.enabled(cfg):
+        for _rec in newly:
+            try:
+                _signal_log.log_outcome(_rec, cfg=cfg)
+            except Exception as e:
+                print(f"[signal_log] outcome write failed: {e!r}", flush=True)
     pending = _outcomes.pending_notifications(state, cfg)
     if not newly and not pending:
         return state
@@ -1032,10 +1040,20 @@ def _monitor_loop():
                                  if _send_telegram(_engine_format_trade(c, session_name))]
                     state = _engine_record_emits(state, accepted, now)
                     # Track TP/SL only for alerts that actually reached Telegram
+                    _recs = {}
                     if _outcomes.outcome_cfg(cfg).get("enabled", True):
                         for c in delivered:
                             rec = _outcomes.add_open_trade(state, c, cfg, now)
+                            _recs[id(c)] = rec
                             print(f"[outcomes] tracking {rec['id']}", flush=True)
+                    # Persistent signal log: every alert (delivered or not)
+                    if _signal_log.enabled(cfg):
+                        for c in accepted:
+                            try:
+                                _signal_log.log_signal(_recs.get(id(c)) or _outcomes.make_trade(c, cfg, now),
+                                                       delivered=(c in delivered), cfg=cfg)
+                            except Exception as e:
+                                print(f"[signal_log] write failed: {e!r}", flush=True)
 
                 state["scan_count"] = int(state.get("scan_count", 0)) + 1
                 state["in_session"] = True
@@ -1598,6 +1616,10 @@ with tab_dash:
     """, height=320)
 
 
+with tab_dash:
+    render_signal_log(_load_strategy_config())
+
+
 # ================= TAB 2: COT DATA =================
 with tab_cot:
     if _pro_only_tab('📊 INSTITUTIONAL POSITIONING'):
@@ -1733,3 +1755,5 @@ with tab_chat:
         f'<div class="ticker-footer"><iframe src="{_footer_url}" width="100%" height="40" frameborder="0" scrolling="no" style="margin-top:-10px;"></iframe></div>',
         unsafe_allow_html=True
     )
+
+render_disclaimer()

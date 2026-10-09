@@ -4,8 +4,8 @@ a bar is closed at time `now` iff start + interval <= now."""
 import numpy as np
 import pandas as pd
 
-INTERVAL_MIN = {"5m": 5, "15m": 15, "1h": 60, "4h": 240}
-TAIL = {"5m": 700, "15m": 400, "1h": 400, "4h": 200}
+INTERVAL_MIN = {"5m": 5, "15m": 15, "1h": 60, "4h": 240, "1d": 1440}
+TAIL = {"5m": 700, "15m": 400, "1h": 400, "4h": 200, "1d": 60}
 _AGG = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
 
 
@@ -26,6 +26,11 @@ def clean(df):
 def resample(df, rule: str):
     out = df.resample(rule, label="left", closed="left").agg(_AGG)
     return out.dropna(subset=["Close"])
+
+
+def daily(df1h):
+    """FX-style trading day (rolls 22:00 UTC ≈ 17:00 New York), derived from 1h bars."""
+    return df1h.resample("24h", offset="22h", label="left", closed="left").agg(_AGG).dropna(subset=["Close"])
 
 
 def closed_only(df, interval: str, now: pd.Timestamp):
@@ -61,9 +66,11 @@ def build_frames(df5, df1h, now: pd.Timestamp | None = None):
     frames = {"5m": df5, "1h": df1h}
     frames["15m"] = resample(df5, "15min") if df5 is not None and len(df5) else None
     frames["4h"] = resample(df1h, "4h") if df1h is not None and len(df1h) else None
+    frames["1d"] = daily(df1h) if df1h is not None and len(df1h) else None
     if now is not None:
         frames["15m"] = closed_only(frames["15m"], "15m", now)
         frames["4h"] = closed_only(frames["4h"], "4h", now)
+        frames["1d"] = closed_only(frames["1d"], "1d", now)
     for k, v in list(frames.items()):
         if v is not None:
             frames[k] = v.tail(TAIL[k])
@@ -89,7 +96,8 @@ class FrameSlicer:
 
     def __init__(self, df5, df1h):
         self.full = {"5m": df5, "1h": df1h,
-                     "15m": resample(df5, "15min"), "4h": resample(df1h, "4h")}
+                     "15m": resample(df5, "15min"), "4h": resample(df1h, "4h"),
+                     "1d": daily(df1h)}
         # Use python-int nanoseconds via .view("int64") — .asi8 is not always
         # comparable to Timestamp.value across pandas builds.
         self._close_ns = {}

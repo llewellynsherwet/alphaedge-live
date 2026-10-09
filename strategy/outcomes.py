@@ -109,6 +109,8 @@ def make_trade(c, cfg: dict, now: pd.Timestamp) -> dict:
         "quote_source": source, "quote_ticker": q.get("ticker", "") if source != "none" else "",
         "quote_label": label, "signal_ticker": signal_ticker, "basis": basis,
         "sent_ts": now.isoformat(),
+        "sizing": meta.get("sizing"), "pattern": meta.get("pattern"),
+        "sl_pips": meta.get("sl_pips"), "score": f"{c.score}/{c.max_score}",
     }
 
 

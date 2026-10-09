@@ -7,3 +7,4 @@ billing.db
 billing.db-*
 .env
 paywall_override.json
+signal_log.csv

@@ -20,6 +20,7 @@ from .config_loader import load_config
 from .setups import REGISTRY
 from . import pricing
 from .outcomes import format_day_outcomes, outcome_cfg
+from .risk_sizing import size_position
 
 _STATE_DEFAULT = Path(__file__).resolve().parent.parent / "monitor_state.json"
 
@@ -195,8 +196,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
 
     for c in ranked:
         tag = f"{c.symbol}/{c.setup}/{c.side}"
-        if c.rr + 1e-9 < min_rr:
-            reasons.append(f"{tag}: R:R {c.rr:.2f} < {min_rr}")
+        c_min_rr = float((getattr(c, "meta", None) or {}).get("min_rr", min_rr))
+        if c.rr + 1e-9 < c_min_rr:
+            reasons.append(f"{tag}: R:R {c.rr:.2f} < {c_min_rr}")
             continue
         age_min = (now - c.bar_time).total_seconds() / 60.0
         if age_min < -1 or age_min > max_age:
@@ -284,6 +286,22 @@ def evaluate_symbol(sym_cfg: dict, frames: dict, cfg: dict, now: pd.Timestamp) -
     return out
 
 
+def attach_sizing(c: Candidate, cfg: dict) -> None:
+    """Add a position-size suggestion (risk_per_trade config) to c.meta['sizing']."""
+    try:
+        sz = size_position(c.symbol, c.entry, c.sl, cfg.get("risk_per_trade"))
+    except Exception:
+        sz = None
+    if sz:
+        c.meta = getattr(c, "meta", {}) or {}
+        c.meta["sizing"] = sz
+
+
+def _has_enabled_setup(sym_cfg: dict, cfg: dict) -> bool:
+    sc = cfg.get("setups", {})
+    return any((sc.get(n) or {}).get("enabled", True) and n in REGISTRY for n in sym_cfg.get("setups", []))
+
+
 def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
               state: dict | None = None, fetch_fn=None, apply_gates: bool = True,
               snapshot_fn=None):
@@ -312,6 +330,8 @@ def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
     fetch_fn = fetch_fn or mdata.live_frames
     all_cands: list[Candidate] = []
     for sym in cfg.get("symbols", []):
+        if not _has_enabled_setup(sym, cfg):
+            continue          # nothing to evaluate → don't spend a data fetch
         frames, errs = fetch_fn(sym["yf"], now)
         for interval, reason in errs or []:
             result["data_errors"].append((sym["name"], interval, reason))
@@ -328,6 +348,8 @@ def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
                 else:
                     result["reject_reasons"].append(f"{c.symbol}/{c.setup}/{c.side}: {why}")
             cands = kept
+        for c in cands:
+            attach_sizing(c, cfg)
         all_cands.extend(cands)
 
     result["candidates"] = all_cands
@@ -416,6 +438,20 @@ def _data_line(c: Candidate) -> str:
     return " · ".join(parts)
 
 
+def _sizing_lines(c: Candidate) -> str:
+    m = getattr(c, "meta", None) or {}
+    out = ""
+    if m.get("tp1"):
+        out += f"🎯 <b>TP1:</b>    {fmt_price(m['tp1'], c.entry)} (partial)\n"
+    sz = m.get("sizing")
+    if m.get("sl_pips") and not sz:
+        out += f"📏 <b>SL / TP:</b> {m['sl_pips']} / {m['tp_pips']} pips\n"
+    if sz:
+        out += (f"📏 <b>SL:</b> {sz['sl_pips']} pips · 💼 <b>Size:</b> {sz['lots']:.2f} lots "
+                f"(risk {sz['risk_pct']:g}% of {sz['account']:,.0f} {sz['ccy']} ≈ {sz['actual_risk']:.2f})\n")
+    return out
+
+
 def format_trade_message(c: Candidate, session_name: str) -> str:
     from html import escape
     lines = "\n".join(escape(x) for x in c.checklist_lines)
@@ -435,6 +471,7 @@ def format_trade_message(c: Candidate, session_name: str) -> str:
         f"🎯 <b>TP:</b>     {fmt_price(c.tp, c.entry)}\n"
         f"🛑 <b>SL:</b>     {fmt_price(c.sl, c.entry)}\n"
         f"📐 <b>R:R:</b>    1 : {c.rr:.1f}\n"
+        f"{_sizing_lines(c)}"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🕒 {escape(_data_line(c))}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
