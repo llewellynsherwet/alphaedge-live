@@ -72,3 +72,28 @@ Same 3.7-year HistData run, spread included (`reports/backtest_pip_builder_tp6_v
 ("gated" = pip_builder alone through the live gates incl. the 3/day setup cap and 40-min cooldown; with smc_sweep also firing, the shared cooldown/cap will cut it further.)
 
 What it implies: average SL ≈ 4.9 pips vs ≈ 6.4 pips of effective reward (6 pips minus the spread paid at entry) → you need to win ≈ 43–44% just to break even; the backtest wins ≈ 33% (31% gated). Zero-cost it is still slightly negative (−0.02R, 41% WR), at double spread −0.44R. Negative in both halves and every variant; the 95% interval for avg R (−0.31…−0.18 raw) excludes zero. A tighter cap on spread (ECN account) helps but does not fix it. Expect more losing days than winning ones; the signal log + outcome alerts will show live reality — review after ~50 live signals and switch it off if it tracks the backtest.
+
+## Rules v3 — SL 20–30 pips + 3 take-profits (PR "pip-builder-ladder", owner instruction 2026-10-09)
+*Replaces the 6-pip single-TP / ~5-pip SL section above (kept for history).*
+* **SL**: pattern extreme + 1.5 pip buffer. If that is < 20 pips it is **widened to exactly 20**; if the structure needs **> 30 pips the trade is rejected**. JPY pairs use the same pip counts (0.20–0.30). The old 0.5×1H-ATR rule and 3-pip floor are ignored while `sl_min_pips/sl_max_pips` are set; the ATR-sanity TP check is dropped (a 2R target is wider than 1H ATR by design). After live repricing the risk must still be within 90–110% of the window.
+* **Targets** (`setups.pip_builder.ladder`): **TP1 = 6 pips**, **TP2 = 1R** (= SL distance, 20–30 pips), **TP3 = 2R** (40–60 pips). Rebuilt from the live entry at alert time. Position split ⅓ / ⅓ / ⅓; after TP1 the stop of the rest moves to **breakeven** (`be_after_tp1`, can be switched off).
+* **Counting** (`strategy/ladder.py`): headline **win = TP1 reached**, loss = stopped before TP1. **Net R is the real blended result** (⅓ weights; BE stop pays 0, SL pays −1R on the remainder), so a TP1 "win" followed by a breakeven stop is only about +0.1R, and without breakeven a later SL can make a TP1 "win" net negative. One stage per candle; stop and target in the same candle = stop first.
+* **Alerts**: TP1/TP2/TP3 with pip distances, SL pips, lot size from the new SL (`risk_per_trade`), "⅓ at each target; SL → BE after TP1"; a **"🎯 TP1 HIT"** (and TP2) follow-up while the trade stays open; final message "TP1 HIT – rest stopped at breakeven", "ALL 3 TARGETS HIT" or "SL HIT". Daily summary adds "Ladder: TP1 n · TP2 n · TP3 n of N". Signal log gains `tp1,tp2,tp3,tp_hit` columns (`tp` = TP3; `r` = blended R); the app log shows target counts.
+* Shared gates unchanged: daily cap 6, `per_setup_max` pip_builder 3, per-symbol cap, cooldowns, correlation, drift/stale checks.
+
+### Backtest — short run only (last ~90 days, 2026-07-02 → 2026-09-30, 7 pairs, HistData 1m, spreads included, one config, no grid)
+(The 3.7-year run was skipped at the owner's request to save time → **small sample, weak evidence**.)
+
+| Mode | Trades | /day (cal / weekday) | TP1 | TP2 | TP3 | Stopped before TP1 | Win % (r>0) | Avg R | Net R | Max DD (R) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **BE after TP1 (live), raw** | 238 | 2.64 / 3.72 | 72.7% | 14.7% | 5.9% | 27.3% | 73.1% | −0.12 | −28.0 | 34 |
+| **BE after TP1, gated** | 83 | 0.92 / 1.30 | 69.9% | 16.9% | 8.4% | 30.1% | 69.9% | −0.13 | −10.6 | 17 |
+| No breakeven, raw | 154 | 1.71 / 2.41 | 72.7% | 46.8% | 26.0% | 27.3% | 47.4% | −0.08 | −12.2 | 21 |
+| No breakeven, gated | 83 | 0.92 / 1.30 | 69.9% | 45.8% | 30.1% | 30.1% | 44.6% | −0.07 | −6.1 | 18 |
+
+* Halves (BE, raw): first 146 trades −0.18R, second 92 trades −0.02R; gated: −0.32R then +0.07R. No-BE gated: −0.37R then +0.23R. Per pair is mixed (only EURUSD and USDCAD slightly positive, n small).
+* Break-even: with BE the average winner is only ≈ +0.1–0.3R vs −1R losers, so you need ≈ 84% (raw) of trades to reach TP1 and stay profitable — the backtest has ≈ 73%. Without BE break-even is ≈ 60% (WR on r>0) vs 47% observed.
+* 95% interval for avg R (BE raw) −0.19…−0.05 (excludes zero); no-BE raw −0.20…+0.05 (includes zero).
+* Costs matter less now but not nothing: zero-spread avg R ≈ 0.00, double spread −0.16R (BE raw). So like the earlier versions the **entry has no edge before costs**; the ladder only reshapes the payoff. TP1 is hit often (≈70%) because 6 pips is close, which is why the "win rate" looks high while net R is negative.
+* Recommendation: still negative/zero-edge on this small sample; no-BE looked slightly less bad than BE here but not significantly. Watch the live signal log (≥ 50 signals) before trusting it.
+Files: `reports/backtest_pip_builder_90d_ladder.json`, `reports/backtest_pip_builder_90d_ladder_trades_{raw,gated}.csv`.

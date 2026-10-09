@@ -183,16 +183,23 @@ setups:
     #    docs/STRATEGY_1000PIP_BUILDER.md. Parameters marked (assumed) are guesses.
     enabled: true                # LIVE (2026-10-09, owner-approved) as a 2nd strategy beside smc_sweep.
                                  # Backtest was NEGATIVE — see docs/STRATEGY_1000PIP_BUILDER.md. Set false to stop.
-    label: "🅱 Pip Builder 6-pip scalp"
+    label: "🅱 Pip Builder (SL 20–30p · 3 TPs)"
     trigger_tfs: ["5m", "15m"]   # double top/bottom or engulfing trigger charts
     zone_width_atr: 0.3          # (assumed) S/R zone width × 1H ATR(14)
     min_touches: 2               # swing points needed to form a zone
     sl_buffer_pips: 1.5          # (assumed) 1–2 pips beyond the pattern extreme
-    sl_max_atr: 0.5              # reject if SL wider than 0.5 × 1H ATR
+    sl_max_atr: 0.5              # legacy ATR rule — ignored while sl_min_pips/sl_max_pips are set
     min_tp_pips: 10
-    tp_pips: 6                   # FIXED 6-pip target (owner request); null = structural swing TP
-    min_rr: 0.75                 # R:R floor (6-pip TP vs SL ≤ 8 pips); see docs for break-even win rate
-    tp_max_atr: 2.5              # (assumed) ATR sanity: TP ≤ this × 1H ATR
+    sl_min_pips: 20              # SL window (owner rule): widen tidy to 20 pips, reject if structure needs > 30
+    sl_max_pips: 30
+    ladder:                      # 3 targets: TP1 = 6 pips, TP2 = 1R, TP3 = 2R; ⅓ off at each
+      tp1_pips: 6
+      tp2_r: 1.0
+      tp3_r: 2.0
+      split: [1, 1, 1]
+      be_after_tp1: true         # SL → breakeven once TP1 is hit
+    min_rr: 1.0                  # TP3 is 2R, so this only guards degenerate cases
+    tp_max_atr: null             # ATR sanity check dropped: the 20–30 pip SL / 2R ladder is wider than 1H ATR by design
     tp1_pips: null               # optional partial target, e.g. 10
     active_hours_utc: null       # e.g. ["07:00", "20:00"]
     checklist:

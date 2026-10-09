@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-COLUMNS = ["id", "sent_utc", "symbol", "side", "setup", "pattern", "score", "entry", "sl", "tp", "rr",
+COLUMNS = ["id", "sent_utc", "symbol", "side", "setup", "pattern", "score", "entry", "sl", "tp", "tp1", "tp2", "tp3", "tp_hit", "rr",
            "sl_pips", "lots", "risk_amount", "delivered", "status", "exit", "r", "closed_utc"]
 
 
@@ -52,7 +52,9 @@ def log_signal(trade: dict, delivered: bool = True, path=None, cfg: dict | None 
     sz = trade.get("sizing") or {}
     row = {"id": trade["id"], "sent_utc": trade["sent_ts"], "symbol": trade["symbol"], "side": trade["side"],
            "setup": trade.get("setup"), "pattern": trade.get("pattern"), "score": trade.get("score"),
-           "entry": trade["entry"], "sl": trade["sl"], "tp": trade["tp"], "rr": trade.get("rr"),
+           "entry": trade["entry"], "sl": trade["sl"], "tp": trade["tp"],
+           "tp1": (trade.get("tps") or [None] * 3)[0], "tp2": (trade.get("tps") or [None] * 3)[1],
+           "tp3": (trade.get("tps") or [None] * 3)[2], "tp_hit": trade.get("tp_hit", 0), "rr": trade.get("rr"),
            "sl_pips": trade.get("sl_pips") or sz.get("sl_pips"), "lots": sz.get("lots"),
            "risk_amount": sz.get("actual_risk"), "delivered": bool(delivered), "status": "OPEN",
            "exit": None, "r": None, "closed_utc": None}
@@ -76,14 +78,28 @@ def log_outcome(closed: dict, path=None, cfg: dict | None = None) -> None:
     df["status"] = df["status"].astype("object"); df["r"] = df["r"].astype("object")
     df.loc[m, ["status", "exit", "r", "closed_utc"]] = [
         closed.get("status"), closed.get("exit"), closed.get("r"), closed.get("closed_ts") or closed.get("hit_ts")]
+    if closed.get("tp_hit") is not None:
+        df.loc[m, "tp_hit"] = closed.get("tp_hit")
     _write(df, path)
 
 
+def log_progress(trade_id: str, tp_hit: int, path=None, cfg: dict | None = None) -> None:
+    """Record TP1/TP2 hits on a still-open ladder trade."""
+    path = Path(path) if path else log_path(cfg)
+    df = read_log(path)
+    m = df["id"] == trade_id
+    if m.any():
+        df.loc[m, "tp_hit"] = tp_hit
+        _write(df, path)
+
+
 def summary(df: pd.DataFrame) -> dict:
-    done = df[df["status"].isin(["TP", "SL"])]
+    done = df[df["status"].isin(["TP", "SL"])]  # TP = TP1 or better reached (headline win); r is the real blended R
     wins = int((done["status"] == "TP").sum())
     r = pd.to_numeric(done["r"], errors="coerce").fillna(0)
-    return {"signals": len(df), "open": int((df["status"] == "OPEN").sum()), "closed": len(done),
+    th = pd.to_numeric(df["tp_hit"], errors="coerce").fillna(0)
+    return {"tp1": int((th >= 1).sum()), "tp2": int((th >= 2).sum()), "tp3": int((th >= 3).sum()),
+            "signals": len(df), "open": int((df["status"] == "OPEN").sum()), "closed": len(done),
             "wins": wins, "losses": len(done) - wins,
             "win_rate": round(100 * wins / len(done), 1) if len(done) else None,
             "net_r": round(float(r.sum()), 2)}

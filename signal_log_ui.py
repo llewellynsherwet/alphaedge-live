@@ -23,7 +23,9 @@ def render_signal_log(cfg: dict | None = None):
         s = sl.summary(df)
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Signals", s["signals"]); c2.metric("Closed", s["closed"])
-        c3.metric("Win rate", f"{s['win_rate']}%" if s["win_rate"] is not None else "—")
+        c3.metric("Win rate (TP1+)", f"{s['win_rate']}%" if s["win_rate"] is not None else "—")
         c4.metric("Net R", f"{s['net_r']:+.2f}")
+        st.caption(f"Targets reached — TP1: {s['tp1']} · TP2: {s['tp2']} · TP3: {s['tp3']}. "
+                   "A trade counts as a win once TP1 is reached; Net R is the real blended result (⅓ off at each target).")
         st.dataframe(df.sort_values("sent_utc", ascending=False), width="stretch", hide_index=True)
         st.download_button("⬇️ Download CSV", df.to_csv(index=False).encode(), "signal_log.csv", "text/csv")

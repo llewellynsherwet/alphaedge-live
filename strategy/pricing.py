@@ -234,6 +234,11 @@ def validate_and_reprice(c, snap: Snapshot, cfg: dict, now: pd.Timestamp):
         tp = tp0
     else:
         tp = entry + d * tp_rr * risk
+    if cmeta.get("ladder"):
+        from . import ladder as _lad
+        tps = _lad.build(entry, sl0, c.side, float(cmeta["pip"]), cmeta["ladder"])
+        tp = tps[-1]
+        c.meta["tps"] = [x - snap.basis for x in tps]
     rr = abs(tp - entry) / risk
     if rr + 1e-9 < min_rr:
         return False, f"R:R after reprice {rr:.2f} < {min_rr}"

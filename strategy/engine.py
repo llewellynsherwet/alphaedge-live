@@ -446,14 +446,26 @@ def _data_line(c: Candidate) -> str:
     return " · ".join(parts)
 
 
+def _tp_lines(c: Candidate) -> str:
+    tps = (getattr(c, "meta", None) or {}).get("tps")
+    if not tps:
+        return f"🎯 <b>TP:</b>     {fmt_price(c.tp, c.entry)}\n"
+    pip = float((c.meta or {}).get("pip") or 0.0001)
+    return "".join(f"🎯 <b>TP{i + 1}:</b>    {fmt_price(x, c.entry)} (+{abs(x - c.entry) / pip:.0f} pips)\n"
+                   for i, x in enumerate(tps))
+
+
 def _sizing_lines(c: Candidate) -> str:
     m = getattr(c, "meta", None) or {}
     out = ""
-    if m.get("tp1"):
+    if m.get("tp1") and not m.get("tps"):
         out += f"🎯 <b>TP1:</b>    {fmt_price(m['tp1'], c.entry)} (partial)\n"
+    if m.get("tps"):
+        out += "ℹ️ <i>Take ⅓ at each target; SL → breakeven after TP1</i>\n" if (m.get("ladder") or {}).get("be_after_tp1", True) \
+            else "ℹ️ <i>Take ⅓ at each target</i>\n"
     sz = m.get("sizing")
     if m.get("sl_pips") and not sz:
-        out += f"📏 <b>SL / TP:</b> {m['sl_pips']} / {m['tp_pips']} pips\n"
+        out += f"📏 <b>SL:</b> {m['sl_pips']} pips\n" if m.get("tps") else f"📏 <b>SL / TP:</b> {m['sl_pips']} / {m['tp_pips']} pips\n"
     if sz:
         out += (f"📏 <b>SL:</b> {sz['sl_pips']} pips · 💼 <b>Size:</b> {sz['lots']:.2f} lots "
                 f"(risk {sz['risk_pct']:g}% of {sz['account']:,.0f} {sz['ccy']} ≈ {sz['actual_risk']:.2f})\n")
@@ -476,9 +488,9 @@ def format_trade_message(c: Candidate, session_name: str) -> str:
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"💰 <b>Entry:</b>  {fmt_price(c.entry, c.entry)}"
         f"{' (LIMIT)' if c.meta.get('entry_mode') == 'limit' else ' (market @ live)' if c.meta else ''}\n"
-        f"🎯 <b>TP:</b>     {fmt_price(c.tp, c.entry)}\n"
+        f"{_tp_lines(c)}"
         f"🛑 <b>SL:</b>     {fmt_price(c.sl, c.entry)}\n"
-        f"📐 <b>R:R:</b>    1 : {c.rr:.1f}\n"
+        f"📐 <b>R:R:</b>    1 : {c.rr:.1f}{' (to TP3)' if (c.meta or {}).get('tps') else ''}\n"
         f"{_sizing_lines(c)}"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🕒 {escape(_data_line(c))}\n"

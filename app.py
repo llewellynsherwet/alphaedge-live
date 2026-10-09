@@ -931,9 +931,18 @@ def _track_outcomes(state: dict, cfg: dict, now) -> dict:
             except Exception as e:
                 print(f"[signal_log] outcome write failed: {e!r}", flush=True)
     pending = _outcomes.pending_notifications(state, cfg)
-    if not newly and not pending:
+    progress = _outcomes.pending_progress(state)
+    if not newly and not pending and not progress:
         return state
     _write_state_raw(state)          # persist "closed" BEFORE sending → never double-closes
+    for t in progress:               # ladder: announce TP1 / TP2 once while the trade stays open
+        if _send_telegram(_outcomes.format_progress_message(t, escape=_tg_escape)):
+            t["tp_notified"] = int(t["tp_hit"])
+        if _signal_log.enabled(cfg):
+            try:
+                _signal_log.log_progress(t["id"], int(t["tp_hit"]), cfg=cfg)
+            except Exception as e:
+                print(f"[signal_log] progress write failed: {e!r}", flush=True)
     for rec in pending:
         rec["notify_attempts"] = int(rec.get("notify_attempts", 0)) + 1
         rec["notified"] = _send_telegram(_outcomes.format_outcome_message(

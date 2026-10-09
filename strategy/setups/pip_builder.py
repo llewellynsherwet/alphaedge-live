@@ -30,6 +30,7 @@ import pandas as pd
 from ..checklist import score as score_checklist
 from ..common import Candidate
 from ..indicators import atr, pivots
+from .. import ladder as lad_mod
 from ..news import blackout
 from ..risk_sizing import pip_size
 
@@ -47,7 +48,9 @@ DEFAULTS = {
     "db_min_height_atr": 0.15, "pattern_max_age_bars": 12,
     "use_double": True, "use_engulf": True,
     "sl_buffer_pips": 1.5,                        # (assumed)
-    "sl_max_atr": 0.5, "min_sl_pips": 3.0,
+    "sl_max_atr": 0.5, "min_sl_pips": 3.0,       # legacy ATR rule (used only when sl_min/max_pips are null)
+    "sl_min_pips": None, "sl_max_pips": None,     # fixed SL window: widen to min, reject if structure needs > max
+    "ladder": None,                               # 3-target ladder (strategy/ladder.py); overrides tp_pips
     "sl_ref": "extreme",                          # or "extreme_or_zone"
     "min_tp_pips": 10.0, "min_rr": 1.0,           # (assumed R:R)
     "tp_pick": "nearest",                         # or "nearest_beyond_min"
@@ -297,9 +300,20 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
             buf = p["sl_buffer_pips"] * pip
             sl = ref - buf if side == "BUY" else ref + buf
             risk = abs(entry - sl)
-            if risk <= 0 or risk > p["sl_max_atr"] * ctx.atr1h or risk < p["min_sl_pips"] * pip:
+            fixed_sl = p.get("sl_min_pips") is not None and p.get("sl_max_pips") is not None
+            if fixed_sl:
+                if risk <= 0 or risk > p["sl_max_pips"] * pip + 1e-12:
+                    continue                                   # structure needs more than the max SL
+                if risk < p["sl_min_pips"] * pip:             # widen tidy to the minimum SL
+                    risk = p["sl_min_pips"] * pip
+                    sl = entry - risk if side == "BUY" else entry + risk
+            elif risk <= 0 or risk > p["sl_max_atr"] * ctx.atr1h or risk < p["min_sl_pips"] * pip:
                 continue
-            if p.get("tp_pips"):
+            tps = None
+            if p.get("ladder"):
+                tps = lad_mod.build(entry, sl, side, pip, p["ladder"])
+                tp, min_tp = tps[-1], float(lad_mod.cfg_of(p["ladder"])["tp1_pips"])
+            elif p.get("tp_pips"):
                 tp = entry + (1 if side == "BUY" else -1) * float(p["tp_pips"]) * pip
                 min_tp = float(p["tp_pips"])
             else:
@@ -308,17 +322,19 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
             if tp is None:
                 continue
             dist = abs(tp - entry)
-            if dist < min_tp * pip - 1e-12 or dist / risk < p["min_rr"] or dist > p["tp_max_atr"] * ctx.atr1h:
+            if dist < min_tp * pip - 1e-12 or dist / risk < p["min_rr"]:
+                continue
+            if not tps and p.get("tp_max_atr") and dist > p["tp_max_atr"] * ctx.atr1h:
                 continue
             blocked, why = blackout(bar_close, symbol, cfg.get("news"))
             if blocked:
                 continue
-            cand = (dist / risk, tf, tr, loc_note, zone, sl, tp, bar_close)
+            cand = (dist / risk, tf, tr, loc_note, zone, sl, tp, bar_close, tps)
             if best is None or cand[0] > best[0]:
                 best = cand
     if best is None:
         return None
-    rr, tf, tr, loc_note, zone, sl, tp, bar_close = best
+    rr, tf, tr, loc_note, zone, sl, tp, bar_close, tps = best
     side, entry = tr["side"], tr["entry"]
     factors = {"trend_agree": True, "at_zone_or_band": True, "trigger_pattern": True,
                "sl_within_atr": True, "tp_min_rr": True, "news_clear": True}
@@ -329,8 +345,9 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
         f"Daily + 4H trend agree: {arrow}trend",
         f"Location (1H): {loc_note}",
         f"Trigger ({tf}): {tr['kind']}",
-        f"SL {abs(entry - sl) / pip:.1f} pips beyond pattern extreme · TP {abs(tp - entry) / pip:.1f} pips "
-        + ("(fixed scalp target)" if p.get("tp_pips") else "(nearest swing / zone / band)"),
+        f"SL {abs(entry - sl) / pip:.1f} pips (beyond pattern extreme, clamped {p['sl_min_pips']}–{p['sl_max_pips']}) · "
+        + (f"TP1 {abs(tps[0] - entry) / pip:.0f} / TP2 {abs(tps[1] - entry) / pip:.0f} / TP3 {abs(tps[2] - entry) / pip:.0f} pips"
+           if tps else f"TP {abs(tp - entry) / pip:.1f} pips"),
         f"1H ATR {ctx.atr1h / pip:.1f} pips · experimental method, parameters partly assumed",
     ]
     meta = {"min_rr": float(p["min_rr"]), "tp_on_reprice": "keep_target", "trigger_tf": tf,
@@ -338,6 +355,9 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
             "tp_pips": round(abs(tp - entry) / pip, 1),
             # re-checked after live repricing (entry moves between trigger close and alert)
             "min_risk": p["min_sl_pips"] * pip, "max_risk": p["sl_max_atr"] * ctx.atr1h}
+    if tps:
+        meta.update(tps=list(tps), ladder=lad_mod.cfg_of(p["ladder"]), pip=pip,
+                    min_risk=p["sl_min_pips"] * pip * 0.9, max_risk=p["sl_max_pips"] * pip * 1.1)
     if p.get("tp1_pips"):
         meta["tp1"] = entry + (1 if side == "BUY" else -1) * p["tp1_pips"] * pip
     zc = (zone[0] + zone[1]) / 2 if zone else (ctx.bb_lo if side == "BUY" else ctx.bb_up)

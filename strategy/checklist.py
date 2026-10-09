@@ -2,8 +2,8 @@
 
 PRETTY = {
     "trend_agree": "Daily + 4H trend agree", "at_zone_or_band": "At 1H S/R zone or Bollinger band",
-    "trigger_pattern": "Double top/bottom or engulfing trigger", "sl_within_atr": "SL ≤ 0.5× 1H ATR",
-    "tp_min_rr": "TP ≥ 10 pips & R:R ≥ 1", "news_clear": "No high-impact news ±30m",
+    "trigger_pattern": "Double top/bottom or engulfing trigger", "sl_within_atr": "SL within 20–30 pips",
+    "tp_min_rr": "3 targets: TP1 6p, TP2 1R, TP3 2R", "news_clear": "No high-impact news ±30m",
     "htf_bias": "HTF bias aligned", "premium_discount": "Premium/discount location",
     "liquidity_sweep": "Liquidity sweep", "mss_bos": "Break of structure (displacement)",
     "pd_array": "Fresh FVG / order block", "kill_zone": "Kill-zone timing",
