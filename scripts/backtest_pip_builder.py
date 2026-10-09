@@ -29,6 +29,7 @@ import pandas as pd  # noqa: E402
 
 from strategy import data as mdata  # noqa: E402
 from strategy.config_loader import load_config  # noqa: E402
+from strategy import ladder as LAD  # noqa: E402
 from strategy.engine import _empty_day, gate_candidates, record_emits  # noqa: E402
 from strategy.risk_sizing import pip_size  # noqa: E402
 from strategy.setups import REGISTRY  # noqa: E402
@@ -87,7 +88,7 @@ def generate(cfg, setup, pairs, start, end, step_min, procs):
 
 # ── outcome simulation on 1m bars ─────────────────────────────────────────────
 
-def simulate(c, spread_mult=1.0, latency_min=5, max_hours=48, tp1_pips=None, tp1_frac=0.5, drift_check=True):
+def simulate(c, spread_mult=1.0, latency_min=5, max_hours=48, tp1_pips=None, tp1_frac=0.5, drift_check=True, ladder_over=None):
     pair = c.meta["pair"]
     m1, _, _, _ = load_pair(pair)
     pip = pip_size(c.symbol)
@@ -119,6 +120,21 @@ def simulate(c, spread_mult=1.0, latency_min=5, max_hours=48, tp1_pips=None, tp1
         if reward / risk + 1e-9 < float((c.meta or {}).get("min_rr", 1.0)):
             return None
     end_i = m1.index.searchsorted(t_in + pd.Timedelta(hours=max_hours))
+    lad = meta.get("ladder")
+    if lad:
+        lad = {**lad, **(ladder_over or {})}
+        tps = LAD.build(op, c.sl, c.side, pip, lad)
+        hi_ = m1["High"].to_numpy()[i0:end_i]; lo_ = m1["Low"].to_numpy()[i0:end_i]
+        if len(hi_) == 0:
+            return None
+        res = LAD.walk(c.side, fill, c.sl, tps, hi_, lo_, lad, shift=spr, last_close=float(m1["Close"].iloc[end_i - 1]))
+        k = res["exit_idx"] if res["exit_idx"] is not None else len(hi_) - 1
+        r = res["r"]
+        return {"pair": pair, "symbol": c.symbol, "setup": c.setup, "side": c.side, "time": c.bar_time,
+                "entry": fill, "sl": c.sl, "tp": tps[-1], "risk_pips": risk / pip, "reward_pips": abs(tps[-1] - fill) / pip,
+                "status": res["status"] if res["status"] != "OPEN" else "EXP", "r": r, "pips": r * risk / pip,
+                "tp_hit": res["tp_hit"], "pattern": meta.get("pattern", ""), "tf": meta.get("trigger_tf", ""),
+                "exit_time": m1.index[i0 + k], "score": c.score}
     hi = m1["High"].to_numpy()[i0:end_i]; lo = m1["Low"].to_numpy()[i0:end_i]; cl = m1["Close"].to_numpy()[i0:end_i]
     if len(hi) == 0:
         return None
@@ -210,6 +226,9 @@ def stats(df, days):
             "pf": round(float(gp / gl), 2) if gl > 0 else None,
             "ci95": [round(float(np.percentile(bs, 2.5)), 3), round(float(np.percentile(bs, 97.5)), 3)],
             "be_wr": round(100 / (1 + avg_win), 1) if avg_win else None,
+            **({"tp1_pct": round(100 * float((df["tp_hit"] >= 1).mean()), 1), "tp2_pct": round(100 * float((df["tp_hit"] >= 2).mean()), 1),
+                "tp3_pct": round(100 * float((df["tp_hit"] >= 3).mean()), 1), "sl_pct": round(100 * float((df["tp_hit"] == 0).mean()), 1)}
+               if "tp_hit" in df else {}),
             "avg_risk_pips": round(float(df["risk_pips"].mean()), 1), "avg_reward_pips": round(float(df["reward_pips"].mean()), 1)}
 
 
@@ -252,6 +271,31 @@ def variants():
     return v
 
 
+def ladder_main(a):
+    """ONE run of the live config (pip_builder + ladder) on a short window; BE vs no-BE evaluated post-hoc."""
+    start, end = pd.Timestamp(a.start, tz="UTC"), pd.Timestamp(a.end, tz="UTC")
+    pairs = a.pairs.split(",")
+    cfg = load_config()
+    cfg["news"] = {"enabled": True, "window_minutes": 30}
+    cfg["setups"]["pip_builder"]["enabled"] = True
+    cands = generate(cfg, "pip_builder", pairs, start, end, 5, a.procs)
+    out = {"window": [str(start), str(end)], "n_candidates": len(cands), "pip_builder_cfg": cfg["setups"]["pip_builder"]}
+    for name, over in (("be_after_tp1", {"be_after_tp1": True}), ("no_breakeven", {"be_after_tp1": False})):
+        for mode, gated in (("raw", False), ("gated", True)):
+            df = run_trades(cands, cfg, gated, latency_min=a.latency, ladder_over=over)
+            out[f"{name}_{mode}"] = report(df, start, end, f"{name} {mode}")
+            if name == "be_after_tp1":
+                df.to_csv(ROOT / f"{a.out}_ladder_trades_{mode}.csv", index=False)
+    for sm in (2.0,):
+        df = run_trades(cands, cfg, False, latency_min=a.latency, spread_mult=sm, ladder_over={"be_after_tp1": True})
+        out["be_raw_spread_x2"] = report(df, start, end, "x2")["all"]
+    df = run_trades(cands, cfg, False, latency_min=a.latency, spread_mult=0.0, ladder_over={"be_after_tp1": True})
+    out["be_raw_zero_cost"] = report(df, start, end, "0")["all"]
+    (ROOT / f"{a.out}_ladder.json").write_text(json.dumps(out, indent=1, default=str))
+    for k in ("be_after_tp1_raw", "be_after_tp1_gated", "no_breakeven_raw", "no_breakeven_gated"):
+        print(k, out[k]["all"], "per_weekday", out[k]["per_weekday"])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", default="2023-02-01"); ap.add_argument("--end", default="2026-09-30")
@@ -259,7 +303,10 @@ def main():
     ap.add_argument("--only", default=""); ap.add_argument("--old", action="store_true", help="also run old smc_sweep")
     ap.add_argument("--out", default="reports/backtest_pip_builder")
     ap.add_argument("--latency", type=int, default=5)
+    ap.add_argument("--ladder", action="store_true", help="single run of the live ladder config")
     a = ap.parse_args()
+    if a.ladder:
+        return ladder_main(a)
     start, end = pd.Timestamp(a.start, tz="UTC"), pd.Timestamp(a.end, tz="UTC")
     pairs = a.pairs.split(",")
     base = load_config()

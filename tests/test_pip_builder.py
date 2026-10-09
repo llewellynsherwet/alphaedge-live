@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from strategy import news, risk_sizing, signal_log  # noqa: E402
+from strategy import news, outcomes as oc, risk_sizing, signal_log  # noqa: E402
 from strategy.common import Candidate  # noqa: E402
 from strategy.config_loader import load_config  # noqa: E402
 from strategy.engine import (_empty_day, _has_enabled_setup, attach_sizing,  # noqa: E402
@@ -42,7 +42,7 @@ def test_enabled_as_second_strategy_with_6pip_tp():
     cfg = load_config()
     assert "pip_builder" in REGISTRY
     pbc = cfg["setups"]["pip_builder"]
-    assert pbc["enabled"] is True and pbc["tp_pips"] == 6 and 0 < pbc["min_rr"] <= 1.0
+    assert pbc["enabled"] is True and pbc["ladder"]["tp1_pips"] == 6 and (pbc["sl_min_pips"], pbc["sl_max_pips"]) == (20, 30)
     assert cfg["risk"]["per_setup_max"]["pip_builder"] <= cfg["risk"]["daily_max_signals"] // 2
     assert "Pip Builder" in pbc["label"]
     assert cfg["setups"]["smc_sweep"]["enabled"] is True          # old strategy untouched
@@ -328,3 +328,109 @@ def test_per_setup_cap_in_gate():
                       bar_time=NOW, atr=2, zone=100, score=4, max_score=6)
     acc3, _ = gate_candidates([other], st, cfg, NOW)
     assert acc3 == [other]                                          # smc_sweep unaffected
+
+
+# ── SL window + 3-target ladder ───────────────────────────────────────────────
+LAD = {"tp1_pips": 6, "tp2_r": 1.0, "tp3_r": 2.0, "split": [1, 1, 1], "be_after_tp1": True}
+SLC = {"sl_min_pips": 20, "sl_max_pips": 30, "ladder": LAD, "min_rr": 1.0}
+
+
+def test_sl_widened_to_20_pips_and_ladder(monkeypatch):
+    c = _eval(monkeypatch, ctx(), BUY_ROWS, SLC)                  # structural SL ≈ 10 pips → 20
+    assert c is not None
+    assert abs((c.entry - c.sl) / PIP - 20.0) < 1e-6
+    t1, t2, t3 = c.meta["tps"]
+    assert abs((t1 - c.entry) / PIP - 6) < 1e-6 and abs((t2 - c.entry) / PIP - 20) < 1e-6 and abs((t3 - c.entry) / PIP - 40) < 1e-6
+    assert c.tp == t3 and abs(c.rr - 2.0) < 1e-6
+
+
+def test_sl_over_30_pips_rejected(monkeypatch):
+    rows = _flat(40, 1.0998) + [(1.0999, 1.1000, 1.0995, 1.0996), (1.0996, 1.1004, 1.0994, 1.1003)]
+    # extreme 1.0994 + 1.5p buffer → 10.5 pips; force structure > 30 with a bigger buffer
+    assert _eval(monkeypatch, ctx(), rows, {**SLC, "sl_buffer_pips": 25}) is None
+
+
+def test_sl_stays_inside_window_when_structural(monkeypatch):
+    rows = _flat(40, 1.0998) + [(1.0999, 1.1000, 1.0995, 1.0996), (1.0996, 1.1004, 1.0994, 1.1003)]
+    c = _eval(monkeypatch, ctx(), rows, {**SLC, "sl_buffer_pips": 14})   # 10.5 − 1.5 + 14 = ~23 pips
+    assert c is not None and 20 <= (c.entry - c.sl) / PIP <= 30
+
+
+def test_ladder_walk_be_and_blended_r():
+    from strategy import ladder as L
+    tps = L.build(1.1000, 1.0980, "BUY", PIP, LAD)                   # 6p / 20p / 40p
+    # TP1 then back to entry → breakeven stop
+    r = L.walk("BUY", 1.1000, 1.0980, tps, [1.1007, 1.1002, 1.1001], [1.1000, 1.0999, 1.0999], LAD)
+    assert r["tp_hit"] == 1 and r["status"] == "TP" and r["stopped_at"] == "BE"
+    assert abs(r["r"] - (1 / 3) * 0.3) < 1e-9                         # 6p / 20p risk = 0.3R, ⅓ weight
+    # all three
+    r = L.walk("BUY", 1.1000, 1.0980, tps, [1.1007, 1.1021, 1.1041], [1.1001, 1.1006, 1.1020], LAD)
+    assert r["tp_hit"] == 3 and abs(r["r"] - (0.3 + 1 + 2) / 3) < 1e-9
+    # SL first
+    r = L.walk("BUY", 1.1000, 1.0980, tps, [1.1001], [1.0979], LAD)
+    assert r["status"] == "SL" and r["r"] == -1.0
+    # no breakeven: stopped at SL after TP1 → blended negative
+    r = L.walk("BUY", 1.1000, 1.0980, tps, [1.1007, 1.1001], [1.1000, 1.0979], {**LAD, "be_after_tp1": False})
+    assert r["tp_hit"] == 1 and r["status"] == "TP" and r["r"] < 0
+    # same candle: stop and TP1 → stop first
+    r = L.walk("BUY", 1.1000, 1.0980, tps, [1.1010], [1.0979], LAD)
+    assert r["status"] == "SL" and r["both_in_bar"]
+
+
+def test_ladder_sell_with_spread_shift():
+    from strategy import ladder as L
+    tps = L.build(1.1000, 1.1020, "SELL", PIP, LAD)
+    r = L.walk("SELL", 1.1000, 1.1020, tps, [1.1001], [1.0995], LAD, shift=0.0001)   # ask low 1.0996 > TP1 1.0994
+    assert r["tp_hit"] == 0 and not r["done"]
+
+
+def test_outcome_tracking_ladder_progress_and_final():
+    tr = {"id": "t", "symbol": "EUR/USD", "side": "BUY", "setup": "pip_builder", "setup_label": "PB",
+          "entry": 1.1000, "sl": 1.0980, "tp": 1.1040, "tps": [1.1006, 1.1020, 1.1040], "ladder": LAD,
+          "rr": 2.0, "quote_source": "none", "quote_label": "x", "sent_ts": "2026-10-08T14:00:00+00:00",
+          "tp_hit": 0, "tp_notified": 0}
+    idx = pd.date_range("2026-10-08 14:01", periods=3, freq="1min", tz="UTC")
+    b = pd.DataFrame({"High": [1.1007, 1.1004, 1.1003], "Low": [1.1001, 1.1001, 1.0999], "Close": [1.1005] * 3,
+                      "Open": [1.1] * 3}, index=idx)
+    now = pd.Timestamp("2026-10-08 14:10", tz="UTC")
+    assert oc.detect_outcome(tr, b.iloc[:2], now) is None and tr["tp_hit"] == 1
+    state = {"trades": {"open": [tr], "closed": []}}
+    assert oc.pending_progress(state) == [tr]
+    assert "TP1 HIT" in oc.format_progress_message(tr) and "breakeven" in oc.format_progress_message(tr)
+    out = oc.detect_outcome(tr, b, now)                               # price returns to entry → BE stop
+    assert out["status"] == "TP" and out["tp_hit"] == 1 and out["stopped_at"] == "BE" and out["r"] > 0
+    msg = oc.format_outcome_message({**tr, **out})
+    assert "TP1 HIT" in msg and "breakeven" in msg and "Not financial advice" in msg
+    sl = oc.detect_outcome({**tr, "tp_hit": 0}, pd.DataFrame({"High": [1.1001], "Low": [1.0979], "Close": [1.098], "Open": [1.1]}, index=idx[:1]), now)
+    assert sl["status"] == "SL" and sl["r"] == -1.0 and "SL HIT" in oc.format_outcome_message({**tr, **sl})
+
+
+def test_day_summary_counts_ladder():
+    closed = [{"id": "a", "symbol": "EUR/USD", "side": "BUY", "status": "TP", "tps": [1, 2, 3], "tp_hit": 3, "r": 1.1,
+               "closed_ts": "2026-10-08T15:00:00+00:00"},
+              {"id": "b", "symbol": "GBP/USD", "side": "BUY", "status": "SL", "tps": [1, 2, 3], "tp_hit": 0, "r": -1.0,
+               "closed_ts": "2026-10-08T16:00:00+00:00"}]
+    st = {"day": "2026-10-08", "trades": {"open": [], "closed": closed}}
+    s = oc.day_stats(st)
+    assert (s["tp1"], s["tp2"], s["tp3"], s["ladder_trades"]) == (1, 1, 1, 2)
+    txt = oc.format_day_outcomes(st)
+    assert "Ladder: TP1 1 · TP2 1 · TP3 1" in txt and "TP3" in txt
+
+
+def test_alert_shows_three_targets_and_sizing(monkeypatch):
+    c = _eval(monkeypatch, ctx(), BUY_ROWS, SLC)
+    attach_sizing(c, {"risk_per_trade": RC})
+    msg = format_trade_message(c, "NY")
+    assert "TP1:" in msg and "TP2:" in msg and "TP3:" in msg and "(+6 pips)" in msg
+    assert c.meta["sizing"]["sl_pips"] == 20.0 and c.meta["sizing"]["lots"] == 0.05   # $10 / (20p × $10)… 0.05 lots
+    assert "Not financial advice" in msg
+
+
+def test_reprice_rebuilds_ladder_from_live_entry(monkeypatch):
+    c = _eval(monkeypatch, ctx(), BUY_ROWS, SLC)
+    cfg = {"risk": {"tp_rr": 1.5, "min_rr": 1.5},
+           "execution": {"tp_on_reprice": "keep_rr", "max_drift_atr": 0.5, "max_drift_tp_frac": 0.25}}
+    px = c.entry + 0.0002
+    ok, why = validate_and_reprice(c, _snap(px), cfg, NOW + pd.Timedelta(minutes=0))
+    assert ok, why
+    assert abs((c.meta["tps"][0] - c.entry) / PIP - 6) < 1e-6 and c.tp == c.meta["tps"][2]

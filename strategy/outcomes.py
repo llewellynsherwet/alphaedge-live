@@ -109,6 +109,7 @@ def make_trade(c, cfg: dict, now: pd.Timestamp) -> dict:
         "quote_source": source, "quote_ticker": q.get("ticker", "") if source != "none" else "",
         "quote_label": label, "signal_ticker": signal_ticker, "basis": basis,
         "sent_ts": now.isoformat(),
+        "tps": meta.get("tps"), "ladder": meta.get("ladder"), "tp_hit": 0, "tp_notified": 0,
         "sizing": meta.get("sizing"), "pattern": meta.get("pattern"),
         "sl_pips": meta.get("sl_pips"), "score": f"{c.score}/{c.max_score}",
     }
@@ -142,6 +143,8 @@ def detect_outcome(trade: dict, bars: pd.DataFrame | None, now: pd.Timestamp,
     """
     now = _ts(now)
     sent = _ts(trade["sent_ts"])
+    if trade.get("tps"):
+        return _detect_ladder(trade, bars, now, sent, max_open_hours, interval_min, allow_expire)
     side = 1 if trade["side"] == "BUY" else -1
     entry, sl, tp = float(trade["entry"]), float(trade["sl"]), float(trade["tp"])
     deadline = sent + pd.Timedelta(hours=float(max_open_hours)) if max_open_hours else None
@@ -168,6 +171,60 @@ def detect_outcome(trade: dict, bars: pd.DataFrame | None, now: pd.Timestamp,
             last = float(usable["Close"].iloc[-1])
         return _outcome(trade, "EXPIRED", last, deadline, interval_min=interval_min)
     return None
+
+
+def _detect_ladder(trade, bars, now, sent, max_open_hours, interval_min, allow_expire):
+    """3-target ladder (strategy/ladder.py). Updates trade['tp_hit'] while open (for the
+    'TP1 hit' progress alert); returns the final outcome once stopped / TP3 / expired."""
+    from . import ladder as L
+    deadline = sent + pd.Timedelta(hours=float(max_open_hours)) if max_open_hours else None
+    highs = lows = ()
+    last = None
+    b_idx = None
+    if bars is not None and len(bars):
+        b = bars.sort_index()
+        b = b[(b.index >= _first_bar_start(sent, interval_min)) & (b.index <= now)]
+        if deadline is not None:
+            b = b[b.index < deadline]
+        highs, lows, b_idx = b["High"].to_numpy(float), b["Low"].to_numpy(float), b.index
+        last = float(b["Close"].iloc[-1]) if len(b) else None
+    expire = bool(allow_expire and deadline is not None and now >= deadline)
+    res = L.walk(trade["side"], float(trade["entry"]), float(trade["sl"]), [float(x) for x in trade["tps"]],
+                 highs, lows, trade.get("ladder"), last_close=last, expire=expire)
+    trade["tp_hit"] = max(int(trade.get("tp_hit", 0)), res["tp_hit"])
+    if not res["done"]:
+        return None
+    k = res["exit_idx"]
+    hit_ts = b_idx[k] if (b_idx is not None and k is not None and len(b_idx)) else (deadline or now)
+    if res["stopped_at"] == "EXP":
+        hit_ts = deadline
+    status = res["status"]
+    side = 1 if trade["side"] == "BUY" else -1
+    px = {"SL": float(trade["sl"]), "BE": float(trade["entry"]), "TP3": float(trade["tps"][2])}.get(res["stopped_at"], last)
+    return {"status": status, "exit": px, "hit_ts": _ts(hit_ts).isoformat(), "r": round(res["r"], 2),
+            "points": None if px is None else (px - float(trade["entry"])) * side,
+            "both_in_bar": res["both_in_bar"], "interval_min": int(interval_min),
+            "tp_hit": res["tp_hit"], "stopped_at": res["stopped_at"], "ladder_final": True}
+
+
+def pending_progress(state: dict) -> list:
+    """Open ladder trades whose TP1/TP2 hits have not been announced yet."""
+    return [t for t in trades_book(state)["open"]
+            if t.get("tps") and int(t.get("tp_hit", 0)) > int(t.get("tp_notified", 0))]
+
+
+def format_progress_message(t: dict, escape=None) -> str:
+    esc = escape or (lambda s: html.escape(str(s), quote=False))
+    n = int(t["tp_hit"])
+    side = "🟢 BUY" if t["side"] == "BUY" else "🔴 SELL"
+    lad = t.get("ladder") or {}
+    be = "SL moved to breakeven" if lad.get("be_after_tp1", True) else "SL unchanged"
+    return (f"🎯 <b>TP{n} HIT</b> — {esc(t['symbol'])} {side}\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"💰 Entry {fmt_price(t['entry'], t['entry'])} · TP{n} {fmt_price(t['tps'][n - 1], t['entry'])}\n"
+            f"🛡 {be}; remaining targets still open\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"⚠️ <i>Not financial advice.</i>")
 
 
 def _outcome(trade, status, exit_px, hit_ts, both_in_bar=False, interval_min=1):
@@ -345,6 +402,8 @@ def format_outcome_message(rec: dict, escape=None, max_open_hours=None) -> str:
     sent = _ts(rec["sent_ts"])
     hit = _ts(rec["hit_ts"])
     entry = rec["entry"]
+    if rec.get("ladder_final"):
+        return _format_ladder_final(rec, esc, sent, hit)
     side = "🟢 BUY" if rec["side"] == "BUY" else "🔴 SELL"
     if rec["status"] == "EXPIRED":
         exit_line = (f"🏁 <b>Marked at:</b> {fmt_price(rec['exit'], entry)} (last price, closed)"
@@ -377,6 +436,33 @@ def format_outcome_message(rec: dict, escape=None, max_open_hours=None) -> str:
     )
 
 
+def _format_ladder_final(rec, esc, sent, hit):
+    n = int(rec.get("tp_hit", 0))
+    entry = rec["entry"]
+    side = "🟢 BUY" if rec["side"] == "BUY" else "🔴 SELL"
+    if rec["status"] == "EXPIRED":
+        head = "⌛ <b>EXPIRED</b>"
+    elif n == 0:
+        head = "❌ <b>SL HIT</b>"
+    elif n == 3:
+        head = "✅ <b>ALL 3 TARGETS HIT</b>"
+    else:
+        stop = "breakeven" if rec.get("stopped_at") == "BE" else "SL"
+        head = f"🟢 <b>TP{n} HIT</b> — rest stopped at {stop}"
+    tps = " · ".join(f"TP{i + 1} {'✅' if i < n else '▫️'} {fmt_price(x, entry)}" for i, x in enumerate(rec["tps"]))
+    return (
+        f"{head} — {esc(rec['symbol'])} {side}\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"🧩 <b>Setup:</b> {esc(rec.get('setup_label') or rec.get('setup', ''))}\n"
+        f"💰 <b>Entry:</b> {fmt_price(entry, entry)} · 🛑 SL {fmt_price(rec['sl'], entry)}\n"
+        f"🎯 {tps}\n"
+        f"📐 <b>Result:</b> {fmt_r(rec.get('r'))} blended · {n}/3 targets\n"
+        f"⏱ <b>Open:</b> {fmt_duration((hit - sent).total_seconds())} (alert {sent:%H:%M} → {hit:%H:%M UTC %d/%m})\n"
+        f"🏦 <b>Price:</b> {esc(rec.get('quote_label', ''))}\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"⚠️ <i>Not financial advice.</i>")
+
+
 def _closed_day(t) -> str:
     return _ts(t.get("closed_ts")).strftime("%Y-%m-%d")
 
@@ -393,7 +479,10 @@ def day_stats(state: dict, day: str | None = None) -> dict:
     losses = [t for t in closed if t["status"] == "SL"]
     expired = [t for t in closed if t["status"] == "EXPIRED"]
     net = sum(float(t.get("r") or 0) for t in wins + losses)
-    return {"closed": closed, "wins": len(wins), "losses": len(losses),
+    lad = [t for t in closed if t.get("tps") and t["status"] in ("TP", "SL")]
+    return {"tp1": sum(1 for t in lad if t.get("tp_hit", 0) >= 1), "tp2": sum(1 for t in lad if t.get("tp_hit", 0) >= 2),
+            "tp3": sum(1 for t in lad if t.get("tp_hit", 0) >= 3), "ladder_trades": len(lad),
+            "closed": closed, "wins": len(wins), "losses": len(losses),
             "expired": len(expired), "net_r": round(net, 2),
             "open": len(book.get("open", []))}
 
@@ -411,9 +500,13 @@ def format_day_outcomes(state: dict, day: str | None = None, escape=None) -> str
             + (f" / {s['expired']} expired" if s["expired"] else "")
             + f" · net {s['net_r']:+.2f}R"
             + (f" · win rate {100 * s['wins'] / decided:.0f}%" if decided else ""))
+    if s.get("ladder_trades"):
+        head += (f"\n🎯 Ladder: TP1 {s['tp1']} · TP2 {s['tp2']} · TP3 {s['tp3']} of {s['ladder_trades']} "
+                 f"(win = TP1 reached; net R is the real blended result)")
     icon = {"TP": "✅", "SL": "❌", "EXPIRED": "⌛"}
     day = day or state.get("day")
     rows = [f"{icon[t['status']]} {esc(t['symbol'])} {t['side']} {fmt_r(t.get('r'))}"
+            + (f" (TP{t['tp_hit']})" if t.get("tps") and t["status"] == "TP" else "")
             + (" (expired, not in net)" if t["status"] == "EXPIRED" else "")
             + ("" if _closed_day(t) == day else f" (closed {_ts(t['closed_ts']):%d/%m %H:%M})")
             for t in s["closed"]]
