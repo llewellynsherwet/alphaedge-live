@@ -174,6 +174,7 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
     cd_min = int(risk.get("cooldown_minutes", 45))
     sym_cd = int(risk.get("symbol_cooldown_minutes", 120))
     min_rr = float(risk.get("min_rr", 2.5))
+    per_setup = risk.get("per_setup_max") or {}
     max_age = int(risk.get("max_signal_age_minutes", 25))
     groups = cfg.get("correlation_groups", [])
 
@@ -190,6 +191,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
     last_trade = _parse_ts(state.get("last_trade_ts"))
     sym_last = {k: _parse_ts(v) for k, v in state.get("symbol_last_ts", {}).items()}
     zone_seen = {e["zone_key"] for e in emitted}
+    setup_counts = {}
+    for e in emitted:
+        setup_counts[e.get("setup")] = setup_counts.get(e.get("setup"), 0) + 1
     sym_counts = {}
     for e in emitted:
         sym_counts[e["symbol"]] = sym_counts.get(e["symbol"], 0) + 1
@@ -209,6 +213,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
             continue
         if len(emitted) + len(accepted) >= daily_max:
             reasons.append(f"{tag}: daily cap {daily_max} reached")
+            continue
+        if c.setup in per_setup and setup_counts.get(c.setup, 0) >= int(per_setup[c.setup]):
+            reasons.append(f"{tag}: per-setup cap {per_setup[c.setup]} for {c.setup}")
             continue
         if sym_counts.get(c.symbol, 0) >= per_sym:
             reasons.append(f"{tag}: per-symbol cap {per_sym}")
@@ -234,6 +241,7 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
         accepted.append(c)
         zone_seen.add(c.zone_key)
         sym_counts[c.symbol] = sym_counts.get(c.symbol, 0) + 1
+        setup_counts[c.setup] = setup_counts.get(c.setup, 0) + 1
         if cd_min > 0:
             # At most one trade alert per monitor loop — daily budget cannot
             # be dumped in a single 5-minute scan.

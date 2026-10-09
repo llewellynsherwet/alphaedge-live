@@ -60,6 +60,7 @@ risk:
   tp_rr: 1.5                  # 1.5R — beat 2.0R on every variant in the 51d replay (2026-10-08)
   daily_max_signals: 6        # ceiling, not a target (replay: ~2/weekday, max 5 in a day)
   per_symbol_max: 2
+  per_setup_max: {pip_builder: 3}   # pip_builder can't use more than 3 of the 6 daily alerts
   cooldown_minutes: 40
   symbol_cooldown_minutes: 120
   max_signal_age_minutes: 20
@@ -180,15 +181,17 @@ setups:
   pip_builder:
     # ── "1000 Pip Builder" — EXPERIMENTAL, DISABLED. Research backtest + caveats:
     #    docs/STRATEGY_1000PIP_BUILDER.md. Parameters marked (assumed) are guesses.
-    enabled: false
-    label: "1000 Pip Builder (experimental)"
+    enabled: true                # LIVE (2026-10-09, owner-approved) as a 2nd strategy beside smc_sweep.
+                                 # Backtest was NEGATIVE — see docs/STRATEGY_1000PIP_BUILDER.md. Set false to stop.
+    label: "🅱 Pip Builder 6-pip scalp"
     trigger_tfs: ["5m", "15m"]   # double top/bottom or engulfing trigger charts
     zone_width_atr: 0.3          # (assumed) S/R zone width × 1H ATR(14)
     min_touches: 2               # swing points needed to form a zone
     sl_buffer_pips: 1.5          # (assumed) 1–2 pips beyond the pattern extreme
     sl_max_atr: 0.5              # reject if SL wider than 0.5 × 1H ATR
     min_tp_pips: 10
-    min_rr: 1.0                  # (assumed) skip if R:R below this
+    tp_pips: 6                   # FIXED 6-pip target (owner request); null = structural swing TP
+    min_rr: 0.75                 # R:R floor (6-pip TP vs SL ≤ 8 pips); see docs for break-even win rate
     tp_max_atr: 2.5              # (assumed) ATR sanity: TP ≤ this × 1H ATR
     tp1_pips: null               # optional partial target, e.g. 10
     active_hours_utc: null       # e.g. ["07:00", "20:00"]

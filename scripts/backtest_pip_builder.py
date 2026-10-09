@@ -246,6 +246,9 @@ def variants():
     v["sl_ref_zone_edge"] = {"sl_ref": "extreme_or_zone"}
     v["tp_max_atr_4"] = {"tp_max_atr": 4.0}
     v["tp1_10p_half"] = {"tp1_pips": 10.0}
+    for rr in (0.5, 0.75, 1.0):
+        v[f"tp6_rr{rr}"] = {"tp_pips": 6.0, "min_rr": rr}
+    v["tp6_rr0.75_london_ny"] = {"tp_pips": 6.0, "min_rr": 0.75, "active_hours_utc": ["07:00", "20:00"]}
     return v
 
 

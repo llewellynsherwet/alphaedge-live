@@ -38,13 +38,16 @@ def ctx(**kw):
 
 # ── config / registry ─────────────────────────────────────────────────────────
 
-def test_disabled_by_default_and_registered():
+def test_enabled_as_second_strategy_with_6pip_tp():
     cfg = load_config()
     assert "pip_builder" in REGISTRY
-    assert cfg["setups"]["pip_builder"]["enabled"] is False
+    pbc = cfg["setups"]["pip_builder"]
+    assert pbc["enabled"] is True and pbc["tp_pips"] == 6 and 0 < pbc["min_rr"] <= 1.0
+    assert cfg["risk"]["per_setup_max"]["pip_builder"] <= cfg["risk"]["daily_max_signals"] // 2
+    assert "Pip Builder" in pbc["label"]
     assert cfg["setups"]["smc_sweep"]["enabled"] is True          # old strategy untouched
     assert cfg["risk_per_trade"]["enabled"] is False               # sizing opt-in
-    assert not any(s["name"] == "NZD/USD" and _has_enabled_setup(s, cfg) for s in cfg["symbols"])
+    assert any(s["name"] == "NZD/USD" and _has_enabled_setup(s, cfg) for s in cfg["symbols"])
 
 
 def test_old_strategy_params_unchanged():
@@ -287,3 +290,41 @@ def test_daily_frame_present_in_slicer():
     m5 = h1.resample("5min").ffill().dropna()
     f = d.FrameSlicer(m5, h1).at(pd.Timestamp("2026-09-20 12:00", tz="UTC"))
     assert "1d" in f and len(f["1d"]) >= 15
+
+
+def _tp6(monkeypatch, c, rows, jpy=False, **cfg):
+    sc = {"tp_pips": 6, "min_rr": 0.5, **cfg}
+    return _eval(monkeypatch, c, rows, sc)
+
+
+def test_fixed_6_pip_tp(monkeypatch):
+    cand = _tp6(monkeypatch, ctx(), BUY_ROWS)
+    assert cand is not None and abs(cand.tp - cand.entry - 0.0006) < 1e-9
+    assert cand.meta["tp_pips"] == 6.0 and cand.rr < 1.0           # honest: RR below 1:1 here
+
+
+def test_fixed_tp_rr_floor_rejects(monkeypatch):
+    assert _tp6(monkeypatch, ctx(), BUY_ROWS, min_rr=1.0) is None   # 6p TP vs ~10p SL → RR 0.57
+
+
+def test_fixed_6_pip_tp_jpy_pip_size():
+    assert risk_sizing.pip_size("USD/JPY") * 6 == 0.06
+
+
+def test_per_setup_cap_in_gate():
+    cfg = load_config()
+    cfg["risk"].update(per_symbol_max=9, cooldown_minutes=0, symbol_cooldown_minutes=0, daily_max_signals=6)
+    cfg["risk"]["per_setup_max"] = {"pip_builder": 1}
+    cfg["correlation_groups"] = []
+    st = _empty_day("2026-10-08")
+    a = _cand(1.1010, min_rr=1.0)
+    b = _cand(1.1010, min_rr=1.0); b.symbol = "GBP/USD"; b.zone = 1.2
+    acc, _ = gate_candidates([a], st, cfg, NOW)
+    from strategy.engine import record_emits
+    st = record_emits(st, acc, NOW)
+    acc2, why = gate_candidates([b], st, cfg, NOW)
+    assert acc2 == [] and "per-setup cap" in why[0]
+    other = Candidate(symbol="US 30", setup="smc_sweep", label="x", side="BUY", entry=100, sl=98, tp=103,
+                      bar_time=NOW, atr=2, zone=100, score=4, max_score=6)
+    acc3, _ = gate_candidates([other], st, cfg, NOW)
+    assert acc3 == [other]                                          # smc_sweep unaffected

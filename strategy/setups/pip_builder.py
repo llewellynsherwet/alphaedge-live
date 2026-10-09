@@ -52,6 +52,7 @@ DEFAULTS = {
     "min_tp_pips": 10.0, "min_rr": 1.0,           # (assumed R:R)
     "tp_pick": "nearest",                         # or "nearest_beyond_min"
     "tp_max_atr": 2.5,                            # (assumed) ATR sanity check
+    "tp_pips": None,                              # FIXED target in pips (e.g. 6 = scalp); None = structural TP
     "tp1_pips": None,                             # optional partial target
     "active_hours_utc": None,                     # e.g. ["07:00", "20:00"]
 }
@@ -298,11 +299,16 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
             risk = abs(entry - sl)
             if risk <= 0 or risk > p["sl_max_atr"] * ctx.atr1h or risk < p["min_sl_pips"] * pip:
                 continue
-            tp = pick_tp(side, entry, ctx, p, pip)
+            if p.get("tp_pips"):
+                tp = entry + (1 if side == "BUY" else -1) * float(p["tp_pips"]) * pip
+                min_tp = float(p["tp_pips"])
+            else:
+                tp = pick_tp(side, entry, ctx, p, pip)
+                min_tp = p["min_tp_pips"]
             if tp is None:
                 continue
             dist = abs(tp - entry)
-            if dist < p["min_tp_pips"] * pip or dist / risk < p["min_rr"] or dist > p["tp_max_atr"] * ctx.atr1h:
+            if dist < min_tp * pip - 1e-12 or dist / risk < p["min_rr"] or dist > p["tp_max_atr"] * ctx.atr1h:
                 continue
             blocked, why = blackout(bar_close, symbol, cfg.get("news"))
             if blocked:
@@ -323,7 +329,8 @@ def evaluate(symbol, frames, cfg, setup_cfg, now, priority=99):
         f"Daily + 4H trend agree: {arrow}trend",
         f"Location (1H): {loc_note}",
         f"Trigger ({tf}): {tr['kind']}",
-        f"SL {abs(entry - sl) / pip:.1f} pips beyond pattern extreme · TP {abs(tp - entry) / pip:.1f} pips (nearest swing / zone / band)",
+        f"SL {abs(entry - sl) / pip:.1f} pips beyond pattern extreme · TP {abs(tp - entry) / pip:.1f} pips "
+        + ("(fixed scalp target)" if p.get("tp_pips") else "(nearest swing / zone / band)"),
         f"1H ATR {ctx.atr1h / pip:.1f} pips · experimental method, parameters partly assumed",
     ]
     meta = {"min_rr": float(p["min_rr"]), "tp_on_reprice": "keep_target", "trigger_tf": tf,
