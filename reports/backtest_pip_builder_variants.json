@@ -1,0 +1,10553 @@
+{
+ "spec_default": {
+  "params": {},
+  "n_candidates": 1781,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 845,
+    "per_day": 0.632,
+    "wr": 20.5,
+    "avg_r": -0.261,
+    "net_r": -220.3,
+    "pips": -1434.0,
+    "maxdd_r": 238.5,
+    "pf": 0.67,
+    "ci95": [
+     -0.366,
+     -0.147
+    ],
+    "be_wr": 27.9,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 26.6
+   },
+   "per_weekday": 0.885,
+   "first_half": {
+    "trades": 392,
+    "per_day": 0.586,
+    "wr": 23.2,
+    "avg_r": -0.177,
+    "net_r": -69.6,
+    "pips": -487.0,
+    "maxdd_r": 98.7,
+    "pf": 0.77,
+    "ci95": [
+     -0.334,
+     -0.013
+    ],
+    "be_wr": 28.4,
+    "avg_risk_pips": 8.5,
+    "avg_reward_pips": 29.2
+   },
+   "second_half": {
+    "trades": 453,
+    "per_day": 0.678,
+    "wr": 18.1,
+    "avg_r": -0.333,
+    "net_r": -150.8,
+    "pips": -947.0,
+    "maxdd_r": 154.2,
+    "pf": 0.59,
+    "ci95": [
+     -0.474,
+     -0.184
+    ],
+    "be_wr": 27.4,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 184,
+     "per_day": 0.138,
+     "wr": 19.6,
+     "avg_r": -0.247,
+     "net_r": -45.5,
+     "pips": -400.0,
+     "maxdd_r": 59.0,
+     "pf": 0.69,
+     "ci95": [
+      -0.467,
+      0.015
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 29.7
+    },
+    "EURUSD": {
+     "trades": 78,
+     "per_day": 0.058,
+     "wr": 10.3,
+     "avg_r": -0.555,
+     "net_r": -43.3,
+     "pips": -258.0,
+     "maxdd_r": 48.9,
+     "pf": 0.37,
+     "ci95": [
+      -0.822,
+      -0.222
+     ],
+     "be_wr": 23.6,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 19.3
+    },
+    "GBPJPY": {
+     "trades": 192,
+     "per_day": 0.144,
+     "wr": 24.0,
+     "avg_r": -0.183,
+     "net_r": -35.1,
+     "pips": -291.0,
+     "maxdd_r": 42.7,
+     "pf": 0.76,
+     "ci95": [
+      -0.387,
+      0.048
+     ],
+     "be_wr": 29.4,
+     "avg_risk_pips": 10.3,
+     "avg_reward_pips": 32.7
+    },
+    "GBPUSD": {
+     "trades": 120,
+     "per_day": 0.09,
+     "wr": 23.3,
+     "avg_r": -0.127,
+     "net_r": -15.3,
+     "pips": -48.0,
+     "maxdd_r": 35.0,
+     "pf": 0.83,
+     "ci95": [
+      -0.43,
+      0.174
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 20.6
+    },
+    "NZDUSD": {
+     "trades": 36,
+     "per_day": 0.027,
+     "wr": 5.6,
+     "avg_r": -0.778,
+     "net_r": -28.0,
+     "pips": -133.0,
+     "maxdd_r": 30.5,
+     "pf": 0.16,
+     "ci95": [
+      -1.0,
+      -0.473
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 17.8
+    },
+    "USDCAD": {
+     "trades": 63,
+     "per_day": 0.047,
+     "wr": 14.3,
+     "avg_r": -0.479,
+     "net_r": -30.2,
+     "pips": -141.0,
+     "maxdd_r": 32.0,
+     "pf": 0.44,
+     "ci95": [
+      -0.767,
+      -0.137
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 17.3
+    },
+    "USDJPY": {
+     "trades": 172,
+     "per_day": 0.129,
+     "wr": 25.6,
+     "avg_r": -0.135,
+     "net_r": -23.1,
+     "pips": -162.0,
+     "maxdd_r": 27.9,
+     "pf": 0.82,
+     "ci95": [
+      -0.382,
+      0.124
+     ],
+     "be_wr": 29.8,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 29.4
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 188,
+     "per_day": 0.141,
+     "wr": 26.1,
+     "avg_r": -0.088,
+     "net_r": -16.5,
+     "pips": -89.0,
+     "maxdd_r": 52.2,
+     "pf": 0.88,
+     "ci95": [
+      -0.313,
+      0.173
+     ],
+     "be_wr": 28.8,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 27.9
+    },
+    "2024": {
+     "trades": 230,
+     "per_day": 0.63,
+     "wr": 19.1,
+     "avg_r": -0.305,
+     "net_r": -70.1,
+     "pips": -524.0,
+     "maxdd_r": 74.8,
+     "pf": 0.62,
+     "ci95": [
+      -0.503,
+      -0.099
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 31.0
+    },
+    "2025": {
+     "trades": 278,
+     "per_day": 0.762,
+     "wr": 20.1,
+     "avg_r": -0.29,
+     "net_r": -80.5,
+     "pips": -521.0,
+     "maxdd_r": 80.7,
+     "pf": 0.63,
+     "ci95": [
+      -0.473,
+      -0.104
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.6
+    },
+    "2026": {
+     "trades": 149,
+     "per_day": 0.111,
+     "wr": 16.1,
+     "avg_r": -0.357,
+     "net_r": -53.2,
+     "pips": -299.0,
+     "maxdd_r": 59.0,
+     "pf": 0.57,
+     "ci95": [
+      -0.613,
+      -0.094
+     ],
+     "be_wr": 25.1,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 22.2
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 398,
+     "per_day": 0.298,
+     "wr": 20.9,
+     "avg_r": -0.245,
+     "net_r": -97.5,
+     "pips": -597.0,
+     "maxdd_r": 110.5,
+     "pf": 0.69,
+     "ci95": [
+      -0.411,
+      -0.081
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.8
+    },
+    "bullish engulfing": {
+     "trades": 431,
+     "per_day": 0.322,
+     "wr": 19.5,
+     "avg_r": -0.291,
+     "net_r": -125.4,
+     "pips": -872.0,
+     "maxdd_r": 138.8,
+     "pf": 0.64,
+     "ci95": [
+      -0.43,
+      -0.141
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 9,
+     "per_day": 0.007,
+     "wr": 33.3,
+     "avg_r": -0.224,
+     "net_r": -2.0,
+     "pips": -7.0,
+     "maxdd_r": 3.0,
+     "pf": 0.61,
+     "ci95": [
+      -0.783,
+      0.463
+     ],
+     "be_wr": 48.4,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 17.7
+    },
+    "double top (neckline break)": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 42.9,
+     "avg_r": 0.644,
+     "net_r": 4.5,
+     "pips": 42.0,
+     "maxdd_r": 2.0,
+     "pf": 2.13,
+     "ci95": [
+      -0.592,
+      2.047
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 26.0
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 330,
+    "per_day": 0.247,
+    "wr": 19.4,
+    "avg_r": -0.291,
+    "net_r": -96.2,
+    "pips": -442.0,
+    "maxdd_r": 100.1,
+    "pf": 0.64,
+    "ci95": [
+     -0.461,
+     -0.125
+    ],
+    "be_wr": 27.6,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.9
+   },
+   "per_weekday": 0.346,
+   "first_half": {
+    "trades": 163,
+    "per_day": 0.244,
+    "wr": 24.5,
+    "avg_r": -0.144,
+    "net_r": -23.5,
+    "pips": -112.0,
+    "maxdd_r": 35.7,
+    "pf": 0.81,
+    "ci95": [
+     -0.396,
+     0.121
+    ],
+    "be_wr": 28.8,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 26.2
+   },
+   "second_half": {
+    "trades": 167,
+    "per_day": 0.25,
+    "wr": 14.4,
+    "avg_r": -0.435,
+    "net_r": -72.6,
+    "pips": -330.0,
+    "maxdd_r": 73.6,
+    "pf": 0.49,
+    "ci95": [
+     -0.642,
+     -0.213
+    ],
+    "be_wr": 25.8,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 23.6
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 69,
+     "per_day": 0.052,
+     "wr": 17.4,
+     "avg_r": -0.381,
+     "net_r": -26.3,
+     "pips": -197.0,
+     "maxdd_r": 29.8,
+     "pf": 0.54,
+     "ci95": [
+      -0.705,
+      0.018
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 27.6
+    },
+    "EURUSD": {
+     "trades": 27,
+     "per_day": 0.02,
+     "wr": 7.4,
+     "avg_r": -0.764,
+     "net_r": -20.6,
+     "pips": -127.0,
+     "maxdd_r": 20.6,
+     "pf": 0.18,
+     "ci95": [
+      -1.0,
+      -0.336
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 19.0
+    },
+    "GBPJPY": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 34.5,
+     "avg_r": 0.203,
+     "net_r": 11.2,
+     "pips": 179.0,
+     "maxdd_r": 13.5,
+     "pf": 1.31,
+     "ci95": [
+      -0.261,
+      0.693
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 31.1
+    },
+    "GBPUSD": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 17.0,
+     "avg_r": -0.278,
+     "net_r": -14.7,
+     "pips": -63.0,
+     "maxdd_r": 25.6,
+     "pf": 0.66,
+     "ci95": [
+      -0.69,
+      0.206
+     ],
+     "be_wr": 24.3,
+     "avg_risk_pips": 6.1,
+     "avg_reward_pips": 19.0
+    },
+    "NZDUSD": {
+     "trades": 30,
+     "per_day": 0.022,
+     "wr": 6.7,
+     "avg_r": -0.733,
+     "net_r": -22.0,
+     "pips": -101.0,
+     "maxdd_r": 24.5,
+     "pf": 0.2,
+     "ci95": [
+      -1.0,
+      -0.363
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 17.2
+    },
+    "USDCAD": {
+     "trades": 31,
+     "per_day": 0.023,
+     "wr": 19.4,
+     "avg_r": -0.274,
+     "net_r": -8.5,
+     "pips": -16.0,
+     "maxdd_r": 11.0,
+     "pf": 0.66,
+     "ci95": [
+      -0.781,
+      0.318
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 5.5,
+     "avg_reward_pips": 16.6
+    },
+    "USDJPY": {
+     "trades": 65,
+     "per_day": 0.049,
+     "wr": 21.5,
+     "avg_r": -0.233,
+     "net_r": -15.2,
+     "pips": -116.0,
+     "maxdd_r": 19.9,
+     "pf": 0.7,
+     "ci95": [
+      -0.615,
+      0.201
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 31.3
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 85,
+     "per_day": 0.064,
+     "wr": 28.2,
+     "avg_r": -0.08,
+     "net_r": -6.8,
+     "pips": 21.0,
+     "maxdd_r": 20.1,
+     "pf": 0.89,
+     "ci95": [
+      -0.401,
+      0.275
+     ],
+     "be_wr": 30.9,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 25.3
+    },
+    "2024": {
+     "trades": 86,
+     "per_day": 0.236,
+     "wr": 20.9,
+     "avg_r": -0.183,
+     "net_r": -15.7,
+     "pips": -95.0,
+     "maxdd_r": 24.9,
+     "pf": 0.77,
+     "ci95": [
+      -0.528,
+      0.185
+     ],
+     "be_wr": 25.6,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 27.6
+    },
+    "2025": {
+     "trades": 99,
+     "per_day": 0.271,
+     "wr": 16.2,
+     "avg_r": -0.413,
+     "net_r": -40.8,
+     "pips": -195.0,
+     "maxdd_r": 40.8,
+     "pf": 0.5,
+     "ci95": [
+      -0.666,
+      -0.106
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 24.2
+    },
+    "2026": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 10.0,
+     "avg_r": -0.546,
+     "net_r": -32.8,
+     "pips": -172.0,
+     "maxdd_r": 32.8,
+     "pf": 0.39,
+     "ci95": [
+      -0.875,
+      -0.133
+     ],
+     "be_wr": 22.0,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 21.5
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 148,
+     "per_day": 0.111,
+     "wr": 17.6,
+     "avg_r": -0.383,
+     "net_r": -56.7,
+     "pips": -305.0,
+     "maxdd_r": 56.8,
+     "pf": 0.54,
+     "ci95": [
+      -0.611,
+      -0.136
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 26.1
+    },
+    "bullish engulfing": {
+     "trades": 176,
+     "per_day": 0.132,
+     "wr": 20.5,
+     "avg_r": -0.23,
+     "net_r": -40.5,
+     "pips": -139.0,
+     "maxdd_r": 47.4,
+     "pf": 0.71,
+     "ci95": [
+      -0.464,
+      0.029
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 23.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.002,
+     "net_r": 0.0,
+     "pips": 4.0,
+     "maxdd_r": 1.0,
+     "pf": 1.0,
+     "ci95": [
+      -1.0,
+      1.458
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 20.9
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.339,
+     "net_r": 1.0,
+     "pips": -2.0,
+     "maxdd_r": 1.0,
+     "pf": 1.51,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 30.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 701,
+   "per_day": 0.524,
+   "wr": 18.1,
+   "avg_r": -0.374,
+   "net_r": -262.3,
+   "pips": -2004.0,
+   "maxdd_r": 269.7,
+   "pf": 0.54,
+   "ci95": [
+    -0.479,
+    -0.259
+   ],
+   "be_wr": 29.1,
+   "avg_risk_pips": 8.6,
+   "avg_reward_pips": 27.2
+  },
+  "raw_zero_cost": {
+   "trades": 893,
+   "per_day": 0.668,
+   "wr": 25.1,
+   "avg_r": -0.006,
+   "net_r": -5.0,
+   "pips": -31.0,
+   "maxdd_r": 71.2,
+   "pf": 0.99,
+   "ci95": [
+    -0.13,
+    0.117
+   ],
+   "be_wr": 25.4,
+   "avg_risk_pips": 7.5,
+   "avg_reward_pips": 26.5
+  }
+ },
+ "zone_width_0.2": {
+  "params": {
+   "zone_width_atr": 0.2
+  },
+  "n_candidates": 1479,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 700,
+    "per_day": 0.524,
+    "wr": 19.9,
+    "avg_r": -0.276,
+    "net_r": -193.2,
+    "pips": -1228.0,
+    "maxdd_r": 206.4,
+    "pf": 0.65,
+    "ci95": [
+     -0.392,
+     -0.161
+    ],
+    "be_wr": 27.6,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 27.2
+   },
+   "per_weekday": 0.733,
+   "first_half": {
+    "trades": 325,
+    "per_day": 0.486,
+    "wr": 22.5,
+    "avg_r": -0.221,
+    "net_r": -71.7,
+    "pips": -425.0,
+    "maxdd_r": 91.8,
+    "pf": 0.71,
+    "ci95": [
+     -0.38,
+     -0.045
+    ],
+    "be_wr": 29.0,
+    "avg_risk_pips": 8.4,
+    "avg_reward_pips": 30.1
+   },
+   "second_half": {
+    "trades": 375,
+    "per_day": 0.561,
+    "wr": 17.6,
+    "avg_r": -0.324,
+    "net_r": -121.5,
+    "pips": -803.0,
+    "maxdd_r": 126.1,
+    "pf": 0.6,
+    "ci95": [
+     -0.487,
+     -0.157
+    ],
+    "be_wr": 26.2,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 24.8
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 138,
+     "per_day": 0.103,
+     "wr": 17.4,
+     "avg_r": -0.33,
+     "net_r": -45.6,
+     "pips": -386.0,
+     "maxdd_r": 52.2,
+     "pf": 0.6,
+     "ci95": [
+      -0.59,
+      -0.048
+     ],
+     "be_wr": 26.2,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 31.0
+    },
+    "EURUSD": {
+     "trades": 65,
+     "per_day": 0.049,
+     "wr": 9.2,
+     "avg_r": -0.588,
+     "net_r": -38.2,
+     "pips": -222.0,
+     "maxdd_r": 43.8,
+     "pf": 0.34,
+     "ci95": [
+      -0.872,
+      -0.216
+     ],
+     "be_wr": 23.1,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 20.5
+    },
+    "GBPJPY": {
+     "trades": 171,
+     "per_day": 0.128,
+     "wr": 22.2,
+     "avg_r": -0.25,
+     "net_r": -42.8,
+     "pips": -394.0,
+     "maxdd_r": 47.5,
+     "pf": 0.68,
+     "ci95": [
+      -0.471,
+      -0.016
+     ],
+     "be_wr": 29.7,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 32.1
+    },
+    "GBPUSD": {
+     "trades": 96,
+     "per_day": 0.072,
+     "wr": 21.9,
+     "avg_r": -0.146,
+     "net_r": -14.0,
+     "pips": -39.0,
+     "maxdd_r": 21.2,
+     "pf": 0.81,
+     "ci95": [
+      -0.493,
+      0.218
+     ],
+     "be_wr": 25.8,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 22.2
+    },
+    "NZDUSD": {
+     "trades": 34,
+     "per_day": 0.025,
+     "wr": 5.9,
+     "avg_r": -0.748,
+     "net_r": -25.4,
+     "pips": -119.0,
+     "maxdd_r": 28.0,
+     "pf": 0.19,
+     "ci95": [
+      -1.0,
+      -0.377
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 18.0
+    },
+    "USDCAD": {
+     "trades": 50,
+     "per_day": 0.037,
+     "wr": 18.0,
+     "avg_r": -0.256,
+     "net_r": -12.8,
+     "pips": -43.0,
+     "maxdd_r": 18.4,
+     "pf": 0.69,
+     "ci95": [
+      -0.687,
+      0.255
+     ],
+     "be_wr": 24.2,
+     "avg_risk_pips": 5.8,
+     "avg_reward_pips": 18.3
+    },
+    "USDJPY": {
+     "trades": 146,
+     "per_day": 0.109,
+     "wr": 26.7,
+     "avg_r": -0.099,
+     "net_r": -14.4,
+     "pips": -26.0,
+     "maxdd_r": 18.9,
+     "pf": 0.87,
+     "ci95": [
+      -0.375,
+      0.185
+     ],
+     "be_wr": 29.6,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 29.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 167,
+     "per_day": 0.125,
+     "wr": 21.0,
+     "avg_r": -0.283,
+     "net_r": -47.3,
+     "pips": -280.0,
+     "maxdd_r": 60.1,
+     "pf": 0.64,
+     "ci95": [
+      -0.508,
+      -0.053
+     ],
+     "be_wr": 29.5,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 29.2
+    },
+    "2024": {
+     "trades": 177,
+     "per_day": 0.485,
+     "wr": 21.5,
+     "avg_r": -0.245,
+     "net_r": -43.3,
+     "pips": -302.0,
+     "maxdd_r": 46.2,
+     "pf": 0.69,
+     "ci95": [
+      -0.457,
+      -0.006
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 9.2,
+     "avg_reward_pips": 31.5
+    },
+    "2025": {
+     "trades": 226,
+     "per_day": 0.619,
+     "wr": 20.4,
+     "avg_r": -0.252,
+     "net_r": -56.9,
+     "pips": -378.0,
+     "maxdd_r": 57.1,
+     "pf": 0.68,
+     "ci95": [
+      -0.446,
+      -0.035
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.9
+    },
+    "2026": {
+     "trades": 130,
+     "per_day": 0.097,
+     "wr": 15.4,
+     "avg_r": -0.351,
+     "net_r": -45.6,
+     "pips": -268.0,
+     "maxdd_r": 52.5,
+     "pf": 0.58,
+     "ci95": [
+      -0.612,
+      -0.058
+     ],
+     "be_wr": 23.8,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 23.1
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 323,
+     "per_day": 0.242,
+     "wr": 18.6,
+     "avg_r": -0.315,
+     "net_r": -101.7,
+     "pips": -593.0,
+     "maxdd_r": 110.8,
+     "pf": 0.61,
+     "ci95": [
+      -0.481,
+      -0.135
+     ],
+     "be_wr": 27.2,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.8
+    },
+    "bullish engulfing": {
+     "trades": 365,
+     "per_day": 0.273,
+     "wr": 20.3,
+     "avg_r": -0.265,
+     "net_r": -96.9,
+     "pips": -702.0,
+     "maxdd_r": 104.0,
+     "pf": 0.67,
+     "ci95": [
+      -0.426,
+      -0.102
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 26.9
+    },
+    "double bottom (neckline break)": {
+     "trades": 6,
+     "per_day": 0.004,
+     "wr": 33.3,
+     "avg_r": -0.088,
+     "net_r": -0.5,
+     "pips": 9.0,
+     "maxdd_r": 2.0,
+     "pf": 0.85,
+     "ci95": [
+      -0.909,
+      0.766
+     ],
+     "be_wr": 40.6,
+     "avg_risk_pips": 8.9,
+     "avg_reward_pips": 21.1
+    },
+    "double top (neckline break)": {
+     "trades": 6,
+     "per_day": 0.004,
+     "wr": 50.0,
+     "avg_r": 0.984,
+     "net_r": 5.9,
+     "pips": 58.0,
+     "maxdd_r": 2.0,
+     "pf": 2.97,
+     "ci95": [
+      -0.503,
+      2.62
+     ],
+     "be_wr": 25.2,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 22.9
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 303,
+    "per_day": 0.227,
+    "wr": 19.8,
+    "avg_r": -0.279,
+    "net_r": -84.5,
+    "pips": -450.0,
+    "maxdd_r": 85.7,
+    "pf": 0.65,
+    "ci95": [
+     -0.442,
+     -0.099
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 7.3,
+    "avg_reward_pips": 26.1
+   },
+   "per_weekday": 0.317,
+   "first_half": {
+    "trades": 151,
+    "per_day": 0.226,
+    "wr": 23.2,
+    "avg_r": -0.214,
+    "net_r": -32.3,
+    "pips": -186.0,
+    "maxdd_r": 43.7,
+    "pf": 0.72,
+    "ci95": [
+     -0.451,
+     0.043
+    ],
+    "be_wr": 29.8,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 28.2
+   },
+   "second_half": {
+    "trades": 152,
+    "per_day": 0.227,
+    "wr": 16.4,
+    "avg_r": -0.343,
+    "net_r": -52.2,
+    "pips": -264.0,
+    "maxdd_r": 52.2,
+    "pf": 0.59,
+    "ci95": [
+     -0.582,
+     -0.066
+    ],
+    "be_wr": 25.2,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 24.1
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 66,
+     "per_day": 0.049,
+     "wr": 18.2,
+     "avg_r": -0.242,
+     "net_r": -16.0,
+     "pips": -154.0,
+     "maxdd_r": 19.9,
+     "pf": 0.7,
+     "ci95": [
+      -0.632,
+      0.2
+     ],
+     "be_wr": 24.3,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 32.5
+    },
+    "EURUSD": {
+     "trades": 27,
+     "per_day": 0.02,
+     "wr": 7.4,
+     "avg_r": -0.764,
+     "net_r": -20.6,
+     "pips": -112.0,
+     "maxdd_r": 20.6,
+     "pf": 0.18,
+     "ci95": [
+      -1.0,
+      -0.336
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 20.3
+    },
+    "GBPJPY": {
+     "trades": 52,
+     "per_day": 0.039,
+     "wr": 32.7,
+     "avg_r": 0.017,
+     "net_r": 0.9,
+     "pips": 43.0,
+     "maxdd_r": 10.4,
+     "pf": 1.03,
+     "ci95": [
+      -0.388,
+      0.459
+     ],
+     "be_wr": 32.1,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 31.0
+    },
+    "GBPUSD": {
+     "trades": 45,
+     "per_day": 0.034,
+     "wr": 17.8,
+     "avg_r": -0.281,
+     "net_r": -12.6,
+     "pips": -36.0,
+     "maxdd_r": 18.6,
+     "pf": 0.65,
+     "ci95": [
+      -0.724,
+      0.228
+     ],
+     "be_wr": 25.1,
+     "avg_risk_pips": 6.1,
+     "avg_reward_pips": 21.6
+    },
+    "NZDUSD": {
+     "trades": 28,
+     "per_day": 0.021,
+     "wr": 7.1,
+     "avg_r": -0.693,
+     "net_r": -19.4,
+     "pips": -87.0,
+     "maxdd_r": 22.0,
+     "pf": 0.24,
+     "ci95": [
+      -1.0,
+      -0.263
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 17.4
+    },
+    "USDCAD": {
+     "trades": 28,
+     "per_day": 0.021,
+     "wr": 25.0,
+     "avg_r": -0.068,
+     "net_r": -1.9,
+     "pips": 11.0,
+     "maxdd_r": 5.5,
+     "pf": 0.91,
+     "ci95": [
+      -0.636,
+      0.612
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 16.5
+    },
+    "USDJPY": {
+     "trades": 57,
+     "per_day": 0.043,
+     "wr": 21.1,
+     "avg_r": -0.261,
+     "net_r": -14.8,
+     "pips": -114.0,
+     "maxdd_r": 21.7,
+     "pf": 0.67,
+     "ci95": [
+      -0.642,
+      0.186
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 29.7
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 83,
+     "per_day": 0.062,
+     "wr": 22.9,
+     "avg_r": -0.285,
+     "net_r": -23.6,
+     "pips": -96.0,
+     "maxdd_r": 24.9,
+     "pf": 0.62,
+     "ci95": [
+      -0.567,
+      0.015
+     ],
+     "be_wr": 32.7,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 26.6
+    },
+    "2024": {
+     "trades": 75,
+     "per_day": 0.205,
+     "wr": 21.3,
+     "avg_r": -0.209,
+     "net_r": -15.7,
+     "pips": -132.0,
+     "maxdd_r": 21.8,
+     "pf": 0.73,
+     "ci95": [
+      -0.559,
+      0.193
+     ],
+     "be_wr": 27.0,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 29.9
+    },
+    "2025": {
+     "trades": 89,
+     "per_day": 0.244,
+     "wr": 20.2,
+     "avg_r": -0.253,
+     "net_r": -22.6,
+     "pips": -86.0,
+     "maxdd_r": 25.3,
+     "pf": 0.68,
+     "ci95": [
+      -0.571,
+      0.101
+     ],
+     "be_wr": 27.3,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 24.9
+    },
+    "2026": {
+     "trades": 56,
+     "per_day": 0.042,
+     "wr": 12.5,
+     "avg_r": -0.404,
+     "net_r": -22.6,
+     "pips": -136.0,
+     "maxdd_r": 29.5,
+     "pf": 0.54,
+     "ci95": [
+      -0.796,
+      0.085
+     ],
+     "be_wr": 21.0,
+     "avg_risk_pips": 6.7,
+     "avg_reward_pips": 22.4
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 134,
+     "per_day": 0.1,
+     "wr": 17.2,
+     "avg_r": -0.405,
+     "net_r": -54.3,
+     "pips": -310.0,
+     "maxdd_r": 54.3,
+     "pf": 0.51,
+     "ci95": [
+      -0.626,
+      -0.163
+     ],
+     "be_wr": 28.8,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 27.4
+    },
+    "bullish engulfing": {
+     "trades": 164,
+     "per_day": 0.123,
+     "wr": 21.3,
+     "avg_r": -0.197,
+     "net_r": -32.4,
+     "pips": -155.0,
+     "maxdd_r": 37.5,
+     "pf": 0.75,
+     "ci95": [
+      -0.443,
+      0.081
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 25.3
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.037,
+     "net_r": 0.1,
+     "pips": 5.0,
+     "maxdd_r": 1.0,
+     "pf": 1.08,
+     "ci95": [
+      -1.0,
+      1.563
+     ],
+     "be_wr": 39.0,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 21.6
+    },
+    "double top (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 50.0,
+     "avg_r": 1.008,
+     "net_r": 2.0,
+     "pips": 10.0,
+     "maxdd_r": 1.0,
+     "pf": 3.02,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 21.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 572,
+   "per_day": 0.428,
+   "wr": 17.0,
+   "avg_r": -0.413,
+   "net_r": -236.5,
+   "pips": -1724.0,
+   "maxdd_r": 239.9,
+   "pf": 0.5,
+   "ci95": [
+    -0.524,
+    -0.286
+   ],
+   "be_wr": 29.0,
+   "avg_risk_pips": 8.6,
+   "avg_reward_pips": 27.9
+  },
+  "raw_zero_cost": {
+   "trades": 746,
+   "per_day": 0.558,
+   "wr": 25.5,
+   "avg_r": -0.018,
+   "net_r": -13.6,
+   "pips": 47.0,
+   "maxdd_r": 64.4,
+   "pf": 0.98,
+   "ci95": [
+    -0.158,
+    0.128
+   ],
+   "be_wr": 26.0,
+   "avg_risk_pips": 7.6,
+   "avg_reward_pips": 27.1
+  }
+ },
+ "zone_width_0.5": {
+  "params": {
+   "zone_width_atr": 0.5
+  },
+  "n_candidates": 2122,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 983,
+    "per_day": 0.735,
+    "wr": 22.2,
+    "avg_r": -0.204,
+    "net_r": -200.7,
+    "pips": -1370.0,
+    "maxdd_r": 209.2,
+    "pf": 0.74,
+    "ci95": [
+     -0.301,
+     -0.097
+    ],
+    "be_wr": 28.1,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 25.6
+   },
+   "per_weekday": 1.029,
+   "first_half": {
+    "trades": 468,
+    "per_day": 0.7,
+    "wr": 24.6,
+    "avg_r": -0.124,
+    "net_r": -57.8,
+    "pips": -520.0,
+    "maxdd_r": 80.0,
+    "pf": 0.83,
+    "ci95": [
+     -0.277,
+     0.017
+    ],
+    "be_wr": 28.3,
+    "avg_risk_pips": 8.7,
+    "avg_reward_pips": 28.0
+   },
+   "second_half": {
+    "trades": 515,
+    "per_day": 0.77,
+    "wr": 20.0,
+    "avg_r": -0.277,
+    "net_r": -142.8,
+    "pips": -850.0,
+    "maxdd_r": 147.0,
+    "pf": 0.65,
+    "ci95": [
+     -0.411,
+     -0.134
+    ],
+    "be_wr": 27.9,
+    "avg_risk_pips": 7.4,
+    "avg_reward_pips": 23.3
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 220,
+     "per_day": 0.165,
+     "wr": 23.2,
+     "avg_r": -0.145,
+     "net_r": -31.8,
+     "pips": -274.0,
+     "maxdd_r": 44.1,
+     "pf": 0.81,
+     "ci95": [
+      -0.362,
+      0.089
+     ],
+     "be_wr": 27.2,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 28.4
+    },
+    "EURUSD": {
+     "trades": 84,
+     "per_day": 0.063,
+     "wr": 16.7,
+     "avg_r": -0.38,
+     "net_r": -32.0,
+     "pips": -199.0,
+     "maxdd_r": 45.0,
+     "pf": 0.54,
+     "ci95": [
+      -0.669,
+      -0.057
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 19.2
+    },
+    "GBPJPY": {
+     "trades": 222,
+     "per_day": 0.166,
+     "wr": 26.6,
+     "avg_r": -0.041,
+     "net_r": -9.0,
+     "pips": -77.0,
+     "maxdd_r": 22.1,
+     "pf": 0.94,
+     "ci95": [
+      -0.26,
+      0.19
+     ],
+     "be_wr": 27.9,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 30.5
+    },
+    "GBPUSD": {
+     "trades": 130,
+     "per_day": 0.097,
+     "wr": 19.2,
+     "avg_r": -0.219,
+     "net_r": -28.5,
+     "pips": -157.0,
+     "maxdd_r": 35.8,
+     "pf": 0.72,
+     "ci95": [
+      -0.5,
+      0.089
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 20.7
+    },
+    "NZDUSD": {
+     "trades": 40,
+     "per_day": 0.03,
+     "wr": 12.5,
+     "avg_r": -0.564,
+     "net_r": -22.6,
+     "pips": -100.0,
+     "maxdd_r": 25.7,
+     "pf": 0.35,
+     "ci95": [
+      -0.877,
+      -0.195
+     ],
+     "be_wr": 29.6,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 16.3
+    },
+    "USDCAD": {
+     "trades": 79,
+     "per_day": 0.059,
+     "wr": 20.3,
+     "avg_r": -0.309,
+     "net_r": -24.4,
+     "pips": -93.0,
+     "maxdd_r": 25.9,
+     "pf": 0.61,
+     "ci95": [
+      -0.604,
+      0.032
+     ],
+     "be_wr": 29.3,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 17.1
+    },
+    "USDJPY": {
+     "trades": 208,
+     "per_day": 0.156,
+     "wr": 23.1,
+     "avg_r": -0.252,
+     "net_r": -52.4,
+     "pips": -469.0,
+     "maxdd_r": 53.8,
+     "pf": 0.67,
+     "ci95": [
+      -0.446,
+      -0.04
+     ],
+     "be_wr": 31.0,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 28.0
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 222,
+     "per_day": 0.166,
+     "wr": 26.1,
+     "avg_r": -0.119,
+     "net_r": -26.5,
+     "pips": -218.0,
+     "maxdd_r": 52.2,
+     "pf": 0.84,
+     "ci95": [
+      -0.317,
+      0.096
+     ],
+     "be_wr": 29.8,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 25.6
+    },
+    "2024": {
+     "trades": 272,
+     "per_day": 0.745,
+     "wr": 22.1,
+     "avg_r": -0.169,
+     "net_r": -46.1,
+     "pips": -404.0,
+     "maxdd_r": 52.1,
+     "pf": 0.78,
+     "ci95": [
+      -0.353,
+      0.039
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 30.1
+    },
+    "2025": {
+     "trades": 322,
+     "per_day": 0.882,
+     "wr": 21.7,
+     "avg_r": -0.228,
+     "net_r": -73.3,
+     "pips": -463.0,
+     "maxdd_r": 80.3,
+     "pf": 0.71,
+     "ci95": [
+      -0.401,
+      -0.049
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 23.9
+    },
+    "2026": {
+     "trades": 167,
+     "per_day": 0.125,
+     "wr": 18.0,
+     "avg_r": -0.329,
+     "net_r": -54.9,
+     "pips": -284.0,
+     "maxdd_r": 61.4,
+     "pf": 0.6,
+     "ci95": [
+      -0.562,
+      -0.087
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 21.4
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 446,
+     "per_day": 0.334,
+     "wr": 21.7,
+     "avg_r": -0.221,
+     "net_r": -98.5,
+     "pips": -634.0,
+     "maxdd_r": 103.4,
+     "pf": 0.72,
+     "ci95": [
+      -0.374,
+      -0.058
+     ],
+     "be_wr": 28.0,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 27.1
+    },
+    "bullish engulfing": {
+     "trades": 525,
+     "per_day": 0.393,
+     "wr": 22.7,
+     "avg_r": -0.185,
+     "net_r": -97.4,
+     "pips": -685.0,
+     "maxdd_r": 104.4,
+     "pf": 0.76,
+     "ci95": [
+      -0.319,
+      -0.038
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 24.3
+    },
+    "double bottom (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 20.0,
+     "avg_r": -0.376,
+     "net_r": -1.9,
+     "pips": -5.0,
+     "maxdd_r": 2.0,
+     "pf": 0.42,
+     "ci95": [
+      -0.952,
+      0.511
+     ],
+     "be_wr": 42.8,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 17.7
+    },
+    "double top (neckline break)": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 14.3,
+     "avg_r": -0.426,
+     "net_r": -3.0,
+     "pips": -45.0,
+     "maxdd_r": 4.0,
+     "pf": 0.5,
+     "ci95": [
+      -1.0,
+      0.721
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 31.7
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 358,
+    "per_day": 0.268,
+    "wr": 21.2,
+    "avg_r": -0.255,
+    "net_r": -91.1,
+    "pips": -396.0,
+    "maxdd_r": 91.1,
+    "pf": 0.67,
+    "ci95": [
+     -0.417,
+     -0.083
+    ],
+    "be_wr": 28.7,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 23.9
+   },
+   "per_weekday": 0.375,
+   "first_half": {
+    "trades": 182,
+    "per_day": 0.272,
+    "wr": 24.2,
+    "avg_r": -0.179,
+    "net_r": -32.6,
+    "pips": -224.0,
+    "maxdd_r": 37.7,
+    "pf": 0.76,
+    "ci95": [
+     -0.39,
+     0.054
+    ],
+    "be_wr": 29.6,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 25.1
+   },
+   "second_half": {
+    "trades": 176,
+    "per_day": 0.263,
+    "wr": 18.2,
+    "avg_r": -0.333,
+    "net_r": -58.6,
+    "pips": -172.0,
+    "maxdd_r": 60.2,
+    "pf": 0.59,
+    "ci95": [
+     -0.55,
+     -0.098
+    ],
+    "be_wr": 27.5,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 22.7
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 74,
+     "per_day": 0.055,
+     "wr": 21.6,
+     "avg_r": -0.241,
+     "net_r": -17.8,
+     "pips": -94.0,
+     "maxdd_r": 21.1,
+     "pf": 0.69,
+     "ci95": [
+      -0.571,
+      0.137
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 26.7
+    },
+    "EURUSD": {
+     "trades": 32,
+     "per_day": 0.024,
+     "wr": 18.8,
+     "avg_r": -0.359,
+     "net_r": -11.5,
+     "pips": -69.0,
+     "maxdd_r": 20.2,
+     "pf": 0.56,
+     "ci95": [
+      -0.836,
+      0.202
+     ],
+     "be_wr": 29.2,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 17.3
+    },
+    "GBPJPY": {
+     "trades": 71,
+     "per_day": 0.053,
+     "wr": 31.0,
+     "avg_r": 0.073,
+     "net_r": 5.2,
+     "pips": 127.0,
+     "maxdd_r": 11.0,
+     "pf": 1.11,
+     "ci95": [
+      -0.305,
+      0.499
+     ],
+     "be_wr": 28.9,
+     "avg_risk_pips": 9.8,
+     "avg_reward_pips": 29.3
+    },
+    "GBPUSD": {
+     "trades": 57,
+     "per_day": 0.043,
+     "wr": 17.5,
+     "avg_r": -0.278,
+     "net_r": -15.9,
+     "pips": -73.0,
+     "maxdd_r": 21.8,
+     "pf": 0.65,
+     "ci95": [
+      -0.661,
+      0.201
+     ],
+     "be_wr": 25.1,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 19.5
+    },
+    "NZDUSD": {
+     "trades": 29,
+     "per_day": 0.022,
+     "wr": 10.3,
+     "avg_r": -0.636,
+     "net_r": -18.4,
+     "pips": -83.0,
+     "maxdd_r": 22.6,
+     "pf": 0.28,
+     "ci95": [
+      -0.981,
+      -0.196
+     ],
+     "be_wr": 29.9,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 16.6
+    },
+    "USDCAD": {
+     "trades": 35,
+     "per_day": 0.026,
+     "wr": 22.9,
+     "avg_r": -0.191,
+     "net_r": -6.7,
+     "pips": 5.0,
+     "maxdd_r": 10.0,
+     "pf": 0.75,
+     "ci95": [
+      -0.675,
+      0.368
+     ],
+     "be_wr": 28.3,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 16.4
+    },
+    "USDJPY": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 18.3,
+     "avg_r": -0.434,
+     "net_r": -26.0,
+     "pips": -208.0,
+     "maxdd_r": 26.7,
+     "pf": 0.47,
+     "ci95": [
+      -0.75,
+      -0.049
+     ],
+     "be_wr": 32.6,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 29.7
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 94,
+     "per_day": 0.07,
+     "wr": 27.7,
+     "avg_r": -0.088,
+     "net_r": -8.2,
+     "pips": -41.0,
+     "maxdd_r": 19.0,
+     "pf": 0.88,
+     "ci95": [
+      -0.399,
+      0.247
+     ],
+     "be_wr": 30.5,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 24.3
+    },
+    "2024": {
+     "trades": 96,
+     "per_day": 0.263,
+     "wr": 20.8,
+     "avg_r": -0.243,
+     "net_r": -23.4,
+     "pips": -149.0,
+     "maxdd_r": 30.7,
+     "pf": 0.69,
+     "ci95": [
+      -0.549,
+      0.086
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.7
+    },
+    "2025": {
+     "trades": 104,
+     "per_day": 0.285,
+     "wr": 21.2,
+     "avg_r": -0.291,
+     "net_r": -30.2,
+     "pips": -79.0,
+     "maxdd_r": 30.8,
+     "pf": 0.63,
+     "ci95": [
+      -0.539,
+      -0.007
+     ],
+     "be_wr": 30.3,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 23.3
+    },
+    "2026": {
+     "trades": 64,
+     "per_day": 0.048,
+     "wr": 12.5,
+     "avg_r": -0.458,
+     "net_r": -29.3,
+     "pips": -128.0,
+     "maxdd_r": 29.7,
+     "pf": 0.48,
+     "ci95": [
+      -0.813,
+      -0.028
+     ],
+     "be_wr": 23.1,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 21.7
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 155,
+     "per_day": 0.116,
+     "wr": 20.0,
+     "avg_r": -0.34,
+     "net_r": -52.8,
+     "pips": -288.0,
+     "maxdd_r": 52.8,
+     "pf": 0.57,
+     "ci95": [
+      -0.549,
+      -0.104
+     ],
+     "be_wr": 30.3,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 25.3
+    },
+    "bullish engulfing": {
+     "trades": 198,
+     "per_day": 0.148,
+     "wr": 22.2,
+     "avg_r": -0.193,
+     "net_r": -38.2,
+     "pips": -100.0,
+     "maxdd_r": 39.8,
+     "pf": 0.75,
+     "ci95": [
+      -0.423,
+      0.052
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 23.0
+    },
+    "double bottom (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -0.607,
+     "net_r": -1.2,
+     "pips": -11.0,
+     "maxdd_r": 1.2,
+     "pf": 0.0,
+     "ci95": [
+      -0.761,
+      -0.452
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 11.9
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.339,
+     "net_r": 1.0,
+     "pips": 3.0,
+     "maxdd_r": 1.0,
+     "pf": 1.51,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 17.5
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 829,
+   "per_day": 0.62,
+   "wr": 19.8,
+   "avg_r": -0.328,
+   "net_r": -272.2,
+   "pips": -2194.0,
+   "maxdd_r": 272.2,
+   "pf": 0.59,
+   "ci95": [
+    -0.425,
+    -0.228
+   ],
+   "be_wr": 29.6,
+   "avg_risk_pips": 8.6,
+   "avg_reward_pips": 25.9
+  },
+  "raw_zero_cost": {
+   "trades": 1019,
+   "per_day": 0.762,
+   "wr": 27.1,
+   "avg_r": 0.068,
+   "net_r": 68.8,
+   "pips": 251.0,
+   "maxdd_r": 47.1,
+   "pf": 1.09,
+   "ci95": [
+    -0.056,
+    0.191
+   ],
+   "be_wr": 25.5,
+   "avg_risk_pips": 7.6,
+   "avg_reward_pips": 25.6
+  }
+ },
+ "sl_buffer_1.0p": {
+  "params": {
+   "sl_buffer_pips": 1.0
+  },
+  "n_candidates": 1893,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 907,
+    "per_day": 0.678,
+    "wr": 20.1,
+    "avg_r": -0.271,
+    "net_r": -245.6,
+    "pips": -1550.0,
+    "maxdd_r": 255.8,
+    "pf": 0.66,
+    "ci95": [
+     -0.37,
+     -0.163
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 7.8,
+    "avg_reward_pips": 26.2
+   },
+   "per_weekday": 0.95,
+   "first_half": {
+    "trades": 435,
+    "per_day": 0.651,
+    "wr": 22.8,
+    "avg_r": -0.186,
+    "net_r": -80.9,
+    "pips": -572.0,
+    "maxdd_r": 103.0,
+    "pf": 0.76,
+    "ci95": [
+     -0.338,
+     -0.029
+    ],
+    "be_wr": 28.1,
+    "avg_risk_pips": 8.2,
+    "avg_reward_pips": 27.9
+   },
+   "second_half": {
+    "trades": 472,
+    "per_day": 0.706,
+    "wr": 17.6,
+    "avg_r": -0.349,
+    "net_r": -164.7,
+    "pips": -978.0,
+    "maxdd_r": 164.7,
+    "pf": 0.57,
+    "ci95": [
+     -0.485,
+     -0.209
+    ],
+    "be_wr": 27.3,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 187,
+     "per_day": 0.14,
+     "wr": 20.9,
+     "avg_r": -0.181,
+     "net_r": -33.9,
+     "pips": -312.0,
+     "maxdd_r": 53.7,
+     "pf": 0.77,
+     "ci95": [
+      -0.419,
+      0.095
+     ],
+     "be_wr": 25.6,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 29.3
+    },
+    "EURUSD": {
+     "trades": 78,
+     "per_day": 0.058,
+     "wr": 10.3,
+     "avg_r": -0.556,
+     "net_r": -43.4,
+     "pips": -276.0,
+     "maxdd_r": 49.4,
+     "pf": 0.37,
+     "ci95": [
+      -0.825,
+      -0.232
+     ],
+     "be_wr": 23.7,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 19.3
+    },
+    "GBPJPY": {
+     "trades": 204,
+     "per_day": 0.153,
+     "wr": 24.0,
+     "avg_r": -0.177,
+     "net_r": -36.1,
+     "pips": -344.0,
+     "maxdd_r": 44.3,
+     "pf": 0.77,
+     "ci95": [
+      -0.386,
+      0.048
+     ],
+     "be_wr": 29.2,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 32.0
+    },
+    "GBPUSD": {
+     "trades": 132,
+     "per_day": 0.099,
+     "wr": 20.5,
+     "avg_r": -0.216,
+     "net_r": -28.5,
+     "pips": -101.0,
+     "maxdd_r": 51.1,
+     "pf": 0.73,
+     "ci95": [
+      -0.489,
+      0.086
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 20.3
+    },
+    "NZDUSD": {
+     "trades": 45,
+     "per_day": 0.034,
+     "wr": 8.9,
+     "avg_r": -0.659,
+     "net_r": -29.6,
+     "pips": -132.0,
+     "maxdd_r": 32.5,
+     "pf": 0.25,
+     "ci95": [
+      -0.914,
+      -0.308
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 17.0
+    },
+    "USDCAD": {
+     "trades": 65,
+     "per_day": 0.049,
+     "wr": 15.4,
+     "avg_r": -0.405,
+     "net_r": -26.3,
+     "pips": -129.0,
+     "maxdd_r": 27.4,
+     "pf": 0.52,
+     "ci95": [
+      -0.731,
+      -0.038
+     ],
+     "be_wr": 25.9,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 17.3
+    },
+    "USDJPY": {
+     "trades": 196,
+     "per_day": 0.147,
+     "wr": 23.0,
+     "avg_r": -0.244,
+     "net_r": -47.7,
+     "pips": -256.0,
+     "maxdd_r": 47.9,
+     "pf": 0.68,
+     "ci95": [
+      -0.435,
+      -0.006
+     ],
+     "be_wr": 30.5,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 28.8
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 203,
+     "per_day": 0.152,
+     "wr": 23.2,
+     "avg_r": -0.162,
+     "net_r": -32.9,
+     "pips": -214.0,
+     "maxdd_r": 50.5,
+     "pf": 0.79,
+     "ci95": [
+      -0.375,
+      0.08
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 26.5
+    },
+    "2024": {
+     "trades": 256,
+     "per_day": 0.701,
+     "wr": 21.5,
+     "avg_r": -0.234,
+     "net_r": -60.0,
+     "pips": -437.0,
+     "maxdd_r": 65.2,
+     "pf": 0.7,
+     "ci95": [
+      -0.421,
+      -0.029
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 29.8
+    },
+    "2025": {
+     "trades": 295,
+     "per_day": 0.808,
+     "wr": 19.7,
+     "avg_r": -0.302,
+     "net_r": -89.1,
+     "pips": -541.0,
+     "maxdd_r": 89.5,
+     "pf": 0.62,
+     "ci95": [
+      -0.472,
+      -0.118
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 24.6
+    },
+    "2026": {
+     "trades": 153,
+     "per_day": 0.114,
+     "wr": 14.4,
+     "avg_r": -0.415,
+     "net_r": -63.5,
+     "pips": -358.0,
+     "maxdd_r": 66.5,
+     "pf": 0.51,
+     "ci95": [
+      -0.644,
+      -0.163
+     ],
+     "be_wr": 24.7,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 22.6
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 411,
+     "per_day": 0.307,
+     "wr": 19.7,
+     "avg_r": -0.279,
+     "net_r": -114.8,
+     "pips": -716.0,
+     "maxdd_r": 117.3,
+     "pf": 0.65,
+     "ci95": [
+      -0.434,
+      -0.126
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 27.5
+    },
+    "bullish engulfing": {
+     "trades": 474,
+     "per_day": 0.355,
+     "wr": 19.8,
+     "avg_r": -0.277,
+     "net_r": -131.1,
+     "pips": -878.0,
+     "maxdd_r": 141.0,
+     "pf": 0.65,
+     "ci95": [
+      -0.422,
+      -0.129
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 25.2
+    },
+    "double bottom (neckline break)": {
+     "trades": 11,
+     "per_day": 0.008,
+     "wr": 18.2,
+     "avg_r": -0.606,
+     "net_r": -6.7,
+     "pips": -45.0,
+     "maxdd_r": 6.7,
+     "pf": 0.21,
+     "ci95": [
+      -1.0,
+      -0.09
+     ],
+     "be_wr": 52.5,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 16.6
+    },
+    "double top (neckline break)": {
+     "trades": 11,
+     "per_day": 0.008,
+     "wr": 45.5,
+     "avg_r": 0.632,
+     "net_r": 7.0,
+     "pips": 90.0,
+     "maxdd_r": 4.0,
+     "pf": 2.16,
+     "ci95": [
+      -0.443,
+      1.725
+     ],
+     "be_wr": 27.9,
+     "avg_risk_pips": 9.0,
+     "avg_reward_pips": 24.9
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 342,
+    "per_day": 0.256,
+    "wr": 18.1,
+    "avg_r": -0.326,
+    "net_r": -111.4,
+    "pips": -551.0,
+    "maxdd_r": 111.5,
+    "pf": 0.6,
+    "ci95": [
+     -0.484,
+     -0.164
+    ],
+    "be_wr": 27.2,
+    "avg_risk_pips": 7.3,
+    "avg_reward_pips": 24.2
+   },
+   "per_weekday": 0.358,
+   "first_half": {
+    "trades": 177,
+    "per_day": 0.265,
+    "wr": 20.9,
+    "avg_r": -0.259,
+    "net_r": -45.8,
+    "pips": -282.0,
+    "maxdd_r": 49.2,
+    "pf": 0.67,
+    "ci95": [
+     -0.478,
+     -0.026
+    ],
+    "be_wr": 28.3,
+    "avg_risk_pips": 7.4,
+    "avg_reward_pips": 25.0
+   },
+   "second_half": {
+    "trades": 165,
+    "per_day": 0.247,
+    "wr": 15.2,
+    "avg_r": -0.397,
+    "net_r": -65.6,
+    "pips": -269.0,
+    "maxdd_r": 69.0,
+    "pf": 0.53,
+    "ci95": [
+     -0.617,
+     -0.165
+    ],
+    "be_wr": 25.6,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 23.3
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 62,
+     "per_day": 0.046,
+     "wr": 16.1,
+     "avg_r": -0.416,
+     "net_r": -25.8,
+     "pips": -176.0,
+     "maxdd_r": 31.0,
+     "pf": 0.5,
+     "ci95": [
+      -0.755,
+      -0.015
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 28.1
+    },
+    "EURUSD": {
+     "trades": 27,
+     "per_day": 0.02,
+     "wr": 7.4,
+     "avg_r": -0.741,
+     "net_r": -20.0,
+     "pips": -125.0,
+     "maxdd_r": 20.0,
+     "pf": 0.2,
+     "ci95": [
+      -1.0,
+      -0.27
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 19.5
+    },
+    "GBPJPY": {
+     "trades": 63,
+     "per_day": 0.047,
+     "wr": 33.3,
+     "avg_r": 0.164,
+     "net_r": 10.3,
+     "pips": 135.0,
+     "maxdd_r": 13.0,
+     "pf": 1.25,
+     "ci95": [
+      -0.268,
+      0.603
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 28.5
+    },
+    "GBPUSD": {
+     "trades": 56,
+     "per_day": 0.042,
+     "wr": 12.5,
+     "avg_r": -0.44,
+     "net_r": -24.6,
+     "pips": -99.0,
+     "maxdd_r": 30.3,
+     "pf": 0.48,
+     "ci95": [
+      -0.807,
+      -0.021
+     ],
+     "be_wr": 23.2,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 18.8
+    },
+    "NZDUSD": {
+     "trades": 38,
+     "per_day": 0.028,
+     "wr": 10.5,
+     "avg_r": -0.596,
+     "net_r": -22.6,
+     "pips": -101.0,
+     "maxdd_r": 25.5,
+     "pf": 0.31,
+     "ci95": [
+      -0.89,
+      -0.205
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 17.0
+    },
+    "USDCAD": {
+     "trades": 29,
+     "per_day": 0.022,
+     "wr": 24.1,
+     "avg_r": -0.046,
+     "net_r": -1.3,
+     "pips": 17.0,
+     "maxdd_r": 7.0,
+     "pf": 0.94,
+     "ci95": [
+      -0.64,
+      0.662
+     ],
+     "be_wr": 25.3,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 17.0
+    },
+    "USDJPY": {
+     "trades": 67,
+     "per_day": 0.05,
+     "wr": 16.4,
+     "avg_r": -0.408,
+     "net_r": -27.3,
+     "pips": -203.0,
+     "maxdd_r": 30.1,
+     "pf": 0.51,
+     "ci95": [
+      -0.728,
+      -0.042
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 30.1
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 94,
+     "per_day": 0.07,
+     "wr": 20.2,
+     "avg_r": -0.326,
+     "net_r": -30.6,
+     "pips": -150.0,
+     "maxdd_r": 32.0,
+     "pf": 0.59,
+     "ci95": [
+      -0.605,
+      -0.027
+     ],
+     "be_wr": 30.2,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 23.7
+    },
+    "2024": {
+     "trades": 89,
+     "per_day": 0.244,
+     "wr": 22.5,
+     "avg_r": -0.134,
+     "net_r": -11.9,
+     "pips": -86.0,
+     "maxdd_r": 18.5,
+     "pf": 0.83,
+     "ci95": [
+      -0.476,
+      0.233
+     ],
+     "be_wr": 25.9,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 26.6
+    },
+    "2025": {
+     "trades": 101,
+     "per_day": 0.277,
+     "wr": 15.8,
+     "avg_r": -0.419,
+     "net_r": -42.3,
+     "pips": -179.0,
+     "maxdd_r": 42.3,
+     "pf": 0.49,
+     "ci95": [
+      -0.661,
+      -0.137
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 23.8
+    },
+    "2026": {
+     "trades": 58,
+     "per_day": 0.043,
+     "wr": 12.1,
+     "avg_r": -0.458,
+     "net_r": -26.6,
+     "pips": -136.0,
+     "maxdd_r": 28.5,
+     "pf": 0.48,
+     "ci95": [
+      -0.83,
+      0.026
+     ],
+     "be_wr": 22.3,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 21.9
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 151,
+     "per_day": 0.113,
+     "wr": 15.2,
+     "avg_r": -0.448,
+     "net_r": -67.6,
+     "pips": -379.0,
+     "maxdd_r": 67.7,
+     "pf": 0.47,
+     "ci95": [
+      -0.662,
+      -0.204
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 25.6
+    },
+    "bullish engulfing": {
+     "trades": 183,
+     "per_day": 0.137,
+     "wr": 20.8,
+     "avg_r": -0.222,
+     "net_r": -40.6,
+     "pips": -137.0,
+     "maxdd_r": 45.4,
+     "pf": 0.72,
+     "ci95": [
+      -0.448,
+      0.023
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 23.1
+    },
+    "double bottom (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 0.0,
+     "avg_r": -0.896,
+     "net_r": -4.5,
+     "pips": -33.0,
+     "maxdd_r": 4.5,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -0.689
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 16.8
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.424,
+     "net_r": 1.3,
+     "pips": -1.0,
+     "maxdd_r": 1.0,
+     "pf": 1.64,
+     "ci95": [
+      -1.0,
+      3.271
+     ],
+     "be_wr": 23.4,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 30.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 754,
+   "per_day": 0.564,
+   "wr": 17.1,
+   "avg_r": -0.408,
+   "net_r": -307.4,
+   "pips": -2190.0,
+   "maxdd_r": 314.2,
+   "pf": 0.51,
+   "ci95": [
+    -0.503,
+    -0.302
+   ],
+   "be_wr": 29.0,
+   "avg_risk_pips": 8.4,
+   "avg_reward_pips": 26.9
+  },
+  "raw_zero_cost": {
+   "trades": 939,
+   "per_day": 0.702,
+   "wr": 24.4,
+   "avg_r": -0.039,
+   "net_r": -36.3,
+   "pips": -208.0,
+   "maxdd_r": 77.6,
+   "pf": 0.95,
+   "ci95": [
+    -0.154,
+    0.076
+   ],
+   "be_wr": 25.5,
+   "avg_risk_pips": 7.4,
+   "avg_reward_pips": 26.3
+  }
+ },
+ "sl_buffer_2.0p": {
+  "params": {
+   "sl_buffer_pips": 2.0
+  },
+  "n_candidates": 1650,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 785,
+    "per_day": 0.587,
+    "wr": 22.3,
+    "avg_r": -0.203,
+    "net_r": -159.4,
+    "pips": -1108.0,
+    "maxdd_r": 174.7,
+    "pf": 0.74,
+    "ci95": [
+     -0.313,
+     -0.087
+    ],
+    "be_wr": 28.2,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 27.1
+   },
+   "per_weekday": 0.822,
+   "first_half": {
+    "trades": 367,
+    "per_day": 0.549,
+    "wr": 23.7,
+    "avg_r": -0.167,
+    "net_r": -61.3,
+    "pips": -433.0,
+    "maxdd_r": 86.3,
+    "pf": 0.78,
+    "ci95": [
+     -0.331,
+     0.001
+    ],
+    "be_wr": 28.7,
+    "avg_risk_pips": 8.8,
+    "avg_reward_pips": 29.7
+   },
+   "second_half": {
+    "trades": 418,
+    "per_day": 0.625,
+    "wr": 21.1,
+    "avg_r": -0.235,
+    "net_r": -98.2,
+    "pips": -675.0,
+    "maxdd_r": 100.9,
+    "pf": 0.7,
+    "ci95": [
+     -0.392,
+     -0.075
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 7.9,
+    "avg_reward_pips": 24.8
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 170,
+     "per_day": 0.127,
+     "wr": 20.6,
+     "avg_r": -0.241,
+     "net_r": -40.9,
+     "pips": -355.0,
+     "maxdd_r": 53.6,
+     "pf": 0.7,
+     "ci95": [
+      -0.469,
+      0.012
+     ],
+     "be_wr": 27.3,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 29.9
+    },
+    "EURUSD": {
+     "trades": 62,
+     "per_day": 0.046,
+     "wr": 16.1,
+     "avg_r": -0.39,
+     "net_r": -24.2,
+     "pips": -168.0,
+     "maxdd_r": 31.1,
+     "pf": 0.53,
+     "ci95": [
+      -0.726,
+      0.004
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 5.8,
+     "avg_reward_pips": 20.0
+    },
+    "GBPJPY": {
+     "trades": 190,
+     "per_day": 0.142,
+     "wr": 23.7,
+     "avg_r": -0.182,
+     "net_r": -34.6,
+     "pips": -342.0,
+     "maxdd_r": 41.7,
+     "pf": 0.76,
+     "ci95": [
+      -0.401,
+      0.053
+     ],
+     "be_wr": 29.0,
+     "avg_risk_pips": 10.7,
+     "avg_reward_pips": 32.8
+    },
+    "GBPUSD": {
+     "trades": 114,
+     "per_day": 0.085,
+     "wr": 26.3,
+     "avg_r": 0.023,
+     "net_r": 2.7,
+     "pips": 36.0,
+     "maxdd_r": 18.9,
+     "pf": 1.03,
+     "ci95": [
+      -0.3,
+      0.383
+     ],
+     "be_wr": 26.0,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 20.6
+    },
+    "NZDUSD": {
+     "trades": 26,
+     "per_day": 0.019,
+     "wr": 7.7,
+     "avg_r": -0.755,
+     "net_r": -19.6,
+     "pips": -94.0,
+     "maxdd_r": 19.6,
+     "pf": 0.16,
+     "ci95": [
+      -1.0,
+      -0.424
+     ],
+     "be_wr": 34.5,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 17.2
+    },
+    "USDCAD": {
+     "trades": 58,
+     "per_day": 0.043,
+     "wr": 12.1,
+     "avg_r": -0.559,
+     "net_r": -32.4,
+     "pips": -151.0,
+     "maxdd_r": 34.1,
+     "pf": 0.36,
+     "ci95": [
+      -0.848,
+      -0.214
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 5.9,
+     "avg_reward_pips": 18.1
+    },
+    "USDJPY": {
+     "trades": 165,
+     "per_day": 0.123,
+     "wr": 27.9,
+     "avg_r": -0.063,
+     "net_r": -10.3,
+     "pips": -34.0,
+     "maxdd_r": 21.7,
+     "pf": 0.91,
+     "ci95": [
+      -0.325,
+      0.211
+     ],
+     "be_wr": 29.9,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 29.4
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 178,
+     "per_day": 0.133,
+     "wr": 26.4,
+     "avg_r": -0.086,
+     "net_r": -15.3,
+     "pips": -53.0,
+     "maxdd_r": 46.4,
+     "pf": 0.88,
+     "ci95": [
+      -0.31,
+      0.176
+     ],
+     "be_wr": 29.1,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 27.9
+    },
+    "2024": {
+     "trades": 212,
+     "per_day": 0.581,
+     "wr": 19.8,
+     "avg_r": -0.284,
+     "net_r": -60.3,
+     "pips": -494.0,
+     "maxdd_r": 65.5,
+     "pf": 0.64,
+     "ci95": [
+      -0.487,
+      -0.063
+     ],
+     "be_wr": 27.9,
+     "avg_risk_pips": 9.7,
+     "avg_reward_pips": 32.0
+    },
+    "2025": {
+     "trades": 257,
+     "per_day": 0.704,
+     "wr": 24.1,
+     "avg_r": -0.144,
+     "net_r": -37.1,
+     "pips": -280.0,
+     "maxdd_r": 46.3,
+     "pf": 0.81,
+     "ci95": [
+      -0.344,
+      0.076
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 24.9
+    },
+    "2026": {
+     "trades": 138,
+     "per_day": 0.103,
+     "wr": 17.4,
+     "avg_r": -0.338,
+     "net_r": -46.7,
+     "pips": -282.0,
+     "maxdd_r": 51.2,
+     "pf": 0.59,
+     "ci95": [
+      -0.581,
+      -0.048
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 22.5
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 378,
+     "per_day": 0.283,
+     "wr": 22.2,
+     "avg_r": -0.178,
+     "net_r": -67.4,
+     "pips": -463.0,
+     "maxdd_r": 75.1,
+     "pf": 0.77,
+     "ci95": [
+      -0.345,
+      -0.002
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 28.2
+    },
+    "bullish engulfing": {
+     "trades": 393,
+     "per_day": 0.294,
+     "wr": 21.6,
+     "avg_r": -0.244,
+     "net_r": -96.0,
+     "pips": -699.0,
+     "maxdd_r": 107.4,
+     "pf": 0.69,
+     "ci95": [
+      -0.388,
+      -0.087
+     ],
+     "be_wr": 28.9,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 26.2
+    },
+    "double bottom (neckline break)": {
+     "trades": 8,
+     "per_day": 0.006,
+     "wr": 37.5,
+     "avg_r": -0.136,
+     "net_r": -1.1,
+     "pips": 4.0,
+     "maxdd_r": 2.3,
+     "pf": 0.74,
+     "ci95": [
+      -0.757,
+      0.562
+     ],
+     "be_wr": 49.5,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 18.4
+    },
+    "double top (neckline break)": {
+     "trades": 6,
+     "per_day": 0.004,
+     "wr": 50.0,
+     "avg_r": 0.833,
+     "net_r": 5.0,
+     "pips": 50.0,
+     "maxdd_r": 2.0,
+     "pf": 2.67,
+     "ci95": [
+      -0.535,
+      2.331
+     ],
+     "be_wr": 27.3,
+     "avg_risk_pips": 9.0,
+     "avg_reward_pips": 26.5
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 324,
+    "per_day": 0.242,
+    "wr": 22.8,
+    "avg_r": -0.16,
+    "net_r": -52.0,
+    "pips": -126.0,
+    "maxdd_r": 55.8,
+    "pf": 0.79,
+    "ci95": [
+     -0.338,
+     0.021
+    ],
+    "be_wr": 27.4,
+    "avg_risk_pips": 7.8,
+    "avg_reward_pips": 25.3
+   },
+   "per_weekday": 0.339,
+   "first_half": {
+    "trades": 157,
+    "per_day": 0.235,
+    "wr": 28.0,
+    "avg_r": 0.003,
+    "net_r": 0.5,
+    "pips": 123.0,
+    "maxdd_r": 17.8,
+    "pf": 1.0,
+    "ci95": [
+     -0.27,
+     0.303
+    ],
+    "be_wr": 28.0,
+    "avg_risk_pips": 8.1,
+    "avg_reward_pips": 26.9
+   },
+   "second_half": {
+    "trades": 167,
+    "per_day": 0.25,
+    "wr": 18.0,
+    "avg_r": -0.314,
+    "net_r": -52.5,
+    "pips": -249.0,
+    "maxdd_r": 52.5,
+    "pf": 0.61,
+    "ci95": [
+     -0.546,
+     -0.059
+    ],
+    "be_wr": 26.5,
+    "avg_risk_pips": 7.4,
+    "avg_reward_pips": 23.7
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 67,
+     "per_day": 0.05,
+     "wr": 19.4,
+     "avg_r": -0.353,
+     "net_r": -23.6,
+     "pips": -169.0,
+     "maxdd_r": 27.6,
+     "pf": 0.56,
+     "ci95": [
+      -0.667,
+      0.036
+     ],
+     "be_wr": 30.0,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 28.0
+    },
+    "EURUSD": {
+     "trades": 23,
+     "per_day": 0.017,
+     "wr": 13.0,
+     "avg_r": -0.585,
+     "net_r": -13.4,
+     "pips": -99.0,
+     "maxdd_r": 13.4,
+     "pf": 0.33,
+     "ci95": [
+      -1.0,
+      -0.016
+     ],
+     "be_wr": 31.4,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 20.4
+    },
+    "GBPJPY": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 33.3,
+     "avg_r": 0.209,
+     "net_r": 12.5,
+     "pips": 181.0,
+     "maxdd_r": 12.0,
+     "pf": 1.31,
+     "ci95": [
+      -0.231,
+      0.71
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 9.8,
+     "avg_reward_pips": 30.5
+    },
+    "GBPUSD": {
+     "trades": 56,
+     "per_day": 0.042,
+     "wr": 25.0,
+     "avg_r": 0.09,
+     "net_r": 5.0,
+     "pips": 20.0,
+     "maxdd_r": 13.0,
+     "pf": 1.12,
+     "ci95": [
+      -0.421,
+      0.668
+     ],
+     "be_wr": 23.5,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 19.3
+    },
+    "NZDUSD": {
+     "trades": 21,
+     "per_day": 0.016,
+     "wr": 9.5,
+     "avg_r": -0.697,
+     "net_r": -14.6,
+     "pips": -68.0,
+     "maxdd_r": 14.6,
+     "pf": 0.21,
+     "ci95": [
+      -1.0,
+      -0.287
+     ],
+     "be_wr": 34.5,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 16.0
+    },
+    "USDCAD": {
+     "trades": 29,
+     "per_day": 0.022,
+     "wr": 13.8,
+     "avg_r": -0.458,
+     "net_r": -13.3,
+     "pips": -44.0,
+     "maxdd_r": 13.3,
+     "pf": 0.47,
+     "ci95": [
+      -0.911,
+      0.096
+     ],
+     "be_wr": 25.5,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 18.0
+    },
+    "USDJPY": {
+     "trades": 68,
+     "per_day": 0.051,
+     "wr": 26.5,
+     "avg_r": -0.067,
+     "net_r": -4.5,
+     "pips": 53.0,
+     "maxdd_r": 21.4,
+     "pf": 0.91,
+     "ci95": [
+      -0.454,
+      0.364
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 30.4
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 83,
+     "per_day": 0.062,
+     "wr": 28.9,
+     "avg_r": -0.043,
+     "net_r": -3.6,
+     "pips": 34.0,
+     "maxdd_r": 14.0,
+     "pf": 0.94,
+     "ci95": [
+      -0.383,
+      0.339
+     ],
+     "be_wr": 30.4,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 26.0
+    },
+    "2024": {
+     "trades": 84,
+     "per_day": 0.23,
+     "wr": 26.2,
+     "avg_r": 0.032,
+     "net_r": 2.7,
+     "pips": 106.0,
+     "maxdd_r": 12.3,
+     "pf": 1.04,
+     "ci95": [
+      -0.355,
+      0.461
+     ],
+     "be_wr": 25.4,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 28.4
+    },
+    "2025": {
+     "trades": 100,
+     "per_day": 0.274,
+     "wr": 21.0,
+     "avg_r": -0.23,
+     "net_r": -23.0,
+     "pips": -102.0,
+     "maxdd_r": 23.0,
+     "pf": 0.7,
+     "ci95": [
+      -0.532,
+      0.088
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 24.5
+    },
+    "2026": {
+     "trades": 57,
+     "per_day": 0.043,
+     "wr": 12.3,
+     "avg_r": -0.493,
+     "net_r": -28.1,
+     "pips": -164.0,
+     "maxdd_r": 30.1,
+     "pf": 0.44,
+     "ci95": [
+      -0.842,
+      -0.077
+     ],
+     "be_wr": 24.2,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 21.0
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 155,
+     "per_day": 0.116,
+     "wr": 20.6,
+     "avg_r": -0.24,
+     "net_r": -37.1,
+     "pips": -197.0,
+     "maxdd_r": 38.4,
+     "pf": 0.7,
+     "ci95": [
+      -0.482,
+      0.049
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 26.2
+    },
+    "bullish engulfing": {
+     "trades": 164,
+     "per_day": 0.123,
+     "wr": 24.4,
+     "avg_r": -0.101,
+     "net_r": -16.6,
+     "pips": 61.0,
+     "maxdd_r": 30.3,
+     "pf": 0.86,
+     "ci95": [
+      -0.347,
+      0.165
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 24.4
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": -0.012,
+     "net_r": -0.0,
+     "pips": 4.0,
+     "maxdd_r": 1.0,
+     "pf": 0.97,
+     "ci95": [
+      -1.0,
+      1.391
+     ],
+     "be_wr": 41.8,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 20.9
+    },
+    "double top (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 50.0,
+     "avg_r": 0.899,
+     "net_r": 1.8,
+     "pips": 7.0,
+     "maxdd_r": 1.0,
+     "pf": 2.8,
+     "ci95": [
+      -1.0,
+      2.797
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 9.8,
+     "avg_reward_pips": 34.6
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 665,
+   "per_day": 0.497,
+   "wr": 19.4,
+   "avg_r": -0.328,
+   "net_r": -218.4,
+   "pips": -1718.0,
+   "maxdd_r": 226.1,
+   "pf": 0.59,
+   "ci95": [
+    -0.438,
+    -0.205
+   ],
+   "be_wr": 29.1,
+   "avg_risk_pips": 8.8,
+   "avg_reward_pips": 27.6
+  },
+  "raw_zero_cost": {
+   "trades": 833,
+   "per_day": 0.623,
+   "wr": 25.7,
+   "avg_r": -0.006,
+   "net_r": -4.7,
+   "pips": -83.0,
+   "maxdd_r": 48.9,
+   "pf": 0.99,
+   "ci95": [
+    -0.127,
+    0.126
+   ],
+   "be_wr": 26.0,
+   "avg_risk_pips": 7.8,
+   "avg_reward_pips": 27.1
+  }
+ },
+ "tp_nearest_beyond_10p": {
+  "params": {
+   "tp_pick": "nearest_beyond_min"
+  },
+  "n_candidates": 4304,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 1826,
+    "per_day": 1.366,
+    "wr": 20.3,
+    "avg_r": -0.244,
+    "net_r": -445.5,
+    "pips": -2810.0,
+    "maxdd_r": 456.6,
+    "pf": 0.69,
+    "ci95": [
+     -0.32,
+     -0.169
+    ],
+    "be_wr": 27.0,
+    "avg_risk_pips": 7.1,
+    "avg_reward_pips": 22.3
+   },
+   "per_weekday": 1.912,
+   "first_half": {
+    "trades": 823,
+    "per_day": 1.231,
+    "wr": 22.2,
+    "avg_r": -0.19,
+    "net_r": -156.3,
+    "pips": -884.0,
+    "maxdd_r": 182.0,
+    "pf": 0.75,
+    "ci95": [
+     -0.303,
+     -0.077
+    ],
+    "be_wr": 27.6,
+    "avg_risk_pips": 7.4,
+    "avg_reward_pips": 24.2
+   },
+   "second_half": {
+    "trades": 1003,
+    "per_day": 1.5,
+    "wr": 18.7,
+    "avg_r": -0.288,
+    "net_r": -289.2,
+    "pips": -1926.0,
+    "maxdd_r": 293.3,
+    "pf": 0.64,
+    "ci95": [
+     -0.387,
+     -0.193
+    ],
+    "be_wr": 26.4,
+    "avg_risk_pips": 6.8,
+    "avg_reward_pips": 20.9
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 334,
+     "per_day": 0.25,
+     "wr": 18.9,
+     "avg_r": -0.268,
+     "net_r": -89.6,
+     "pips": -720.0,
+     "maxdd_r": 107.0,
+     "pf": 0.67,
+     "ci95": [
+      -0.44,
+      -0.087
+     ],
+     "be_wr": 25.9,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 27.1
+    },
+    "EURUSD": {
+     "trades": 181,
+     "per_day": 0.135,
+     "wr": 17.1,
+     "avg_r": -0.326,
+     "net_r": -59.0,
+     "pips": -349.0,
+     "maxdd_r": 71.2,
+     "pf": 0.6,
+     "ci95": [
+      -0.549,
+      -0.097
+     ],
+     "be_wr": 25.7,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 17.3
+    },
+    "GBPJPY": {
+     "trades": 317,
+     "per_day": 0.237,
+     "wr": 22.7,
+     "avg_r": -0.224,
+     "net_r": -71.0,
+     "pips": -570.0,
+     "maxdd_r": 75.4,
+     "pf": 0.71,
+     "ci95": [
+      -0.389,
+      -0.055
+     ],
+     "be_wr": 29.3,
+     "avg_risk_pips": 9.8,
+     "avg_reward_pips": 28.5
+    },
+    "GBPUSD": {
+     "trades": 276,
+     "per_day": 0.206,
+     "wr": 22.5,
+     "avg_r": -0.127,
+     "net_r": -35.0,
+     "pips": -189.0,
+     "maxdd_r": 48.1,
+     "pf": 0.84,
+     "ci95": [
+      -0.33,
+      0.09
+     ],
+     "be_wr": 25.9,
+     "avg_risk_pips": 5.9,
+     "avg_reward_pips": 18.5
+    },
+    "NZDUSD": {
+     "trades": 163,
+     "per_day": 0.122,
+     "wr": 11.7,
+     "avg_r": -0.551,
+     "net_r": -89.9,
+     "pips": -371.0,
+     "maxdd_r": 91.6,
+     "pf": 0.37,
+     "ci95": [
+      -0.738,
+      -0.343
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 4.5,
+     "avg_reward_pips": 14.8
+    },
+    "USDCAD": {
+     "trades": 216,
+     "per_day": 0.162,
+     "wr": 17.1,
+     "avg_r": -0.323,
+     "net_r": -69.8,
+     "pips": -383.0,
+     "maxdd_r": 74.2,
+     "pf": 0.61,
+     "ci95": [
+      -0.529,
+      -0.117
+     ],
+     "be_wr": 25.3,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 16.5
+    },
+    "USDJPY": {
+     "trades": 339,
+     "per_day": 0.254,
+     "wr": 25.7,
+     "avg_r": -0.092,
+     "net_r": -31.3,
+     "pips": -228.0,
+     "maxdd_r": 35.9,
+     "pf": 0.88,
+     "ci95": [
+      -0.268,
+      0.088
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 25.1
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 416,
+     "per_day": 0.311,
+     "wr": 22.1,
+     "avg_r": -0.225,
+     "net_r": -93.5,
+     "pips": -440.0,
+     "maxdd_r": 113.2,
+     "pf": 0.71,
+     "ci95": [
+      -0.374,
+      -0.075
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 23.0
+    },
+    "2024": {
+     "trades": 459,
+     "per_day": 1.258,
+     "wr": 21.4,
+     "avg_r": -0.19,
+     "net_r": -87.0,
+     "pips": -595.0,
+     "maxdd_r": 90.1,
+     "pf": 0.76,
+     "ci95": [
+      -0.34,
+      -0.03
+     ],
+     "be_wr": 26.5,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 25.5
+    },
+    "2025": {
+     "trades": 612,
+     "per_day": 1.677,
+     "wr": 19.4,
+     "avg_r": -0.29,
+     "net_r": -177.3,
+     "pips": -1283.0,
+     "maxdd_r": 178.9,
+     "pf": 0.64,
+     "ci95": [
+      -0.409,
+      -0.164
+     ],
+     "be_wr": 27.5,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 21.3
+    },
+    "2026": {
+     "trades": 339,
+     "per_day": 0.254,
+     "wr": 18.3,
+     "avg_r": -0.259,
+     "net_r": -87.7,
+     "pips": -492.0,
+     "maxdd_r": 93.4,
+     "pf": 0.68,
+     "ci95": [
+      -0.433,
+      -0.072
+     ],
+     "be_wr": 24.7,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 19.1
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 855,
+     "per_day": 0.639,
+     "wr": 19.2,
+     "avg_r": -0.284,
+     "net_r": -243.2,
+     "pips": -1440.0,
+     "maxdd_r": 248.4,
+     "pf": 0.65,
+     "ci95": [
+      -0.386,
+      -0.18
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 23.2
+    },
+    "bullish engulfing": {
+     "trades": 942,
+     "per_day": 0.705,
+     "wr": 21.0,
+     "avg_r": -0.216,
+     "net_r": -203.6,
+     "pips": -1389.0,
+     "maxdd_r": 223.8,
+     "pf": 0.72,
+     "ci95": [
+      -0.321,
+      -0.111
+     ],
+     "be_wr": 27.0,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 21.6
+    },
+    "double bottom (neckline break)": {
+     "trades": 14,
+     "per_day": 0.01,
+     "wr": 28.6,
+     "avg_r": -0.239,
+     "net_r": -3.3,
+     "pips": -25.0,
+     "maxdd_r": 6.7,
+     "pf": 0.64,
+     "ci95": [
+      -0.826,
+      0.501
+     ],
+     "be_wr": 40.5,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 18.0
+    },
+    "double top (neckline break)": {
+     "trades": 15,
+     "per_day": 0.011,
+     "wr": 33.3,
+     "avg_r": 0.313,
+     "net_r": 4.7,
+     "pips": 45.0,
+     "maxdd_r": 4.0,
+     "pf": 1.47,
+     "ci95": [
+      -0.598,
+      1.31
+     ],
+     "be_wr": 25.4,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 22.8
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 519,
+    "per_day": 0.388,
+    "wr": 18.9,
+    "avg_r": -0.273,
+    "net_r": -141.8,
+    "pips": -696.0,
+    "maxdd_r": 150.7,
+    "pf": 0.66,
+    "ci95": [
+     -0.408,
+     -0.132
+    ],
+    "be_wr": 26.1,
+    "avg_risk_pips": 6.6,
+    "avg_reward_pips": 21.7
+   },
+   "per_weekday": 0.543,
+   "first_half": {
+    "trades": 261,
+    "per_day": 0.39,
+    "wr": 21.5,
+    "avg_r": -0.2,
+    "net_r": -52.2,
+    "pips": -217.0,
+    "maxdd_r": 72.9,
+    "pf": 0.74,
+    "ci95": [
+     -0.398,
+     0.002
+    ],
+    "be_wr": 26.9,
+    "avg_risk_pips": 6.7,
+    "avg_reward_pips": 22.3
+   },
+   "second_half": {
+    "trades": 258,
+    "per_day": 0.386,
+    "wr": 16.3,
+    "avg_r": -0.347,
+    "net_r": -89.6,
+    "pips": -479.0,
+    "maxdd_r": 93.9,
+    "pf": 0.58,
+    "ci95": [
+     -0.539,
+     -0.147
+    ],
+    "be_wr": 25.1,
+    "avg_risk_pips": 6.6,
+    "avg_reward_pips": 21.0
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 83,
+     "per_day": 0.062,
+     "wr": 18.1,
+     "avg_r": -0.233,
+     "net_r": -19.4,
+     "pips": -125.0,
+     "maxdd_r": 25.1,
+     "pf": 0.72,
+     "ci95": [
+      -0.578,
+      0.146
+     ],
+     "be_wr": 23.6,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 28.7
+    },
+    "EURUSD": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 18.9,
+     "avg_r": -0.271,
+     "net_r": -14.4,
+     "pips": -67.0,
+     "maxdd_r": 19.9,
+     "pf": 0.66,
+     "ci95": [
+      -0.68,
+      0.2
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 16.6
+    },
+    "GBPJPY": {
+     "trades": 75,
+     "per_day": 0.056,
+     "wr": 32.0,
+     "avg_r": 0.023,
+     "net_r": 1.7,
+     "pips": 76.0,
+     "maxdd_r": 14.6,
+     "pf": 1.03,
+     "ci95": [
+      -0.316,
+      0.386
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 25.9
+    },
+    "GBPUSD": {
+     "trades": 77,
+     "per_day": 0.058,
+     "wr": 22.1,
+     "avg_r": -0.094,
+     "net_r": -7.2,
+     "pips": -40.0,
+     "maxdd_r": 12.0,
+     "pf": 0.88,
+     "ci95": [
+      -0.484,
+      0.319
+     ],
+     "be_wr": 24.6,
+     "avg_risk_pips": 5.9,
+     "avg_reward_pips": 18.1
+    },
+    "NZDUSD": {
+     "trades": 93,
+     "per_day": 0.07,
+     "wr": 11.8,
+     "avg_r": -0.57,
+     "net_r": -53.0,
+     "pips": -206.0,
+     "maxdd_r": 57.7,
+     "pf": 0.35,
+     "ci95": [
+      -0.794,
+      -0.295
+     ],
+     "be_wr": 27.9,
+     "avg_risk_pips": 4.4,
+     "avg_reward_pips": 14.8
+    },
+    "USDCAD": {
+     "trades": 64,
+     "per_day": 0.048,
+     "wr": 15.6,
+     "avg_r": -0.32,
+     "net_r": -20.5,
+     "pips": -99.0,
+     "maxdd_r": 28.1,
+     "pf": 0.62,
+     "ci95": [
+      -0.693,
+      0.108
+     ],
+     "be_wr": 23.0,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 17.2
+    },
+    "USDJPY": {
+     "trades": 74,
+     "per_day": 0.055,
+     "wr": 14.9,
+     "avg_r": -0.394,
+     "net_r": -29.1,
+     "pips": -235.0,
+     "maxdd_r": 32.0,
+     "pf": 0.54,
+     "ci95": [
+      -0.738,
+      -0.01
+     ],
+     "be_wr": 24.5,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 29.3
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 134,
+     "per_day": 0.1,
+     "wr": 22.4,
+     "avg_r": -0.209,
+     "net_r": -27.9,
+     "pips": -86.0,
+     "maxdd_r": 37.4,
+     "pf": 0.73,
+     "ci95": [
+      -0.455,
+      0.056
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 21.6
+    },
+    "2024": {
+     "trades": 142,
+     "per_day": 0.389,
+     "wr": 19.7,
+     "avg_r": -0.213,
+     "net_r": -30.3,
+     "pips": -148.0,
+     "maxdd_r": 43.3,
+     "pf": 0.73,
+     "ci95": [
+      -0.475,
+      0.095
+     ],
+     "be_wr": 25.1,
+     "avg_risk_pips": 7.0,
+     "avg_reward_pips": 23.2
+    },
+    "2025": {
+     "trades": 152,
+     "per_day": 0.416,
+     "wr": 16.4,
+     "avg_r": -0.408,
+     "net_r": -62.0,
+     "pips": -348.0,
+     "maxdd_r": 62.0,
+     "pf": 0.51,
+     "ci95": [
+      -0.622,
+      -0.176
+     ],
+     "be_wr": 28.0,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 21.8
+    },
+    "2026": {
+     "trades": 91,
+     "per_day": 0.068,
+     "wr": 16.5,
+     "avg_r": -0.237,
+     "net_r": -21.6,
+     "pips": -114.0,
+     "maxdd_r": 28.5,
+     "pf": 0.72,
+     "ci95": [
+      -0.593,
+      0.176
+     ],
+     "be_wr": 21.6,
+     "avg_risk_pips": 5.5,
+     "avg_reward_pips": 19.1
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 235,
+     "per_day": 0.176,
+     "wr": 14.0,
+     "avg_r": -0.444,
+     "net_r": -104.3,
+     "pips": -564.0,
+     "maxdd_r": 108.5,
+     "pf": 0.48,
+     "ci95": [
+      -0.624,
+      -0.253
+     ],
+     "be_wr": 25.2,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 22.5
+    },
+    "bullish engulfing": {
+     "trades": 275,
+     "per_day": 0.206,
+     "wr": 23.3,
+     "avg_r": -0.122,
+     "net_r": -33.5,
+     "pips": -88.0,
+     "maxdd_r": 45.1,
+     "pf": 0.84,
+     "ci95": [
+      -0.323,
+      0.086
+     ],
+     "be_wr": 26.6,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 20.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 20.0,
+     "avg_r": -0.019,
+     "net_r": -0.1,
+     "pips": -4.0,
+     "maxdd_r": 3.5,
+     "pf": 0.97,
+     "ci95": [
+      -1.0,
+      1.725
+     ],
+     "be_wr": 22.9,
+     "avg_risk_pips": 7.0,
+     "avg_reward_pips": 21.1
+    },
+    "double top (neckline break)": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -4.0,
+     "pips": -41.0,
+     "maxdd_r": 4.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 28.9
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 1517,
+   "per_day": 1.135,
+   "wr": 17.3,
+   "avg_r": -0.395,
+   "net_r": -599.7,
+   "pips": -4137.0,
+   "maxdd_r": 602.4,
+   "pf": 0.52,
+   "ci95": [
+    -0.47,
+    -0.321
+   ],
+   "be_wr": 28.7,
+   "avg_risk_pips": 7.6,
+   "avg_reward_pips": 22.7
+  },
+  "raw_zero_cost": {
+   "trades": 1931,
+   "per_day": 1.444,
+   "wr": 25.3,
+   "avg_r": 0.004,
+   "net_r": 8.5,
+   "pips": -140.0,
+   "maxdd_r": 122.0,
+   "pf": 1.01,
+   "ci95": [
+    -0.081,
+    0.089
+   ],
+   "be_wr": 25.2,
+   "avg_risk_pips": 6.8,
+   "avg_reward_pips": 22.4
+  }
+ },
+ "min_touches_1": {
+  "params": {
+   "min_touches": 1
+  },
+  "n_candidates": 2752,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 1276,
+    "per_day": 0.954,
+    "wr": 23.8,
+    "avg_r": -0.139,
+    "net_r": -177.2,
+    "pips": -1570.0,
+    "maxdd_r": 218.0,
+    "pf": 0.82,
+    "ci95": [
+     -0.231,
+     -0.046
+    ],
+    "be_wr": 27.8,
+    "avg_risk_pips": 8.2,
+    "avg_reward_pips": 24.8
+   },
+   "per_weekday": 1.336,
+   "first_half": {
+    "trades": 650,
+    "per_day": 0.972,
+    "wr": 24.9,
+    "avg_r": -0.1,
+    "net_r": -65.3,
+    "pips": -674.0,
+    "maxdd_r": 104.6,
+    "pf": 0.87,
+    "ci95": [
+     -0.23,
+     0.035
+    ],
+    "be_wr": 27.8,
+    "avg_risk_pips": 8.5,
+    "avg_reward_pips": 26.8
+   },
+   "second_half": {
+    "trades": 626,
+    "per_day": 0.936,
+    "wr": 22.7,
+    "avg_r": -0.179,
+    "net_r": -111.9,
+    "pips": -896.0,
+    "maxdd_r": 122.6,
+    "pf": 0.77,
+    "ci95": [
+     -0.31,
+     -0.037
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 7.8,
+    "avg_reward_pips": 22.9
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 252,
+     "per_day": 0.188,
+     "wr": 24.6,
+     "avg_r": -0.092,
+     "net_r": -23.3,
+     "pips": -379.0,
+     "maxdd_r": 47.2,
+     "pf": 0.88,
+     "ci95": [
+      -0.303,
+      0.14
+     ],
+     "be_wr": 27.2,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 26.7
+    },
+    "EURUSD": {
+     "trades": 102,
+     "per_day": 0.076,
+     "wr": 19.6,
+     "avg_r": -0.279,
+     "net_r": -28.4,
+     "pips": -116.0,
+     "maxdd_r": 43.8,
+     "pf": 0.65,
+     "ci95": [
+      -0.569,
+      0.026
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 5.5,
+     "avg_reward_pips": 17.8
+    },
+    "GBPJPY": {
+     "trades": 330,
+     "per_day": 0.247,
+     "wr": 21.8,
+     "avg_r": -0.258,
+     "net_r": -85.2,
+     "pips": -829.0,
+     "maxdd_r": 93.9,
+     "pf": 0.67,
+     "ci95": [
+      -0.418,
+      -0.089
+     ],
+     "be_wr": 29.5,
+     "avg_risk_pips": 10.4,
+     "avg_reward_pips": 30.5
+    },
+    "GBPUSD": {
+     "trades": 163,
+     "per_day": 0.122,
+     "wr": 28.2,
+     "avg_r": 0.12,
+     "net_r": 19.6,
+     "pips": 104.0,
+     "maxdd_r": 15.4,
+     "pf": 1.17,
+     "ci95": [
+      -0.172,
+      0.45
+     ],
+     "be_wr": 25.3,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 18.8
+    },
+    "NZDUSD": {
+     "trades": 48,
+     "per_day": 0.036,
+     "wr": 16.7,
+     "avg_r": -0.402,
+     "net_r": -19.3,
+     "pips": -91.0,
+     "maxdd_r": 20.1,
+     "pf": 0.51,
+     "ci95": [
+      -0.772,
+      0.02
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 15.9
+    },
+    "USDCAD": {
+     "trades": 91,
+     "per_day": 0.068,
+     "wr": 16.5,
+     "avg_r": -0.387,
+     "net_r": -35.2,
+     "pips": -173.0,
+     "maxdd_r": 38.0,
+     "pf": 0.54,
+     "ci95": [
+      -0.678,
+      -0.064
+     ],
+     "be_wr": 26.9,
+     "avg_risk_pips": 5.5,
+     "avg_reward_pips": 16.9
+    },
+    "USDJPY": {
+     "trades": 290,
+     "per_day": 0.217,
+     "wr": 27.9,
+     "avg_r": -0.019,
+     "net_r": -5.4,
+     "pips": -86.0,
+     "maxdd_r": 28.9,
+     "pf": 0.97,
+     "ci95": [
+      -0.223,
+      0.213
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 26.6
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 311,
+     "per_day": 0.233,
+     "wr": 29.3,
+     "avg_r": 0.092,
+     "net_r": 28.5,
+     "pips": 158.0,
+     "maxdd_r": 38.7,
+     "pf": 1.13,
+     "ci95": [
+      -0.105,
+      0.314
+     ],
+     "be_wr": 26.9,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 24.6
+    },
+    "2024": {
+     "trades": 368,
+     "per_day": 1.008,
+     "wr": 20.7,
+     "avg_r": -0.29,
+     "net_r": -106.8,
+     "pips": -916.0,
+     "maxdd_r": 110.8,
+     "pf": 0.63,
+     "ci95": [
+      -0.439,
+      -0.137
+     ],
+     "be_wr": 29.2,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 28.3
+    },
+    "2025": {
+     "trades": 399,
+     "per_day": 1.093,
+     "wr": 22.8,
+     "avg_r": -0.172,
+     "net_r": -68.8,
+     "pips": -663.0,
+     "maxdd_r": 87.7,
+     "pf": 0.78,
+     "ci95": [
+      -0.359,
+      0.009
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 23.5
+    },
+    "2026": {
+     "trades": 198,
+     "per_day": 0.148,
+     "wr": 23.2,
+     "avg_r": -0.152,
+     "net_r": -30.1,
+     "pips": -150.0,
+     "maxdd_r": 41.0,
+     "pf": 0.8,
+     "ci95": [
+      -0.366,
+      0.093
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 21.4
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 567,
+     "per_day": 0.424,
+     "wr": 24.5,
+     "avg_r": -0.08,
+     "net_r": -45.2,
+     "pips": -429.0,
+     "maxdd_r": 77.2,
+     "pf": 0.89,
+     "ci95": [
+      -0.232,
+      0.074
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 26.2
+    },
+    "bullish engulfing": {
+     "trades": 687,
+     "per_day": 0.514,
+     "wr": 23.1,
+     "avg_r": -0.187,
+     "net_r": -128.6,
+     "pips": -1078.0,
+     "maxdd_r": 156.9,
+     "pf": 0.76,
+     "ci95": [
+      -0.3,
+      -0.06
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 23.3
+    },
+    "double bottom (neckline break)": {
+     "trades": 12,
+     "per_day": 0.009,
+     "wr": 25.0,
+     "avg_r": -0.359,
+     "net_r": -4.3,
+     "pips": -56.0,
+     "maxdd_r": 5.6,
+     "pf": 0.49,
+     "ci95": [
+      -0.909,
+      0.348
+     ],
+     "be_wr": 42.0,
+     "avg_risk_pips": 10.7,
+     "avg_reward_pips": 37.4
+    },
+    "double top (neckline break)": {
+     "trades": 10,
+     "per_day": 0.007,
+     "wr": 30.0,
+     "avg_r": 0.094,
+     "net_r": 0.9,
+     "pips": -6.0,
+     "maxdd_r": 3.1,
+     "pf": 1.13,
+     "ci95": [
+      -1.0,
+      1.189
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 10.5,
+     "avg_reward_pips": 35.2
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 438,
+    "per_day": 0.328,
+    "wr": 22.8,
+    "avg_r": -0.177,
+    "net_r": -77.6,
+    "pips": -573.0,
+    "maxdd_r": 92.2,
+    "pf": 0.77,
+    "ci95": [
+     -0.325,
+     -0.015
+    ],
+    "be_wr": 27.9,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 23.0
+   },
+   "per_weekday": 0.459,
+   "first_half": {
+    "trades": 237,
+    "per_day": 0.355,
+    "wr": 25.7,
+    "avg_r": -0.062,
+    "net_r": -14.7,
+    "pips": -231.0,
+    "maxdd_r": 32.6,
+    "pf": 0.92,
+    "ci95": [
+     -0.274,
+     0.161
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 7.9,
+    "avg_reward_pips": 24.6
+   },
+   "second_half": {
+    "trades": 201,
+    "per_day": 0.301,
+    "wr": 19.4,
+    "avg_r": -0.313,
+    "net_r": -62.9,
+    "pips": -342.0,
+    "maxdd_r": 66.2,
+    "pf": 0.61,
+    "ci95": [
+     -0.527,
+     -0.092
+    ],
+    "be_wr": 28.2,
+    "avg_risk_pips": 7.3,
+    "avg_reward_pips": 21.1
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 83,
+     "per_day": 0.062,
+     "wr": 21.7,
+     "avg_r": -0.243,
+     "net_r": -20.2,
+     "pips": -168.0,
+     "maxdd_r": 27.6,
+     "pf": 0.69,
+     "ci95": [
+      -0.538,
+      0.103
+     ],
+     "be_wr": 29.0,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 25.3
+    },
+    "EURUSD": {
+     "trades": 36,
+     "per_day": 0.027,
+     "wr": 11.1,
+     "avg_r": -0.589,
+     "net_r": -21.2,
+     "pips": -84.0,
+     "maxdd_r": 23.8,
+     "pf": 0.33,
+     "ci95": [
+      -0.908,
+      -0.187
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 17.4
+    },
+    "GBPJPY": {
+     "trades": 100,
+     "per_day": 0.075,
+     "wr": 25.0,
+     "avg_r": -0.13,
+     "net_r": -13.0,
+     "pips": -200.0,
+     "maxdd_r": 24.2,
+     "pf": 0.83,
+     "ci95": [
+      -0.434,
+      0.208
+     ],
+     "be_wr": 28.9,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 30.2
+    },
+    "GBPUSD": {
+     "trades": 62,
+     "per_day": 0.046,
+     "wr": 30.6,
+     "avg_r": 0.118,
+     "net_r": 7.3,
+     "pips": 52.0,
+     "maxdd_r": 12.1,
+     "pf": 1.17,
+     "ci95": [
+      -0.334,
+      0.606
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 18.0
+    },
+    "NZDUSD": {
+     "trades": 37,
+     "per_day": 0.028,
+     "wr": 13.5,
+     "avg_r": -0.48,
+     "net_r": -17.8,
+     "pips": -86.0,
+     "maxdd_r": 18.6,
+     "pf": 0.44,
+     "ci95": [
+      -0.876,
+      -0.022
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 15.8
+    },
+    "USDCAD": {
+     "trades": 40,
+     "per_day": 0.03,
+     "wr": 17.5,
+     "avg_r": -0.43,
+     "net_r": -17.2,
+     "pips": -74.0,
+     "maxdd_r": 18.6,
+     "pf": 0.48,
+     "ci95": [
+      -0.779,
+      -0.022
+     ],
+     "be_wr": 30.7,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 15.4
+    },
+    "USDJPY": {
+     "trades": 80,
+     "per_day": 0.06,
+     "wr": 27.5,
+     "avg_r": 0.055,
+     "net_r": 4.4,
+     "pips": -14.0,
+     "maxdd_r": 11.3,
+     "pf": 1.08,
+     "ci95": [
+      -0.359,
+      0.582
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 25.1
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 131,
+     "per_day": 0.098,
+     "wr": 29.8,
+     "avg_r": 0.086,
+     "net_r": 11.2,
+     "pips": 106.0,
+     "maxdd_r": 15.8,
+     "pf": 1.12,
+     "ci95": [
+      -0.212,
+      0.404
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 23.5
+    },
+    "2024": {
+     "trades": 117,
+     "per_day": 0.321,
+     "wr": 20.5,
+     "avg_r": -0.252,
+     "net_r": -29.5,
+     "pips": -340.0,
+     "maxdd_r": 32.6,
+     "pf": 0.68,
+     "ci95": [
+      -0.534,
+      0.04
+     ],
+     "be_wr": 27.6,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 25.7
+    },
+    "2025": {
+     "trades": 116,
+     "per_day": 0.318,
+     "wr": 20.7,
+     "avg_r": -0.262,
+     "net_r": -30.4,
+     "pips": -151.0,
+     "maxdd_r": 34.0,
+     "pf": 0.67,
+     "ci95": [
+      -0.555,
+      0.078
+     ],
+     "be_wr": 28.0,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 21.6
+    },
+    "2026": {
+     "trades": 74,
+     "per_day": 0.055,
+     "wr": 17.6,
+     "avg_r": -0.392,
+     "net_r": -29.0,
+     "pips": -188.0,
+     "maxdd_r": 32.3,
+     "pf": 0.52,
+     "ci95": [
+      -0.702,
+      -0.049
+     ],
+     "be_wr": 28.9,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 19.9
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 187,
+     "per_day": 0.14,
+     "wr": 22.5,
+     "avg_r": -0.234,
+     "net_r": -43.8,
+     "pips": -143.0,
+     "maxdd_r": 50.8,
+     "pf": 0.7,
+     "ci95": [
+      -0.457,
+      -0.015
+     ],
+     "be_wr": 29.3,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 22.7
+    },
+    "bullish engulfing": {
+     "trades": 241,
+     "per_day": 0.18,
+     "wr": 23.2,
+     "avg_r": -0.126,
+     "net_r": -30.3,
+     "pips": -369.0,
+     "maxdd_r": 55.4,
+     "pf": 0.84,
+     "ci95": [
+      -0.341,
+      0.11
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 22.5
+    },
+    "double bottom (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 20.0,
+     "avg_r": -0.399,
+     "net_r": -2.0,
+     "pips": -36.0,
+     "maxdd_r": 2.5,
+     "pf": 0.42,
+     "ci95": [
+      -1.0,
+      0.477
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 13.2,
+     "avg_reward_pips": 44.5
+    },
+    "double top (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 20.0,
+     "avg_r": -0.31,
+     "net_r": -1.5,
+     "pips": -26.0,
+     "maxdd_r": 4.0,
+     "pf": 0.61,
+     "ci95": [
+      -1.0,
+      1.071
+     ],
+     "be_wr": 29.0,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 36.6
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 1068,
+   "per_day": 0.799,
+   "wr": 21.3,
+   "avg_r": -0.297,
+   "net_r": -317.4,
+   "pips": -2788.0,
+   "maxdd_r": 328.6,
+   "pf": 0.62,
+   "ci95": [
+    -0.388,
+    -0.204
+   ],
+   "be_wr": 30.3,
+   "avg_risk_pips": 8.7,
+   "avg_reward_pips": 25.0
+  },
+  "raw_zero_cost": {
+   "trades": 1336,
+   "per_day": 0.999,
+   "wr": 27.7,
+   "avg_r": 0.073,
+   "net_r": 97.6,
+   "pips": 269.0,
+   "maxdd_r": 54.8,
+   "pf": 1.1,
+   "ci95": [
+    -0.033,
+    0.181
+   ],
+   "be_wr": 25.9,
+   "avg_risk_pips": 7.7,
+   "avg_reward_pips": 24.9
+  }
+ },
+ "double_only": {
+  "params": {
+   "use_engulf": false
+  },
+  "n_candidates": 75,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 42,
+    "per_day": 0.031,
+    "wr": 23.8,
+    "avg_r": -0.276,
+    "net_r": -11.6,
+    "pips": -108.0,
+    "maxdd_r": 17.4,
+    "pf": 0.62,
+    "ci95": [
+     -0.655,
+     0.147
+    ],
+    "be_wr": 34.9,
+    "avg_risk_pips": 9.6,
+    "avg_reward_pips": 25.5
+   },
+   "per_weekday": 0.044,
+   "first_half": {
+    "trades": 28,
+    "per_day": 0.042,
+    "wr": 28.6,
+    "avg_r": -0.141,
+    "net_r": -3.9,
+    "pips": -26.0,
+    "maxdd_r": 11.6,
+    "pf": 0.78,
+    "ci95": [
+     -0.609,
+     0.378
+    ],
+    "be_wr": 35.9,
+    "avg_risk_pips": 9.4,
+    "avg_reward_pips": 26.4
+   },
+   "second_half": {
+    "trades": 14,
+    "per_day": 0.021,
+    "wr": 14.3,
+    "avg_r": -0.546,
+    "net_r": -7.6,
+    "pips": -82.0,
+    "maxdd_r": 10.0,
+    "pf": 0.36,
+    "ci95": [
+     -1.0,
+     0.147
+    ],
+    "be_wr": 31.5,
+    "avg_risk_pips": 9.9,
+    "avg_reward_pips": 23.7
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 10,
+     "per_day": 0.007,
+     "wr": 20.0,
+     "avg_r": -0.191,
+     "net_r": -1.9,
+     "pips": -37.0,
+     "maxdd_r": 6.0,
+     "pf": 0.73,
+     "ci95": [
+      -1.0,
+      0.883
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 11.3,
+     "avg_reward_pips": 30.3
+    },
+    "EURUSD": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -3.0,
+     "pips": -17.0,
+     "maxdd_r": 3.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 14.2
+    },
+    "GBPJPY": {
+     "trades": 8,
+     "per_day": 0.006,
+     "wr": 25.0,
+     "avg_r": -0.44,
+     "net_r": -3.5,
+     "pips": -27.0,
+     "maxdd_r": 4.0,
+     "pf": 0.41,
+     "ci95": [
+      -1.0,
+      0.426
+     ],
+     "be_wr": 44.6,
+     "avg_risk_pips": 10.9,
+     "avg_reward_pips": 29.7
+    },
+    "GBPUSD": {
+     "trades": 6,
+     "per_day": 0.004,
+     "wr": 16.7,
+     "avg_r": -0.561,
+     "net_r": -3.4,
+     "pips": -21.0,
+     "maxdd_r": 3.4,
+     "pf": 0.33,
+     "ci95": [
+      -1.0,
+      0.317
+     ],
+     "be_wr": 38.0,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 16.4
+    },
+    "NZDUSD": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.354,
+     "net_r": 1.1,
+     "pips": 2.0,
+     "maxdd_r": 1.0,
+     "pf": 1.73,
+     "ci95": [
+      -1.0,
+      2.516
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 19.4
+    },
+    "USDCAD": {
+     "trades": 1,
+     "per_day": 0.001,
+     "wr": 100.0,
+     "avg_r": 3.016,
+     "net_r": 3.0,
+     "pips": 19.0,
+     "maxdd_r": 0.0,
+     "pf": null,
+     "ci95": [
+      3.016,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 19.3
+    },
+    "USDJPY": {
+     "trades": 11,
+     "per_day": 0.008,
+     "wr": 27.3,
+     "avg_r": -0.353,
+     "net_r": -3.9,
+     "pips": -27.0,
+     "maxdd_r": 6.0,
+     "pf": 0.5,
+     "ci95": [
+      -0.935,
+      0.306
+     ],
+     "be_wr": 43.6,
+     "avg_risk_pips": 11.1,
+     "avg_reward_pips": 28.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 16,
+     "per_day": 0.012,
+     "wr": 37.5,
+     "avg_r": 0.16,
+     "net_r": 2.6,
+     "pips": 41.0,
+     "maxdd_r": 3.9,
+     "pf": 1.27,
+     "ci95": [
+      -0.516,
+      0.905
+     ],
+     "be_wr": 33.3,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 22.9
+    },
+    "2024": {
+     "trades": 13,
+     "per_day": 0.036,
+     "wr": 15.4,
+     "avg_r": -0.578,
+     "net_r": -7.5,
+     "pips": -82.0,
+     "maxdd_r": 8.4,
+     "pf": 0.23,
+     "ci95": [
+      -0.963,
+      -0.067
+     ],
+     "be_wr": 47.0,
+     "avg_risk_pips": 12.1,
+     "avg_reward_pips": 31.2
+    },
+    "2025": {
+     "trades": 7,
+     "per_day": 0.019,
+     "wr": 28.6,
+     "avg_r": -0.093,
+     "net_r": -0.6,
+     "pips": -11.0,
+     "maxdd_r": 4.0,
+     "pf": 0.87,
+     "ci95": [
+      -1.0,
+      1.057
+     ],
+     "be_wr": 31.5,
+     "avg_risk_pips": 9.7,
+     "avg_reward_pips": 20.9
+    },
+    "2026": {
+     "trades": 6,
+     "per_day": 0.004,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -6.0,
+     "pips": -56.0,
+     "maxdd_r": 6.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 25.6
+    }
+   },
+   "by_pattern": {
+    "double bottom (neckline break)": {
+     "trades": 22,
+     "per_day": 0.016,
+     "wr": 18.2,
+     "avg_r": -0.523,
+     "net_r": -11.5,
+     "pips": -105.0,
+     "maxdd_r": 13.0,
+     "pf": 0.33,
+     "ci95": [
+      -0.876,
+      -0.06
+     ],
+     "be_wr": 41.2,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 22.1
+    },
+    "double top (neckline break)": {
+     "trades": 20,
+     "per_day": 0.015,
+     "wr": 30.0,
+     "avg_r": -0.005,
+     "net_r": -0.1,
+     "pips": -3.0,
+     "maxdd_r": 4.9,
+     "pf": 0.99,
+     "ci95": [
+      -0.612,
+      0.711
+     ],
+     "be_wr": 31.7,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 29.3
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 37,
+    "per_day": 0.028,
+    "wr": 27.0,
+    "avg_r": -0.205,
+    "net_r": -7.6,
+    "pips": -76.0,
+    "maxdd_r": 13.5,
+    "pf": 0.71,
+    "ci95": [
+     -0.61,
+     0.231
+    ],
+    "be_wr": 34.9,
+    "avg_risk_pips": 9.6,
+    "avg_reward_pips": 26.1
+   },
+   "per_weekday": 0.039,
+   "first_half": {
+    "trades": 25,
+    "per_day": 0.037,
+    "wr": 32.0,
+    "avg_r": -0.078,
+    "net_r": -1.9,
+    "pips": -14.0,
+    "maxdd_r": 9.7,
+    "pf": 0.88,
+    "ci95": [
+     -0.579,
+     0.505
+    ],
+    "be_wr": 35.9,
+    "avg_risk_pips": 9.4,
+    "avg_reward_pips": 27.2
+   },
+   "second_half": {
+    "trades": 12,
+    "per_day": 0.018,
+    "wr": 16.7,
+    "avg_r": -0.471,
+    "net_r": -5.6,
+    "pips": -62.0,
+    "maxdd_r": 8.0,
+    "pf": 0.44,
+    "ci95": [
+     -1.0,
+     0.393
+    ],
+    "be_wr": 31.5,
+    "avg_risk_pips": 9.9,
+    "avg_reward_pips": 23.7
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 9,
+     "per_day": 0.007,
+     "wr": 22.2,
+     "avg_r": -0.211,
+     "net_r": -1.9,
+     "pips": -37.0,
+     "maxdd_r": 6.0,
+     "pf": 0.73,
+     "ci95": [
+      -1.0,
+      0.85
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 10.8,
+     "avg_reward_pips": 30.9
+    },
+    "EURUSD": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -2.0,
+     "pips": -10.0,
+     "maxdd_r": 2.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 12.9
+    },
+    "GBPJPY": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 28.6,
+     "avg_r": -0.36,
+     "net_r": -2.5,
+     "pips": -12.0,
+     "maxdd_r": 3.0,
+     "pf": 0.5,
+     "ci95": [
+      -1.0,
+      0.455
+     ],
+     "be_wr": 44.6,
+     "avg_risk_pips": 10.4,
+     "avg_reward_pips": 29.8
+    },
+    "GBPUSD": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 25.0,
+     "avg_r": -0.342,
+     "net_r": -1.4,
+     "pips": -10.0,
+     "maxdd_r": 2.0,
+     "pf": 0.54,
+     "ci95": [
+      -1.0,
+      0.975
+     ],
+     "be_wr": 38.0,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 15.2
+    },
+    "NZDUSD": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.354,
+     "net_r": 1.1,
+     "pips": 2.0,
+     "maxdd_r": 1.0,
+     "pf": 1.73,
+     "ci95": [
+      -1.0,
+      2.516
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 19.4
+    },
+    "USDCAD": {
+     "trades": 1,
+     "per_day": 0.001,
+     "wr": 100.0,
+     "avg_r": 3.016,
+     "net_r": 3.0,
+     "pips": 19.0,
+     "maxdd_r": 0.0,
+     "pf": null,
+     "ci95": [
+      3.016,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 19.3
+    },
+    "USDJPY": {
+     "trades": 11,
+     "per_day": 0.008,
+     "wr": 27.3,
+     "avg_r": -0.353,
+     "net_r": -3.9,
+     "pips": -27.0,
+     "maxdd_r": 6.0,
+     "pf": 0.5,
+     "ci95": [
+      -0.935,
+      0.306
+     ],
+     "be_wr": 43.6,
+     "avg_risk_pips": 11.1,
+     "avg_reward_pips": 28.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 14,
+     "per_day": 0.01,
+     "wr": 42.9,
+     "avg_r": 0.326,
+     "net_r": 4.6,
+     "pips": 52.0,
+     "maxdd_r": 2.0,
+     "pf": 1.61,
+     "ci95": [
+      -0.444,
+      1.207
+     ],
+     "be_wr": 33.3,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 23.6
+    },
+    "2024": {
+     "trades": 12,
+     "per_day": 0.033,
+     "wr": 16.7,
+     "avg_r": -0.625,
+     "net_r": -7.5,
+     "pips": -82.0,
+     "maxdd_r": 8.4,
+     "pf": 0.23,
+     "ci95": [
+      -1.0,
+      -0.053
+     ],
+     "be_wr": 47.0,
+     "avg_risk_pips": 11.7,
+     "avg_reward_pips": 31.7
+    },
+    "2025": {
+     "trades": 7,
+     "per_day": 0.019,
+     "wr": 28.6,
+     "avg_r": -0.093,
+     "net_r": -0.6,
+     "pips": -11.0,
+     "maxdd_r": 4.0,
+     "pf": 0.87,
+     "ci95": [
+      -1.0,
+      1.057
+     ],
+     "be_wr": 31.5,
+     "avg_risk_pips": 9.7,
+     "avg_reward_pips": 20.9
+    },
+    "2026": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -4.0,
+     "pips": -35.0,
+     "maxdd_r": 4.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 26.7
+    }
+   },
+   "by_pattern": {
+    "double bottom (neckline break)": {
+     "trades": 20,
+     "per_day": 0.015,
+     "wr": 20.0,
+     "avg_r": -0.475,
+     "net_r": -9.5,
+     "pips": -84.0,
+     "maxdd_r": 11.0,
+     "pf": 0.38,
+     "ci95": [
+      -0.877,
+      -0.004
+     ],
+     "be_wr": 41.2,
+     "avg_risk_pips": 9.0,
+     "avg_reward_pips": 22.0
+    },
+    "double top (neckline break)": {
+     "trades": 17,
+     "per_day": 0.013,
+     "wr": 35.3,
+     "avg_r": 0.112,
+     "net_r": 1.9,
+     "pips": 8.0,
+     "maxdd_r": 4.4,
+     "pf": 1.17,
+     "ci95": [
+      -0.572,
+      0.939
+     ],
+     "be_wr": 31.7,
+     "avg_risk_pips": 10.3,
+     "avg_reward_pips": 30.8
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 30,
+   "per_day": 0.022,
+   "wr": 23.3,
+   "avg_r": -0.271,
+   "net_r": -8.1,
+   "pips": -82.0,
+   "maxdd_r": 13.7,
+   "pf": 0.63,
+   "ci95": [
+    -0.721,
+    0.257
+   ],
+   "be_wr": 33.4,
+   "avg_risk_pips": 10.3,
+   "avg_reward_pips": 27.7
+  },
+  "raw_zero_cost": {
+   "trades": 49,
+   "per_day": 0.037,
+   "wr": 30.6,
+   "avg_r": -0.019,
+   "net_r": -0.9,
+   "pips": -9.0,
+   "maxdd_r": 13.5,
+   "pf": 0.97,
+   "ci95": [
+    -0.426,
+    0.451
+   ],
+   "be_wr": 31.8,
+   "avg_risk_pips": 8.8,
+   "avg_reward_pips": 25.3
+  }
+ },
+ "engulf_only": {
+  "params": {
+   "use_double": false
+  },
+  "n_candidates": 1726,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 836,
+    "per_day": 0.625,
+    "wr": 20.2,
+    "avg_r": -0.269,
+    "net_r": -225.1,
+    "pips": -1472.0,
+    "maxdd_r": 243.3,
+    "pf": 0.66,
+    "ci95": [
+     -0.379,
+     -0.159
+    ],
+    "be_wr": 27.8,
+    "avg_risk_pips": 7.9,
+    "avg_reward_pips": 26.7
+   },
+   "per_weekday": 0.875,
+   "first_half": {
+    "trades": 387,
+    "per_day": 0.579,
+    "wr": 22.7,
+    "avg_r": -0.192,
+    "net_r": -74.2,
+    "pips": -533.0,
+    "maxdd_r": 101.6,
+    "pf": 0.75,
+    "ci95": [
+     -0.357,
+     -0.024
+    ],
+    "be_wr": 28.3,
+    "avg_risk_pips": 8.4,
+    "avg_reward_pips": 29.2
+   },
+   "second_half": {
+    "trades": 449,
+    "per_day": 0.672,
+    "wr": 18.0,
+    "avg_r": -0.336,
+    "net_r": -150.9,
+    "pips": -939.0,
+    "maxdd_r": 154.3,
+    "pf": 0.59,
+    "ci95": [
+     -0.472,
+     -0.189
+    ],
+    "be_wr": 27.4,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 182,
+     "per_day": 0.136,
+     "wr": 19.2,
+     "avg_r": -0.265,
+     "net_r": -48.2,
+     "pips": -419.0,
+     "maxdd_r": 59.5,
+     "pf": 0.67,
+     "ci95": [
+      -0.487,
+      -0.009
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 29.8
+    },
+    "EURUSD": {
+     "trades": 78,
+     "per_day": 0.058,
+     "wr": 10.3,
+     "avg_r": -0.555,
+     "net_r": -43.3,
+     "pips": -259.0,
+     "maxdd_r": 48.9,
+     "pf": 0.37,
+     "ci95": [
+      -0.822,
+      -0.222
+     ],
+     "be_wr": 23.6,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 19.3
+    },
+    "GBPJPY": {
+     "trades": 190,
+     "per_day": 0.142,
+     "wr": 23.7,
+     "avg_r": -0.189,
+     "net_r": -35.9,
+     "pips": -314.0,
+     "maxdd_r": 43.5,
+     "pf": 0.75,
+     "ci95": [
+      -0.405,
+      0.03
+     ],
+     "be_wr": 29.3,
+     "avg_risk_pips": 10.3,
+     "avg_reward_pips": 32.8
+    },
+    "GBPUSD": {
+     "trades": 120,
+     "per_day": 0.09,
+     "wr": 23.3,
+     "avg_r": -0.127,
+     "net_r": -15.3,
+     "pips": -49.0,
+     "maxdd_r": 35.0,
+     "pf": 0.83,
+     "ci95": [
+      -0.43,
+      0.174
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 20.6
+    },
+    "NZDUSD": {
+     "trades": 36,
+     "per_day": 0.027,
+     "wr": 5.6,
+     "avg_r": -0.79,
+     "net_r": -28.4,
+     "pips": -135.0,
+     "maxdd_r": 30.9,
+     "pf": 0.16,
+     "ci95": [
+      -1.0,
+      -0.497
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 17.8
+    },
+    "USDCAD": {
+     "trades": 62,
+     "per_day": 0.046,
+     "wr": 12.9,
+     "avg_r": -0.535,
+     "net_r": -33.2,
+     "pips": -160.0,
+     "maxdd_r": 35.0,
+     "pf": 0.39,
+     "ci95": [
+      -0.816,
+      -0.215
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 17.3
+    },
+    "USDJPY": {
+     "trades": 168,
+     "per_day": 0.126,
+     "wr": 25.6,
+     "avg_r": -0.124,
+     "net_r": -20.9,
+     "pips": -137.0,
+     "maxdd_r": 25.7,
+     "pf": 0.83,
+     "ci95": [
+      -0.375,
+      0.149
+     ],
+     "be_wr": 29.4,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 29.6
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 186,
+     "per_day": 0.139,
+     "wr": 25.8,
+     "avg_r": -0.106,
+     "net_r": -19.7,
+     "pips": -115.0,
+     "maxdd_r": 54.9,
+     "pf": 0.86,
+     "ci95": [
+      -0.341,
+      0.137
+     ],
+     "be_wr": 29.0,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.9
+    },
+    "2024": {
+     "trades": 227,
+     "per_day": 0.622,
+     "wr": 18.5,
+     "avg_r": -0.315,
+     "net_r": -71.6,
+     "pips": -545.0,
+     "maxdd_r": 76.3,
+     "pf": 0.61,
+     "ci95": [
+      -0.523,
+      -0.105
+     ],
+     "be_wr": 27.2,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 31.1
+    },
+    "2025": {
+     "trades": 274,
+     "per_day": 0.751,
+     "wr": 20.1,
+     "avg_r": -0.294,
+     "net_r": -80.6,
+     "pips": -513.0,
+     "maxdd_r": 80.8,
+     "pf": 0.63,
+     "ci95": [
+      -0.471,
+      -0.108
+     ],
+     "be_wr": 28.8,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.7
+    },
+    "2026": {
+     "trades": 149,
+     "per_day": 0.111,
+     "wr": 16.1,
+     "avg_r": -0.357,
+     "net_r": -53.2,
+     "pips": -299.0,
+     "maxdd_r": 59.0,
+     "pf": 0.57,
+     "ci95": [
+      -0.613,
+      -0.094
+     ],
+     "be_wr": 25.1,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 22.2
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 401,
+     "per_day": 0.3,
+     "wr": 20.9,
+     "avg_r": -0.245,
+     "net_r": -98.1,
+     "pips": -600.0,
+     "maxdd_r": 111.5,
+     "pf": 0.69,
+     "ci95": [
+      -0.396,
+      -0.082
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.8
+    },
+    "bullish engulfing": {
+     "trades": 435,
+     "per_day": 0.325,
+     "wr": 19.5,
+     "avg_r": -0.292,
+     "net_r": -127.0,
+     "pips": -872.0,
+     "maxdd_r": 140.5,
+     "pf": 0.63,
+     "ci95": [
+      -0.438,
+      -0.147
+     ],
+     "be_wr": 27.9,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.7
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 330,
+    "per_day": 0.247,
+    "wr": 19.4,
+    "avg_r": -0.283,
+    "net_r": -93.4,
+    "pips": -414.0,
+    "maxdd_r": 102.6,
+    "pf": 0.65,
+    "ci95": [
+     -0.447,
+     -0.104
+    ],
+    "be_wr": 27.2,
+    "avg_risk_pips": 7.4,
+    "avg_reward_pips": 24.8
+   },
+   "per_weekday": 0.346,
+   "first_half": {
+    "trades": 163,
+    "per_day": 0.244,
+    "wr": 24.5,
+    "avg_r": -0.124,
+    "net_r": -20.2,
+    "pips": -84.0,
+    "maxdd_r": 36.6,
+    "pf": 0.84,
+    "ci95": [
+     -0.384,
+     0.144
+    ],
+    "be_wr": 28.0,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 26.3
+   },
+   "second_half": {
+    "trades": 167,
+    "per_day": 0.25,
+    "wr": 14.4,
+    "avg_r": -0.438,
+    "net_r": -73.2,
+    "pips": -330.0,
+    "maxdd_r": 74.2,
+    "pf": 0.48,
+    "ci95": [
+     -0.645,
+     -0.209
+    ],
+    "be_wr": 25.9,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 23.4
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 68,
+     "per_day": 0.051,
+     "wr": 17.6,
+     "avg_r": -0.316,
+     "net_r": -21.5,
+     "pips": -163.0,
+     "maxdd_r": 30.3,
+     "pf": 0.62,
+     "ci95": [
+      -0.674,
+      0.118
+     ],
+     "be_wr": 25.8,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 28.1
+    },
+    "EURUSD": {
+     "trades": 28,
+     "per_day": 0.021,
+     "wr": 7.1,
+     "avg_r": -0.772,
+     "net_r": -21.6,
+     "pips": -130.0,
+     "maxdd_r": 21.6,
+     "pf": 0.17,
+     "ci95": [
+      -1.0,
+      -0.359
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 18.7
+    },
+    "GBPJPY": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 34.5,
+     "avg_r": 0.203,
+     "net_r": 11.2,
+     "pips": 179.0,
+     "maxdd_r": 13.5,
+     "pf": 1.31,
+     "ci95": [
+      -0.261,
+      0.693
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 31.1
+    },
+    "GBPUSD": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 18.2,
+     "avg_r": -0.242,
+     "net_r": -13.3,
+     "pips": -54.0,
+     "maxdd_r": 24.1,
+     "pf": 0.7,
+     "ci95": [
+      -0.646,
+      0.225
+     ],
+     "be_wr": 24.7,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 18.9
+    },
+    "NZDUSD": {
+     "trades": 30,
+     "per_day": 0.022,
+     "wr": 6.7,
+     "avg_r": -0.748,
+     "net_r": -22.4,
+     "pips": -103.0,
+     "maxdd_r": 24.9,
+     "pf": 0.2,
+     "ci95": [
+      -1.0,
+      -0.392
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 17.2
+    },
+    "USDCAD": {
+     "trades": 30,
+     "per_day": 0.022,
+     "wr": 16.7,
+     "avg_r": -0.384,
+     "net_r": -11.5,
+     "pips": -35.0,
+     "maxdd_r": 11.5,
+     "pf": 0.54,
+     "ci95": [
+      -0.818,
+      0.148
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 16.5
+    },
+    "USDJPY": {
+     "trades": 64,
+     "per_day": 0.048,
+     "wr": 21.9,
+     "avg_r": -0.222,
+     "net_r": -14.2,
+     "pips": -108.0,
+     "maxdd_r": 18.9,
+     "pf": 0.72,
+     "ci95": [
+      -0.59,
+      0.217
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 31.3
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 85,
+     "per_day": 0.064,
+     "wr": 28.2,
+     "avg_r": -0.041,
+     "net_r": -3.5,
+     "pips": 44.0,
+     "maxdd_r": 20.5,
+     "pf": 0.94,
+     "ci95": [
+      -0.394,
+      0.34
+     ],
+     "be_wr": 29.5,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 25.6
+    },
+    "2024": {
+     "trades": 86,
+     "per_day": 0.236,
+     "wr": 20.9,
+     "avg_r": -0.183,
+     "net_r": -15.7,
+     "pips": -91.0,
+     "maxdd_r": 23.9,
+     "pf": 0.77,
+     "ci95": [
+      -0.538,
+      0.206
+     ],
+     "be_wr": 25.6,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 27.4
+    },
+    "2025": {
+     "trades": 98,
+     "per_day": 0.268,
+     "wr": 16.3,
+     "avg_r": -0.413,
+     "net_r": -40.4,
+     "pips": -192.0,
+     "maxdd_r": 40.4,
+     "pf": 0.5,
+     "ci95": [
+      -0.667,
+      -0.122
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 24.2
+    },
+    "2026": {
+     "trades": 61,
+     "per_day": 0.046,
+     "wr": 9.8,
+     "avg_r": -0.553,
+     "net_r": -33.8,
+     "pips": -175.0,
+     "maxdd_r": 33.8,
+     "pf": 0.39,
+     "ci95": [
+      -0.878,
+      -0.147
+     ],
+     "be_wr": 22.0,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 21.3
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 152,
+     "per_day": 0.114,
+     "wr": 17.8,
+     "avg_r": -0.377,
+     "net_r": -57.2,
+     "pips": -310.0,
+     "maxdd_r": 57.4,
+     "pf": 0.54,
+     "ci95": [
+      -0.607,
+      -0.13
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 26.1
+    },
+    "bullish engulfing": {
+     "trades": 178,
+     "per_day": 0.133,
+     "wr": 20.8,
+     "avg_r": -0.203,
+     "net_r": -36.2,
+     "pips": -104.0,
+     "maxdd_r": 48.2,
+     "pf": 0.74,
+     "ci95": [
+      -0.438,
+      0.056
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 23.8
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 692,
+   "per_day": 0.518,
+   "wr": 17.8,
+   "avg_r": -0.386,
+   "net_r": -267.1,
+   "pips": -2057.0,
+   "maxdd_r": 274.4,
+   "pf": 0.53,
+   "ci95": [
+    -0.495,
+    -0.267
+   ],
+   "be_wr": 29.1,
+   "avg_risk_pips": 8.5,
+   "avg_reward_pips": 27.2
+  },
+  "raw_zero_cost": {
+   "trades": 883,
+   "per_day": 0.66,
+   "wr": 24.9,
+   "avg_r": -0.01,
+   "net_r": -9.2,
+   "pips": -89.0,
+   "maxdd_r": 70.3,
+   "pf": 0.99,
+   "ci95": [
+    -0.138,
+    0.117
+   ],
+   "be_wr": 25.3,
+   "avg_risk_pips": 7.5,
+   "avg_reward_pips": 26.5
+  }
+ },
+ "tf_15m_only": {
+  "params": {
+   "trigger_tfs": [
+    "15m"
+   ]
+  },
+  "n_candidates": 206,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 120,
+    "per_day": 0.09,
+    "wr": 18.3,
+    "avg_r": -0.384,
+    "net_r": -46.0,
+    "pips": -340.0,
+    "maxdd_r": 46.0,
+    "pf": 0.53,
+    "ci95": [
+     -0.614,
+     -0.118
+    ],
+    "be_wr": 29.7,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 26.1
+   },
+   "per_weekday": 0.126,
+   "first_half": {
+    "trades": 67,
+    "per_day": 0.1,
+    "wr": 16.4,
+    "avg_r": -0.504,
+    "net_r": -33.8,
+    "pips": -265.0,
+    "maxdd_r": 33.8,
+    "pf": 0.4,
+    "ci95": [
+     -0.785,
+     -0.196
+    ],
+    "be_wr": 33.1,
+    "avg_risk_pips": 8.6,
+    "avg_reward_pips": 25.7
+   },
+   "second_half": {
+    "trades": 53,
+    "per_day": 0.079,
+    "wr": 20.8,
+    "avg_r": -0.231,
+    "net_r": -12.3,
+    "pips": -75.0,
+    "maxdd_r": 16.5,
+    "pf": 0.71,
+    "ci95": [
+     -0.641,
+     0.206
+    ],
+    "be_wr": 27.0,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 26.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 27,
+     "per_day": 0.02,
+     "wr": 22.2,
+     "avg_r": -0.41,
+     "net_r": -11.1,
+     "pips": -81.0,
+     "maxdd_r": 15.4,
+     "pf": 0.47,
+     "ci95": [
+      -0.793,
+      0.064
+     ],
+     "be_wr": 37.7,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 27.7
+    },
+    "EURUSD": {
+     "trades": 13,
+     "per_day": 0.01,
+     "wr": 7.7,
+     "avg_r": -0.907,
+     "net_r": -11.8,
+     "pips": -72.0,
+     "maxdd_r": 11.8,
+     "pf": 0.02,
+     "ci95": [
+      -1.0,
+      -0.72
+     ],
+     "be_wr": 82.5,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 20.6
+    },
+    "GBPJPY": {
+     "trades": 22,
+     "per_day": 0.016,
+     "wr": 22.7,
+     "avg_r": -0.131,
+     "net_r": -2.9,
+     "pips": -64.0,
+     "maxdd_r": 6.4,
+     "pf": 0.83,
+     "ci95": [
+      -0.773,
+      0.663
+     ],
+     "be_wr": 26.2,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 28.6
+    },
+    "GBPUSD": {
+     "trades": 21,
+     "per_day": 0.016,
+     "wr": 19.0,
+     "avg_r": -0.035,
+     "net_r": -0.7,
+     "pips": 5.0,
+     "maxdd_r": 7.0,
+     "pf": 0.96,
+     "ci95": [
+      -0.795,
+      0.935
+     ],
+     "be_wr": 19.7,
+     "avg_risk_pips": 5.9,
+     "avg_reward_pips": 21.6
+    },
+    "NZDUSD": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -4.0,
+     "pips": -28.0,
+     "maxdd_r": 4.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 7.0,
+     "avg_reward_pips": 20.8
+    },
+    "USDCAD": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -7.0,
+     "pips": -37.0,
+     "maxdd_r": 7.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 19.8
+    },
+    "USDJPY": {
+     "trades": 26,
+     "per_day": 0.019,
+     "wr": 23.1,
+     "avg_r": -0.329,
+     "net_r": -8.6,
+     "pips": -62.0,
+     "maxdd_r": 8.7,
+     "pf": 0.57,
+     "ci95": [
+      -0.786,
+      0.167
+     ],
+     "be_wr": 34.4,
+     "avg_risk_pips": 10.0,
+     "avg_reward_pips": 31.2
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 42,
+     "per_day": 0.031,
+     "wr": 19.0,
+     "avg_r": -0.392,
+     "net_r": -16.5,
+     "pips": -145.0,
+     "maxdd_r": 20.3,
+     "pf": 0.52,
+     "ci95": [
+      -0.767,
+      0.084
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 24.8
+    },
+    "2024": {
+     "trades": 28,
+     "per_day": 0.077,
+     "wr": 10.7,
+     "avg_r": -0.726,
+     "net_r": -20.3,
+     "pips": -156.0,
+     "maxdd_r": 20.3,
+     "pf": 0.19,
+     "ci95": [
+      -1.0,
+      -0.351
+     ],
+     "be_wr": 39.2,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 29.2
+    },
+    "2025": {
+     "trades": 33,
+     "per_day": 0.09,
+     "wr": 30.3,
+     "avg_r": 0.16,
+     "net_r": 5.3,
+     "pips": 58.0,
+     "maxdd_r": 8.7,
+     "pf": 1.23,
+     "ci95": [
+      -0.416,
+      0.848
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 25.7
+    },
+    "2026": {
+     "trades": 17,
+     "per_day": 0.013,
+     "wr": 5.9,
+     "avg_r": -0.856,
+     "net_r": -14.5,
+     "pips": -97.0,
+     "maxdd_r": 14.5,
+     "pf": 0.09,
+     "ci95": [
+      -1.0,
+      -0.568
+     ],
+     "be_wr": 40.8,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 24.8
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 25.0,
+     "avg_r": -0.127,
+     "net_r": -7.6,
+     "pips": -64.0,
+     "maxdd_r": 14.7,
+     "pf": 0.83,
+     "ci95": [
+      -0.523,
+      0.337
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 28.8
+    },
+    "bullish engulfing": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 11.7,
+     "avg_r": -0.64,
+     "net_r": -38.4,
+     "pips": -276.0,
+     "maxdd_r": 38.4,
+     "pf": 0.28,
+     "ci95": [
+      -0.875,
+      -0.354
+     ],
+     "be_wr": 32.4,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 23.4
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 94,
+    "per_day": 0.07,
+    "wr": 19.1,
+    "avg_r": -0.363,
+    "net_r": -34.1,
+    "pips": -244.0,
+    "maxdd_r": 34.1,
+    "pf": 0.55,
+    "ci95": [
+     -0.641,
+     -0.062
+    ],
+    "be_wr": 30.1,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 26.0
+   },
+   "per_weekday": 0.098,
+   "first_half": {
+    "trades": 54,
+    "per_day": 0.081,
+    "wr": 16.7,
+    "avg_r": -0.462,
+    "net_r": -24.9,
+    "pips": -200.0,
+    "maxdd_r": 24.9,
+    "pf": 0.45,
+    "ci95": [
+     -0.788,
+     -0.098
+    ],
+    "be_wr": 31.0,
+    "avg_risk_pips": 8.4,
+    "avg_reward_pips": 26.1
+   },
+   "second_half": {
+    "trades": 40,
+    "per_day": 0.06,
+    "wr": 22.5,
+    "avg_r": -0.23,
+    "net_r": -9.2,
+    "pips": -45.0,
+    "maxdd_r": 13.1,
+    "pf": 0.7,
+    "ci95": [
+     -0.67,
+     0.281
+    ],
+    "be_wr": 29.2,
+    "avg_risk_pips": 8.2,
+    "avg_reward_pips": 25.9
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 21,
+     "per_day": 0.016,
+     "wr": 23.8,
+     "avg_r": -0.318,
+     "net_r": -6.7,
+     "pips": -50.0,
+     "maxdd_r": 13.0,
+     "pf": 0.58,
+     "ci95": [
+      -0.791,
+      0.249
+     ],
+     "be_wr": 34.9,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 27.1
+    },
+    "EURUSD": {
+     "trades": 10,
+     "per_day": 0.007,
+     "wr": 10.0,
+     "avg_r": -0.879,
+     "net_r": -8.8,
+     "pips": -54.0,
+     "maxdd_r": 8.8,
+     "pf": 0.02,
+     "ci95": [
+      -1.0,
+      -0.637
+     ],
+     "be_wr": 82.5,
+     "avg_risk_pips": 6.0,
+     "avg_reward_pips": 20.0
+    },
+    "GBPJPY": {
+     "trades": 16,
+     "per_day": 0.012,
+     "wr": 18.8,
+     "avg_r": -0.287,
+     "net_r": -4.6,
+     "pips": -78.0,
+     "maxdd_r": 7.0,
+     "pf": 0.65,
+     "ci95": [
+      -1.0,
+      0.643
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 10.3,
+     "avg_reward_pips": 29.8
+    },
+    "GBPUSD": {
+     "trades": 16,
+     "per_day": 0.012,
+     "wr": 18.8,
+     "avg_r": -0.031,
+     "net_r": -0.5,
+     "pips": 12.0,
+     "maxdd_r": 5.7,
+     "pf": 0.96,
+     "ci95": [
+      -1.0,
+      1.083
+     ],
+     "be_wr": 19.4,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 21.3
+    },
+    "NZDUSD": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -4.0,
+     "pips": -28.0,
+     "maxdd_r": 4.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 7.0,
+     "avg_reward_pips": 20.8
+    },
+    "USDCAD": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -5.0,
+     "pips": -22.0,
+     "maxdd_r": 5.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 4.4,
+     "avg_reward_pips": 19.1
+    },
+    "USDJPY": {
+     "trades": 22,
+     "per_day": 0.016,
+     "wr": 27.3,
+     "avg_r": -0.207,
+     "net_r": -4.6,
+     "pips": -25.0,
+     "maxdd_r": 4.7,
+     "pf": 0.72,
+     "ci95": [
+      -0.737,
+      0.395
+     ],
+     "be_wr": 34.4,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 30.9
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 35,
+     "per_day": 0.026,
+     "wr": 22.9,
+     "avg_r": -0.27,
+     "net_r": -9.5,
+     "pips": -90.0,
+     "maxdd_r": 16.3,
+     "pf": 0.65,
+     "ci95": [
+      -0.716,
+      0.273
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 25.6
+    },
+    "2024": {
+     "trades": 21,
+     "per_day": 0.058,
+     "wr": 4.8,
+     "avg_r": -0.832,
+     "net_r": -17.5,
+     "pips": -133.0,
+     "maxdd_r": 17.5,
+     "pf": 0.13,
+     "ci95": [
+      -1.0,
+      -0.497
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 28.1
+    },
+    "2025": {
+     "trades": 27,
+     "per_day": 0.074,
+     "wr": 29.6,
+     "avg_r": 0.05,
+     "net_r": 1.4,
+     "pips": 38.0,
+     "maxdd_r": 7.0,
+     "pf": 1.07,
+     "ci95": [
+      -0.541,
+      0.738
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 25.4
+    },
+    "2026": {
+     "trades": 11,
+     "per_day": 0.008,
+     "wr": 9.1,
+     "avg_r": -0.777,
+     "net_r": -8.5,
+     "pips": -60.0,
+     "maxdd_r": 8.5,
+     "pf": 0.15,
+     "ci95": [
+      -1.0,
+      -0.332
+     ],
+     "be_wr": 40.8,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.0
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 46,
+     "per_day": 0.034,
+     "wr": 23.9,
+     "avg_r": -0.167,
+     "net_r": -7.7,
+     "pips": -71.0,
+     "maxdd_r": 16.8,
+     "pf": 0.78,
+     "ci95": [
+      -0.616,
+      0.355
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 28.4
+    },
+    "bullish engulfing": {
+     "trades": 48,
+     "per_day": 0.036,
+     "wr": 14.6,
+     "avg_r": -0.55,
+     "net_r": -26.4,
+     "pips": -173.0,
+     "maxdd_r": 28.3,
+     "pf": 0.36,
+     "ci95": [
+      -0.831,
+      -0.219
+     ],
+     "be_wr": 32.4,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 23.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 102,
+   "per_day": 0.076,
+   "wr": 14.7,
+   "avg_r": -0.58,
+   "net_r": -59.2,
+   "pips": -460.0,
+   "maxdd_r": 59.2,
+   "pf": 0.32,
+   "ci95": [
+    -0.774,
+    -0.369
+   ],
+   "be_wr": 35.1,
+   "avg_risk_pips": 8.9,
+   "avg_reward_pips": 26.5
+  },
+  "raw_zero_cost": {
+   "trades": 133,
+   "per_day": 0.099,
+   "wr": 24.1,
+   "avg_r": -0.198,
+   "net_r": -26.3,
+   "pips": -178.0,
+   "maxdd_r": 33.1,
+   "pf": 0.74,
+   "ci95": [
+    -0.451,
+    0.081
+   ],
+   "be_wr": 30.0,
+   "avg_risk_pips": 7.9,
+   "avg_reward_pips": 26.5
+  }
+ },
+ "london_ny_07-20utc": {
+  "params": {
+   "active_hours_utc": [
+    "07:00",
+    "20:00"
+   ]
+  },
+  "n_candidates": 951,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 442,
+    "per_day": 0.331,
+    "wr": 21.9,
+    "avg_r": -0.204,
+    "net_r": -90.2,
+    "pips": -532.0,
+    "maxdd_r": 97.5,
+    "pf": 0.74,
+    "ci95": [
+     -0.359,
+     -0.044
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 27.6
+   },
+   "per_weekday": 0.463,
+   "first_half": {
+    "trades": 207,
+    "per_day": 0.31,
+    "wr": 25.1,
+    "avg_r": -0.13,
+    "net_r": -26.9,
+    "pips": -169.0,
+    "maxdd_r": 40.8,
+    "pf": 0.83,
+    "ci95": [
+     -0.343,
+     0.1
+    ],
+    "be_wr": 29.1,
+    "avg_risk_pips": 8.5,
+    "avg_reward_pips": 30.6
+   },
+   "second_half": {
+    "trades": 235,
+    "per_day": 0.352,
+    "wr": 19.1,
+    "avg_r": -0.27,
+    "net_r": -63.4,
+    "pips": -363.0,
+    "maxdd_r": 66.4,
+    "pf": 0.67,
+    "ci95": [
+     -0.47,
+     -0.039
+    ],
+    "be_wr": 26.3,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 25.0
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 90,
+     "per_day": 0.067,
+     "wr": 24.4,
+     "avg_r": -0.07,
+     "net_r": -6.3,
+     "pips": -21.0,
+     "maxdd_r": 17.6,
+     "pf": 0.91,
+     "ci95": [
+      -0.435,
+      0.327
+     ],
+     "be_wr": 26.5,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 31.9
+    },
+    "EURUSD": {
+     "trades": 44,
+     "per_day": 0.033,
+     "wr": 9.1,
+     "avg_r": -0.654,
+     "net_r": -28.8,
+     "pips": -154.0,
+     "maxdd_r": 34.0,
+     "pf": 0.28,
+     "ci95": [
+      -0.945,
+      -0.294
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 19.8
+    },
+    "GBPJPY": {
+     "trades": 96,
+     "per_day": 0.072,
+     "wr": 18.8,
+     "avg_r": -0.339,
+     "net_r": -32.5,
+     "pips": -318.0,
+     "maxdd_r": 38.9,
+     "pf": 0.58,
+     "ci95": [
+      -0.613,
+      -0.008
+     ],
+     "be_wr": 28.4,
+     "avg_risk_pips": 10.8,
+     "avg_reward_pips": 35.1
+    },
+    "GBPUSD": {
+     "trades": 64,
+     "per_day": 0.048,
+     "wr": 28.1,
+     "avg_r": 0.104,
+     "net_r": 6.7,
+     "pips": 27.0,
+     "maxdd_r": 10.3,
+     "pf": 1.15,
+     "ci95": [
+      -0.329,
+      0.616
+     ],
+     "be_wr": 25.7,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 22.6
+    },
+    "NZDUSD": {
+     "trades": 23,
+     "per_day": 0.017,
+     "wr": 8.7,
+     "avg_r": -0.652,
+     "net_r": -15.0,
+     "pips": -63.0,
+     "maxdd_r": 17.5,
+     "pf": 0.27,
+     "ci95": [
+      -1.0,
+      -0.156
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 16.6
+    },
+    "USDCAD": {
+     "trades": 34,
+     "per_day": 0.025,
+     "wr": 14.7,
+     "avg_r": -0.529,
+     "net_r": -18.0,
+     "pips": -76.0,
+     "maxdd_r": 19.7,
+     "pf": 0.38,
+     "ci95": [
+      -0.894,
+      -0.12
+     ],
+     "be_wr": 31.2,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 17.6
+    },
+    "USDJPY": {
+     "trades": 91,
+     "per_day": 0.068,
+     "wr": 30.8,
+     "avg_r": 0.04,
+     "net_r": 3.7,
+     "pips": 73.0,
+     "maxdd_r": 9.2,
+     "pf": 1.06,
+     "ci95": [
+      -0.297,
+      0.436
+     ],
+     "be_wr": 29.6,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 29.4
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 95,
+     "per_day": 0.071,
+     "wr": 29.5,
+     "avg_r": 0.011,
+     "net_r": 1.1,
+     "pips": 29.0,
+     "maxdd_r": 30.4,
+     "pf": 1.02,
+     "ci95": [
+      -0.321,
+      0.38
+     ],
+     "be_wr": 29.5,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 27.3
+    },
+    "2024": {
+     "trades": 125,
+     "per_day": 0.342,
+     "wr": 20.0,
+     "avg_r": -0.301,
+     "net_r": -37.7,
+     "pips": -267.0,
+     "maxdd_r": 42.7,
+     "pf": 0.62,
+     "ci95": [
+      -0.556,
+      -0.045
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 33.7
+    },
+    "2025": {
+     "trades": 144,
+     "per_day": 0.395,
+     "wr": 22.9,
+     "avg_r": -0.146,
+     "net_r": -21.0,
+     "pips": -150.0,
+     "maxdd_r": 25.4,
+     "pf": 0.81,
+     "ci95": [
+      -0.42,
+      0.145
+     ],
+     "be_wr": 27.0,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.2
+    },
+    "2026": {
+     "trades": 78,
+     "per_day": 0.058,
+     "wr": 14.1,
+     "avg_r": -0.419,
+     "net_r": -32.7,
+     "pips": -144.0,
+     "maxdd_r": 35.7,
+     "pf": 0.51,
+     "ci95": [
+      -0.728,
+      -0.028
+     ],
+     "be_wr": 24.3,
+     "avg_risk_pips": 6.9,
+     "avg_reward_pips": 24.5
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 222,
+     "per_day": 0.166,
+     "wr": 23.9,
+     "avg_r": -0.13,
+     "net_r": -28.9,
+     "pips": -149.0,
+     "maxdd_r": 53.8,
+     "pf": 0.83,
+     "ci95": [
+      -0.337,
+      0.102
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.9
+    },
+    "bullish engulfing": {
+     "trades": 212,
+     "per_day": 0.159,
+     "wr": 18.9,
+     "avg_r": -0.305,
+     "net_r": -64.6,
+     "pips": -422.0,
+     "maxdd_r": 69.7,
+     "pf": 0.62,
+     "ci95": [
+      -0.517,
+      -0.075
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 27.7
+    },
+    "double bottom (neckline break)": {
+     "trades": 5,
+     "per_day": 0.004,
+     "wr": 40.0,
+     "avg_r": -0.118,
+     "net_r": -0.6,
+     "pips": -3.0,
+     "maxdd_r": 2.0,
+     "pf": 0.76,
+     "ci95": [
+      -0.89,
+      0.755
+     ],
+     "be_wr": 51.8,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 17.2
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 66.7,
+     "avg_r": 1.289,
+     "net_r": 3.9,
+     "pips": 42.0,
+     "maxdd_r": 1.0,
+     "pf": 4.87,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 29.1,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 21.2
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 210,
+    "per_day": 0.157,
+    "wr": 19.0,
+    "avg_r": -0.272,
+    "net_r": -57.2,
+    "pips": -372.0,
+    "maxdd_r": 60.9,
+    "pf": 0.66,
+    "ci95": [
+     -0.493,
+     -0.034
+    ],
+    "be_wr": 26.4,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 26.4
+   },
+   "per_weekday": 0.22,
+   "first_half": {
+    "trades": 105,
+    "per_day": 0.157,
+    "wr": 20.0,
+    "avg_r": -0.33,
+    "net_r": -34.6,
+    "pips": -254.0,
+    "maxdd_r": 37.6,
+    "pf": 0.59,
+    "ci95": [
+     -0.592,
+     -0.041
+    ],
+    "be_wr": 30.1,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 29.5
+   },
+   "second_half": {
+    "trades": 105,
+    "per_day": 0.157,
+    "wr": 18.1,
+    "avg_r": -0.215,
+    "net_r": -22.6,
+    "pips": -118.0,
+    "maxdd_r": 26.4,
+    "pf": 0.74,
+    "ci95": [
+     -0.534,
+     0.151
+    ],
+    "be_wr": 23.3,
+    "avg_risk_pips": 7.3,
+    "avg_reward_pips": 23.3
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 44,
+     "per_day": 0.033,
+     "wr": 22.7,
+     "avg_r": -0.068,
+     "net_r": -3.0,
+     "pips": -21.0,
+     "maxdd_r": 13.9,
+     "pf": 0.91,
+     "ci95": [
+      -0.598,
+      0.585
+     ],
+     "be_wr": 24.4,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 30.6
+    },
+    "EURUSD": {
+     "trades": 18,
+     "per_day": 0.013,
+     "wr": 11.1,
+     "avg_r": -0.645,
+     "net_r": -11.6,
+     "pips": -65.0,
+     "maxdd_r": 13.0,
+     "pf": 0.27,
+     "ci95": [
+      -1.0,
+      -0.004
+     ],
+     "be_wr": 31.3,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 19.2
+    },
+    "GBPJPY": {
+     "trades": 33,
+     "per_day": 0.025,
+     "wr": 18.2,
+     "avg_r": -0.383,
+     "net_r": -12.6,
+     "pips": -128.0,
+     "maxdd_r": 15.8,
+     "pf": 0.53,
+     "ci95": [
+      -0.8,
+      0.083
+     ],
+     "be_wr": 29.5,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 35.4
+    },
+    "GBPUSD": {
+     "trades": 36,
+     "per_day": 0.027,
+     "wr": 25.0,
+     "avg_r": 0.036,
+     "net_r": 1.3,
+     "pips": -11.0,
+     "maxdd_r": 8.0,
+     "pf": 1.05,
+     "ci95": [
+      -0.522,
+      0.71
+     ],
+     "be_wr": 24.6,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 22.1
+    },
+    "NZDUSD": {
+     "trades": 21,
+     "per_day": 0.016,
+     "wr": 9.5,
+     "avg_r": -0.619,
+     "net_r": -13.0,
+     "pips": -54.0,
+     "maxdd_r": 15.5,
+     "pf": 0.3,
+     "ci95": [
+      -1.0,
+      -0.075
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.8,
+     "avg_reward_pips": 16.3
+    },
+    "USDCAD": {
+     "trades": 20,
+     "per_day": 0.015,
+     "wr": 15.0,
+     "avg_r": -0.526,
+     "net_r": -10.5,
+     "pips": -34.0,
+     "maxdd_r": 13.0,
+     "pf": 0.38,
+     "ci95": [
+      -1.0,
+      0.01
+     ],
+     "be_wr": 31.6,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 15.6
+    },
+    "USDJPY": {
+     "trades": 38,
+     "per_day": 0.028,
+     "wr": 21.1,
+     "avg_r": -0.204,
+     "net_r": -7.7,
+     "pips": -59.0,
+     "maxdd_r": 17.3,
+     "pf": 0.74,
+     "ci95": [
+      -0.673,
+      0.396
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 8.9,
+     "avg_reward_pips": 32.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 28.3,
+     "avg_r": -0.104,
+     "net_r": -5.5,
+     "pips": -33.0,
+     "maxdd_r": 20.0,
+     "pf": 0.85,
+     "ci95": [
+      -0.508,
+      0.35
+     ],
+     "be_wr": 31.9,
+     "avg_risk_pips": 7.0,
+     "avg_reward_pips": 26.9
+    },
+    "2024": {
+     "trades": 58,
+     "per_day": 0.159,
+     "wr": 12.1,
+     "avg_r": -0.549,
+     "net_r": -31.8,
+     "pips": -230.0,
+     "maxdd_r": 34.1,
+     "pf": 0.38,
+     "ci95": [
+      -0.859,
+      -0.149
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 31.9
+    },
+    "2025": {
+     "trades": 64,
+     "per_day": 0.175,
+     "wr": 21.9,
+     "avg_r": -0.102,
+     "net_r": -6.5,
+     "pips": -45.0,
+     "maxdd_r": 12.1,
+     "pf": 0.87,
+     "ci95": [
+      -0.532,
+      0.35
+     ],
+     "be_wr": 24.7,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 22.9
+    },
+    "2026": {
+     "trades": 35,
+     "per_day": 0.026,
+     "wr": 11.4,
+     "avg_r": -0.38,
+     "net_r": -13.3,
+     "pips": -64.0,
+     "maxdd_r": 20.7,
+     "pf": 0.57,
+     "ci95": [
+      -0.915,
+      0.317
+     ],
+     "be_wr": 18.4,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 23.0
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 98,
+     "per_day": 0.073,
+     "wr": 20.4,
+     "avg_r": -0.279,
+     "net_r": -27.4,
+     "pips": -184.0,
+     "maxdd_r": 29.3,
+     "pf": 0.65,
+     "ci95": [
+      -0.577,
+      0.046
+     ],
+     "be_wr": 28.3,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 26.9
+    },
+    "bullish engulfing": {
+     "trades": 107,
+     "per_day": 0.08,
+     "wr": 16.8,
+     "avg_r": -0.298,
+     "net_r": -31.8,
+     "pips": -200.0,
+     "maxdd_r": 35.6,
+     "pf": 0.64,
+     "ci95": [
+      -0.61,
+      0.04
+     ],
+     "be_wr": 24.2,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 26.3
+    },
+    "double bottom (neckline break)": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 25.0,
+     "avg_r": -0.249,
+     "net_r": -1.0,
+     "pips": -7.0,
+     "maxdd_r": 2.0,
+     "pf": 0.59,
+     "ci95": [
+      -1.0,
+      0.843
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 18.6
+    },
+    "double top (neckline break)": {
+     "trades": 1,
+     "per_day": 0.001,
+     "wr": 100.0,
+     "avg_r": 3.016,
+     "net_r": 3.0,
+     "pips": 19.0,
+     "maxdd_r": 0.0,
+     "pf": null,
+     "ci95": [
+      3.016,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 19.3
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 375,
+   "per_day": 0.28,
+   "wr": 19.2,
+   "avg_r": -0.338,
+   "net_r": -126.9,
+   "pips": -928.0,
+   "maxdd_r": 129.9,
+   "pf": 0.58,
+   "ci95": [
+    -0.484,
+    -0.189
+   ],
+   "be_wr": 29.1,
+   "avg_risk_pips": 8.7,
+   "avg_reward_pips": 28.1
+  },
+  "raw_zero_cost": {
+   "trades": 477,
+   "per_day": 0.357,
+   "wr": 26.4,
+   "avg_r": 0.037,
+   "net_r": 17.7,
+   "pips": 186.0,
+   "maxdd_r": 32.8,
+   "pf": 1.05,
+   "ci95": [
+    -0.135,
+    0.216
+   ],
+   "be_wr": 25.6,
+   "avg_risk_pips": 7.7,
+   "avg_reward_pips": 27.4
+  }
+ },
+ "bands_only": {
+  "params": {
+   "use_zones": false
+  },
+  "n_candidates": 830,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 405,
+    "per_day": 0.303,
+    "wr": 19.8,
+    "avg_r": -0.263,
+    "net_r": -106.3,
+    "pips": -792.0,
+    "maxdd_r": 112.5,
+    "pf": 0.67,
+    "ci95": [
+     -0.414,
+     -0.095
+    ],
+    "be_wr": 26.9,
+    "avg_risk_pips": 8.2,
+    "avg_reward_pips": 29.2
+   },
+   "per_weekday": 0.424,
+   "first_half": {
+    "trades": 182,
+    "per_day": 0.272,
+    "wr": 23.1,
+    "avg_r": -0.188,
+    "net_r": -34.2,
+    "pips": -294.0,
+    "maxdd_r": 41.4,
+    "pf": 0.75,
+    "ci95": [
+     -0.402,
+     0.053
+    ],
+    "be_wr": 28.5,
+    "avg_risk_pips": 8.7,
+    "avg_reward_pips": 31.3
+   },
+   "second_half": {
+    "trades": 223,
+    "per_day": 0.334,
+    "wr": 17.0,
+    "avg_r": -0.323,
+    "net_r": -72.1,
+    "pips": -499.0,
+    "maxdd_r": 75.6,
+    "pf": 0.61,
+    "ci95": [
+     -0.54,
+     -0.102
+    ],
+    "be_wr": 25.4,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 27.4
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 67,
+     "per_day": 0.05,
+     "wr": 19.4,
+     "avg_r": -0.197,
+     "net_r": -13.2,
+     "pips": -140.0,
+     "maxdd_r": 18.3,
+     "pf": 0.76,
+     "ci95": [
+      -0.604,
+      0.286
+     ],
+     "be_wr": 24.2,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 32.8
+    },
+    "EURUSD": {
+     "trades": 45,
+     "per_day": 0.034,
+     "wr": 15.6,
+     "avg_r": -0.319,
+     "net_r": -14.4,
+     "pips": -100.0,
+     "maxdd_r": 24.0,
+     "pf": 0.61,
+     "ci95": [
+      -0.77,
+      0.156
+     ],
+     "be_wr": 23.5,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 22.2
+    },
+    "GBPJPY": {
+     "trades": 98,
+     "per_day": 0.073,
+     "wr": 22.4,
+     "avg_r": -0.243,
+     "net_r": -23.8,
+     "pips": -256.0,
+     "maxdd_r": 33.8,
+     "pf": 0.69,
+     "ci95": [
+      -0.511,
+      0.087
+     ],
+     "be_wr": 29.8,
+     "avg_risk_pips": 10.7,
+     "avg_reward_pips": 34.6
+    },
+    "GBPUSD": {
+     "trades": 59,
+     "per_day": 0.044,
+     "wr": 20.3,
+     "avg_r": -0.21,
+     "net_r": -12.4,
+     "pips": -69.0,
+     "maxdd_r": 18.4,
+     "pf": 0.74,
+     "ci95": [
+      -0.599,
+      0.253
+     ],
+     "be_wr": 25.7,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 23.7
+    },
+    "NZDUSD": {
+     "trades": 19,
+     "per_day": 0.014,
+     "wr": 5.3,
+     "avg_r": -0.816,
+     "net_r": -15.5,
+     "pips": -72.0,
+     "maxdd_r": 15.5,
+     "pf": 0.11,
+     "ci95": [
+      -1.0,
+      -0.476
+     ],
+     "be_wr": 33.8,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 18.5
+    },
+    "USDCAD": {
+     "trades": 31,
+     "per_day": 0.023,
+     "wr": 16.1,
+     "avg_r": -0.336,
+     "net_r": -10.4,
+     "pips": -35.0,
+     "maxdd_r": 16.0,
+     "pf": 0.6,
+     "ci95": [
+      -0.87,
+      0.23
+     ],
+     "be_wr": 24.3,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 18.5
+    },
+    "USDJPY": {
+     "trades": 86,
+     "per_day": 0.064,
+     "wr": 23.3,
+     "avg_r": -0.193,
+     "net_r": -16.6,
+     "pips": -121.0,
+     "maxdd_r": 19.0,
+     "pf": 0.75,
+     "ci95": [
+      -0.531,
+      0.17
+     ],
+     "be_wr": 28.8,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 33.8
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 95,
+     "per_day": 0.071,
+     "wr": 20.0,
+     "avg_r": -0.237,
+     "net_r": -22.5,
+     "pips": -227.0,
+     "maxdd_r": 32.0,
+     "pf": 0.7,
+     "ci95": [
+      -0.562,
+      0.114
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 30.9
+    },
+    "2024": {
+     "trades": 100,
+     "per_day": 0.274,
+     "wr": 23.0,
+     "avg_r": -0.247,
+     "net_r": -24.7,
+     "pips": -168.0,
+     "maxdd_r": 30.1,
+     "pf": 0.68,
+     "ci95": [
+      -0.517,
+      0.059
+     ],
+     "be_wr": 30.5,
+     "avg_risk_pips": 9.2,
+     "avg_reward_pips": 32.2
+    },
+    "2025": {
+     "trades": 137,
+     "per_day": 0.375,
+     "wr": 19.7,
+     "avg_r": -0.247,
+     "net_r": -33.8,
+     "pips": -263.0,
+     "maxdd_r": 34.2,
+     "pf": 0.69,
+     "ci95": [
+      -0.503,
+      0.03
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 27.5
+    },
+    "2026": {
+     "trades": 73,
+     "per_day": 0.055,
+     "wr": 15.1,
+     "avg_r": -0.346,
+     "net_r": -25.3,
+     "pips": -134.0,
+     "maxdd_r": 28.8,
+     "pf": 0.59,
+     "ci95": [
+      -0.693,
+      0.069
+     ],
+     "be_wr": 23.2,
+     "avg_risk_pips": 6.8,
+     "avg_reward_pips": 25.8
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 180,
+     "per_day": 0.135,
+     "wr": 17.8,
+     "avg_r": -0.337,
+     "net_r": -60.6,
+     "pips": -464.0,
+     "maxdd_r": 69.9,
+     "pf": 0.59,
+     "ci95": [
+      -0.548,
+      -0.11
+     ],
+     "be_wr": 27.0,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 28.8
+    },
+    "bullish engulfing": {
+     "trades": 220,
+     "per_day": 0.165,
+     "wr": 21.4,
+     "avg_r": -0.206,
+     "net_r": -45.3,
+     "pips": -321.0,
+     "maxdd_r": 51.1,
+     "pf": 0.74,
+     "ci95": [
+      -0.421,
+      0.031
+     ],
+     "be_wr": 26.9,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 29.7
+    },
+    "double bottom (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -0.726,
+     "net_r": -1.5,
+     "pips": -12.0,
+     "maxdd_r": 1.5,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -0.452
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 20.4
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.339,
+     "net_r": 1.0,
+     "pips": 4.0,
+     "maxdd_r": 2.0,
+     "pf": 1.51,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 20.2
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 206,
+    "per_day": 0.154,
+    "wr": 19.9,
+    "avg_r": -0.254,
+    "net_r": -52.3,
+    "pips": -410.0,
+    "maxdd_r": 52.3,
+    "pf": 0.68,
+    "ci95": [
+     -0.474,
+     -0.032
+    ],
+    "be_wr": 26.8,
+    "avg_risk_pips": 7.8,
+    "avg_reward_pips": 27.8
+   },
+   "per_weekday": 0.216,
+   "first_half": {
+    "trades": 100,
+    "per_day": 0.15,
+    "wr": 23.0,
+    "avg_r": -0.22,
+    "net_r": -22.0,
+    "pips": -223.0,
+    "maxdd_r": 23.8,
+    "pf": 0.71,
+    "ci95": [
+     -0.509,
+     0.082
+    ],
+    "be_wr": 29.7,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 28.8
+   },
+   "second_half": {
+    "trades": 106,
+    "per_day": 0.159,
+    "wr": 17.0,
+    "avg_r": -0.286,
+    "net_r": -30.3,
+    "pips": -188.0,
+    "maxdd_r": 30.3,
+    "pf": 0.66,
+    "ci95": [
+     -0.595,
+     0.063
+    ],
+    "be_wr": 23.8,
+    "avg_risk_pips": 7.3,
+    "avg_reward_pips": 26.8
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 34,
+     "per_day": 0.025,
+     "wr": 23.5,
+     "avg_r": 0.035,
+     "net_r": 1.2,
+     "pips": -46.0,
+     "maxdd_r": 6.2,
+     "pf": 1.05,
+     "ci95": [
+      -0.624,
+      0.841
+     ],
+     "be_wr": 22.7,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 31.4
+    },
+    "EURUSD": {
+     "trades": 23,
+     "per_day": 0.017,
+     "wr": 17.4,
+     "avg_r": -0.358,
+     "net_r": -8.2,
+     "pips": -54.0,
+     "maxdd_r": 11.0,
+     "pf": 0.57,
+     "ci95": [
+      -0.947,
+      0.297
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 19.9
+    },
+    "GBPJPY": {
+     "trades": 42,
+     "per_day": 0.031,
+     "wr": 35.7,
+     "avg_r": 0.129,
+     "net_r": 5.4,
+     "pips": 42.0,
+     "maxdd_r": 6.0,
+     "pf": 1.2,
+     "ci95": [
+      -0.339,
+      0.632
+     ],
+     "be_wr": 31.6,
+     "avg_risk_pips": 10.5,
+     "avg_reward_pips": 34.9
+    },
+    "GBPUSD": {
+     "trades": 32,
+     "per_day": 0.024,
+     "wr": 18.8,
+     "avg_r": -0.15,
+     "net_r": -4.8,
+     "pips": -48.0,
+     "maxdd_r": 7.9,
+     "pf": 0.82,
+     "ci95": [
+      -0.745,
+      0.562
+     ],
+     "be_wr": 22.1,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 23.2
+    },
+    "NZDUSD": {
+     "trades": 16,
+     "per_day": 0.012,
+     "wr": 6.2,
+     "avg_r": -0.781,
+     "net_r": -12.5,
+     "pips": -58.0,
+     "maxdd_r": 12.5,
+     "pf": 0.14,
+     "ci95": [
+      -1.0,
+      -0.377
+     ],
+     "be_wr": 33.8,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 17.6
+    },
+    "USDCAD": {
+     "trades": 17,
+     "per_day": 0.013,
+     "wr": 17.6,
+     "avg_r": -0.227,
+     "net_r": -3.9,
+     "pips": 1.0,
+     "maxdd_r": 8.0,
+     "pf": 0.72,
+     "ci95": [
+      -1.0,
+      0.656
+     ],
+     "be_wr": 22.8,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 17.9
+    },
+    "USDJPY": {
+     "trades": 42,
+     "per_day": 0.031,
+     "wr": 9.5,
+     "avg_r": -0.705,
+     "net_r": -29.6,
+     "pips": -247.0,
+     "maxdd_r": 29.6,
+     "pf": 0.22,
+     "ci95": [
+      -0.95,
+      -0.398
+     ],
+     "be_wr": 32.3,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 33.3
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 20.0,
+     "avg_r": -0.257,
+     "net_r": -14.2,
+     "pips": -158.0,
+     "maxdd_r": 20.7,
+     "pf": 0.67,
+     "ci95": [
+      -0.669,
+      0.2
+     ],
+     "be_wr": 27.3,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 27.0
+    },
+    "2024": {
+     "trades": 50,
+     "per_day": 0.137,
+     "wr": 24.0,
+     "avg_r": -0.257,
+     "net_r": -12.9,
+     "pips": -100.0,
+     "maxdd_r": 17.7,
+     "pf": 0.66,
+     "ci95": [
+      -0.62,
+      0.143
+     ],
+     "be_wr": 32.3,
+     "avg_risk_pips": 9.0,
+     "avg_reward_pips": 30.8
+    },
+    "2025": {
+     "trades": 62,
+     "per_day": 0.17,
+     "wr": 19.4,
+     "avg_r": -0.231,
+     "net_r": -14.3,
+     "pips": -109.0,
+     "maxdd_r": 19.0,
+     "pf": 0.71,
+     "ci95": [
+      -0.622,
+      0.252
+     ],
+     "be_wr": 25.2,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 26.8
+    },
+    "2026": {
+     "trades": 39,
+     "per_day": 0.029,
+     "wr": 15.4,
+     "avg_r": -0.282,
+     "net_r": -11.0,
+     "pips": -44.0,
+     "maxdd_r": 18.3,
+     "pf": 0.67,
+     "ci95": [
+      -0.79,
+      0.388
+     ],
+     "be_wr": 21.4,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 26.3
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 91,
+     "per_day": 0.068,
+     "wr": 15.4,
+     "avg_r": -0.457,
+     "net_r": -41.6,
+     "pips": -330.0,
+     "maxdd_r": 41.6,
+     "pf": 0.46,
+     "ci95": [
+      -0.719,
+      -0.134
+     ],
+     "be_wr": 28.3,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 27.4
+    },
+    "bullish engulfing": {
+     "trades": 112,
+     "per_day": 0.084,
+     "wr": 23.2,
+     "avg_r": -0.11,
+     "net_r": -12.4,
+     "pips": -86.0,
+     "maxdd_r": 17.3,
+     "pf": 0.86,
+     "ci95": [
+      -0.445,
+      0.214
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 28.3
+    },
+    "double bottom (neckline break)": {
+     "trades": 1,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -0.452,
+     "net_r": -0.5,
+     "pips": -4.0,
+     "maxdd_r": 0.5,
+     "pf": 0.0,
+     "ci95": [
+      -0.452,
+      -0.452
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 14.5
+    },
+    "double top (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 50.0,
+     "avg_r": 1.008,
+     "net_r": 2.0,
+     "pips": 10.0,
+     "maxdd_r": 1.0,
+     "pf": 3.02,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 21.1
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 333,
+   "per_day": 0.249,
+   "wr": 17.7,
+   "avg_r": -0.362,
+   "net_r": -120.4,
+   "pips": -953.0,
+   "maxdd_r": 121.9,
+   "pf": 0.56,
+   "ci95": [
+    -0.518,
+    -0.204
+   ],
+   "be_wr": 27.9,
+   "avg_risk_pips": 8.7,
+   "avg_reward_pips": 30.1
+  },
+  "raw_zero_cost": {
+   "trades": 420,
+   "per_day": 0.314,
+   "wr": 25.0,
+   "avg_r": 0.032,
+   "net_r": 13.6,
+   "pips": -52.0,
+   "maxdd_r": 31.7,
+   "pf": 1.04,
+   "ci95": [
+    -0.155,
+    0.231
+   ],
+   "be_wr": 24.3,
+   "avg_risk_pips": 7.8,
+   "avg_reward_pips": 29.3
+  }
+ },
+ "zones_only": {
+  "params": {
+   "use_bands": false
+  },
+  "n_candidates": 1178,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 566,
+    "per_day": 0.423,
+    "wr": 20.7,
+    "avg_r": -0.269,
+    "net_r": -152.1,
+    "pips": -957.0,
+    "maxdd_r": 166.4,
+    "pf": 0.66,
+    "ci95": [
+     -0.398,
+     -0.141
+    ],
+    "be_wr": 28.6,
+    "avg_risk_pips": 7.9,
+    "avg_reward_pips": 24.5
+   },
+   "per_weekday": 0.593,
+   "first_half": {
+    "trades": 262,
+    "per_day": 0.392,
+    "wr": 22.9,
+    "avg_r": -0.179,
+    "net_r": -46.9,
+    "pips": -323.0,
+    "maxdd_r": 72.1,
+    "pf": 0.77,
+    "ci95": [
+     -0.377,
+     0.031
+    ],
+    "be_wr": 28.2,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 27.0
+   },
+   "second_half": {
+    "trades": 304,
+    "per_day": 0.455,
+    "wr": 18.8,
+    "avg_r": -0.346,
+    "net_r": -105.1,
+    "pips": -634.0,
+    "maxdd_r": 106.1,
+    "pf": 0.57,
+    "ci95": [
+     -0.504,
+     -0.171
+    ],
+    "be_wr": 29.0,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 22.3
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 137,
+     "per_day": 0.102,
+     "wr": 18.2,
+     "avg_r": -0.328,
+     "net_r": -44.9,
+     "pips": -364.0,
+     "maxdd_r": 51.8,
+     "pf": 0.6,
+     "ci95": [
+      -0.573,
+      -0.062
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 28.3
+    },
+    "EURUSD": {
+     "trades": 49,
+     "per_day": 0.037,
+     "wr": 8.2,
+     "avg_r": -0.613,
+     "net_r": -30.0,
+     "pips": -157.0,
+     "maxdd_r": 35.0,
+     "pf": 0.32,
+     "ci95": [
+      -0.913,
+      -0.223
+     ],
+     "be_wr": 22.1,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 17.5
+    },
+    "GBPJPY": {
+     "trades": 132,
+     "per_day": 0.099,
+     "wr": 23.5,
+     "avg_r": -0.212,
+     "net_r": -27.9,
+     "pips": -195.0,
+     "maxdd_r": 32.7,
+     "pf": 0.72,
+     "ci95": [
+      -0.478,
+      0.059
+     ],
+     "be_wr": 29.9,
+     "avg_risk_pips": 9.9,
+     "avg_reward_pips": 29.5
+    },
+    "GBPUSD": {
+     "trades": 77,
+     "per_day": 0.058,
+     "wr": 27.3,
+     "avg_r": 0.007,
+     "net_r": 0.5,
+     "pips": 24.0,
+     "maxdd_r": 23.2,
+     "pf": 1.01,
+     "ci95": [
+      -0.362,
+      0.448
+     ],
+     "be_wr": 27.5,
+     "avg_risk_pips": 6.1,
+     "avg_reward_pips": 18.4
+    },
+    "NZDUSD": {
+     "trades": 20,
+     "per_day": 0.015,
+     "wr": 5.0,
+     "avg_r": -0.748,
+     "net_r": -15.0,
+     "pips": -74.0,
+     "maxdd_r": 18.5,
+     "pf": 0.19,
+     "ci95": [
+      -1.0,
+      -0.27
+     ],
+     "be_wr": 22.2,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 16.5
+    },
+    "USDCAD": {
+     "trades": 41,
+     "per_day": 0.031,
+     "wr": 9.8,
+     "avg_r": -0.701,
+     "net_r": -28.7,
+     "pips": -157.0,
+     "maxdd_r": 28.7,
+     "pf": 0.22,
+     "ci95": [
+      -0.935,
+      -0.379
+     ],
+     "be_wr": 32.6,
+     "avg_risk_pips": 5.8,
+     "avg_reward_pips": 16.4
+    },
+    "USDJPY": {
+     "trades": 110,
+     "per_day": 0.082,
+     "wr": 28.2,
+     "avg_r": -0.054,
+     "net_r": -6.0,
+     "pips": -34.0,
+     "maxdd_r": 18.4,
+     "pf": 0.92,
+     "ci95": [
+      -0.355,
+      0.262
+     ],
+     "be_wr": 30.1,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 25.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 124,
+     "per_day": 0.093,
+     "wr": 29.8,
+     "avg_r": -0.012,
+     "net_r": -1.5,
+     "pips": 42.0,
+     "maxdd_r": 42.5,
+     "pf": 0.98,
+     "ci95": [
+      -0.282,
+      0.301
+     ],
+     "be_wr": 30.5,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 25.4
+    },
+    "2024": {
+     "trades": 157,
+     "per_day": 0.43,
+     "wr": 15.9,
+     "avg_r": -0.353,
+     "net_r": -55.4,
+     "pips": -437.0,
+     "maxdd_r": 60.1,
+     "pf": 0.58,
+     "ci95": [
+      -0.586,
+      -0.098
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 8.9,
+     "avg_reward_pips": 29.0
+    },
+    "2025": {
+     "trades": 188,
+     "per_day": 0.515,
+     "wr": 21.3,
+     "avg_r": -0.292,
+     "net_r": -54.9,
+     "pips": -320.0,
+     "maxdd_r": 58.0,
+     "pf": 0.62,
+     "ci95": [
+      -0.48,
+      -0.077
+     ],
+     "be_wr": 30.5,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 22.4
+    },
+    "2026": {
+     "trades": 97,
+     "per_day": 0.073,
+     "wr": 15.5,
+     "avg_r": -0.414,
+     "net_r": -40.2,
+     "pips": -242.0,
+     "maxdd_r": 46.5,
+     "pf": 0.51,
+     "ci95": [
+      -0.679,
+      -0.124
+     ],
+     "be_wr": 26.6,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 19.9
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 272,
+     "per_day": 0.203,
+     "wr": 22.8,
+     "avg_r": -0.174,
+     "net_r": -47.3,
+     "pips": -267.0,
+     "maxdd_r": 66.8,
+     "pf": 0.77,
+     "ci95": [
+      -0.362,
+      0.046
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 26.4
+    },
+    "bullish engulfing": {
+     "trades": 282,
+     "per_day": 0.211,
+     "wr": 17.7,
+     "avg_r": -0.38,
+     "net_r": -107.2,
+     "pips": -729.0,
+     "maxdd_r": 118.8,
+     "pf": 0.53,
+     "ci95": [
+      -0.533,
+      -0.21
+     ],
+     "be_wr": 29.1,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 22.7
+    },
+    "double bottom (neckline break)": {
+     "trades": 8,
+     "per_day": 0.006,
+     "wr": 37.5,
+     "avg_r": -0.127,
+     "net_r": -1.0,
+     "pips": 1.0,
+     "maxdd_r": 2.4,
+     "pf": 0.76,
+     "ci95": [
+      -0.765,
+      0.589
+     ],
+     "be_wr": 48.4,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 16.6
+    },
+    "double top (neckline break)": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 50.0,
+     "avg_r": 0.873,
+     "net_r": 3.5,
+     "pips": 38.0,
+     "maxdd_r": 2.0,
+     "pf": 2.75,
+     "ci95": [
+      -1.0,
+      2.746
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 9.7,
+     "avg_reward_pips": 30.3
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 259,
+    "per_day": 0.194,
+    "wr": 19.7,
+    "avg_r": -0.275,
+    "net_r": -71.4,
+    "pips": -372.0,
+    "maxdd_r": 80.4,
+    "pf": 0.65,
+    "ci95": [
+     -0.461,
+     -0.075
+    ],
+    "be_wr": 27.4,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 24.1
+   },
+   "per_weekday": 0.271,
+   "first_half": {
+    "trades": 128,
+    "per_day": 0.191,
+    "wr": 22.7,
+    "avg_r": -0.148,
+    "net_r": -19.0,
+    "pips": -136.0,
+    "maxdd_r": 42.9,
+    "pf": 0.81,
+    "ci95": [
+     -0.433,
+     0.146
+    ],
+    "be_wr": 26.7,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 26.5
+   },
+   "second_half": {
+    "trades": 131,
+    "per_day": 0.196,
+    "wr": 16.8,
+    "avg_r": -0.4,
+    "net_r": -52.3,
+    "pips": -236.0,
+    "maxdd_r": 57.3,
+    "pf": 0.51,
+    "ci95": [
+     -0.628,
+     -0.142
+    ],
+    "be_wr": 28.4,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 21.9
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 61,
+     "per_day": 0.046,
+     "wr": 16.4,
+     "avg_r": -0.431,
+     "net_r": -26.3,
+     "pips": -241.0,
+     "maxdd_r": 28.3,
+     "pf": 0.48,
+     "ci95": [
+      -0.75,
+      -0.087
+     ],
+     "be_wr": 28.8,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 28.2
+    },
+    "EURUSD": {
+     "trades": 21,
+     "per_day": 0.016,
+     "wr": 9.5,
+     "avg_r": -0.559,
+     "net_r": -11.7,
+     "pips": -77.0,
+     "maxdd_r": 15.0,
+     "pf": 0.38,
+     "ci95": [
+      -1.0,
+      0.128
+     ],
+     "be_wr": 21.6,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 16.6
+    },
+    "GBPJPY": {
+     "trades": 48,
+     "per_day": 0.036,
+     "wr": 20.8,
+     "avg_r": -0.18,
+     "net_r": -8.7,
+     "pips": -23.0,
+     "maxdd_r": 14.0,
+     "pf": 0.77,
+     "ci95": [
+      -0.606,
+      0.343
+     ],
+     "be_wr": 25.4,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 30.5
+    },
+    "GBPUSD": {
+     "trades": 39,
+     "per_day": 0.029,
+     "wr": 23.1,
+     "avg_r": -0.112,
+     "net_r": -4.4,
+     "pips": 15.0,
+     "maxdd_r": 13.6,
+     "pf": 0.85,
+     "ci95": [
+      -0.617,
+      0.468
+     ],
+     "be_wr": 27.0,
+     "avg_risk_pips": 5.9,
+     "avg_reward_pips": 18.0
+    },
+    "NZDUSD": {
+     "trades": 17,
+     "per_day": 0.013,
+     "wr": 5.9,
+     "avg_r": -0.703,
+     "net_r": -12.0,
+     "pips": -60.0,
+     "maxdd_r": 15.5,
+     "pf": 0.23,
+     "ci95": [
+      -1.0,
+      -0.141
+     ],
+     "be_wr": 22.2,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 16.6
+    },
+    "USDCAD": {
+     "trades": 20,
+     "per_day": 0.015,
+     "wr": 20.0,
+     "avg_r": -0.387,
+     "net_r": -7.7,
+     "pips": -28.0,
+     "maxdd_r": 8.4,
+     "pf": 0.52,
+     "ci95": [
+      -0.866,
+      0.225
+     ],
+     "be_wr": 32.6,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 15.6
+    },
+    "USDJPY": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 28.3,
+     "avg_r": -0.011,
+     "net_r": -0.6,
+     "pips": 42.0,
+     "maxdd_r": 11.9,
+     "pf": 0.98,
+     "ci95": [
+      -0.475,
+      0.498
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 26.8
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 61,
+     "per_day": 0.046,
+     "wr": 29.5,
+     "avg_r": -0.058,
+     "net_r": -3.5,
+     "pips": 29.0,
+     "maxdd_r": 22.8,
+     "pf": 0.92,
+     "ci95": [
+      -0.443,
+      0.366
+     ],
+     "be_wr": 31.6,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 26.0
+    },
+    "2024": {
+     "trades": 75,
+     "per_day": 0.205,
+     "wr": 17.3,
+     "avg_r": -0.194,
+     "net_r": -14.5,
+     "pips": -127.0,
+     "maxdd_r": 32.3,
+     "pf": 0.77,
+     "ci95": [
+      -0.588,
+      0.275
+     ],
+     "be_wr": 21.5,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 27.6
+    },
+    "2025": {
+     "trades": 77,
+     "per_day": 0.211,
+     "wr": 18.2,
+     "avg_r": -0.39,
+     "net_r": -30.1,
+     "pips": -120.0,
+     "maxdd_r": 32.3,
+     "pf": 0.51,
+     "ci95": [
+      -0.679,
+      -0.082
+     ],
+     "be_wr": 30.7,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 22.2
+    },
+    "2026": {
+     "trades": 46,
+     "per_day": 0.034,
+     "wr": 13.0,
+     "avg_r": -0.505,
+     "net_r": -23.2,
+     "pips": -154.0,
+     "maxdd_r": 25.2,
+     "pf": 0.42,
+     "ci95": [
+      -0.86,
+      -0.087
+     ],
+     "be_wr": 26.4,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 19.2
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 120,
+     "per_day": 0.09,
+     "wr": 20.8,
+     "avg_r": -0.24,
+     "net_r": -28.8,
+     "pips": -137.0,
+     "maxdd_r": 34.7,
+     "pf": 0.7,
+     "ci95": [
+      -0.523,
+      0.06
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 25.4
+    },
+    "bullish engulfing": {
+     "trades": 135,
+     "per_day": 0.101,
+     "wr": 18.5,
+     "avg_r": -0.308,
+     "net_r": -41.5,
+     "pips": -228.0,
+     "maxdd_r": 44.7,
+     "pf": 0.62,
+     "ci95": [
+      -0.567,
+      -0.036
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 22.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.002,
+     "net_r": 0.0,
+     "pips": 4.0,
+     "maxdd_r": 1.0,
+     "pf": 1.0,
+     "ci95": [
+      -1.0,
+      1.458
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 20.9
+    },
+    "double top (neckline break)": {
+     "trades": 1,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -1.0,
+     "net_r": -1.0,
+     "pips": -12.0,
+     "maxdd_r": 1.0,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -1.0
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 12.1,
+     "avg_reward_pips": 49.9
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 464,
+   "per_day": 0.347,
+   "wr": 17.9,
+   "avg_r": -0.393,
+   "net_r": -182.4,
+   "pips": -1387.0,
+   "maxdd_r": 188.1,
+   "pf": 0.52,
+   "ci95": [
+    -0.518,
+    -0.267
+   ],
+   "be_wr": 29.7,
+   "avg_risk_pips": 8.4,
+   "avg_reward_pips": 24.8
+  },
+  "raw_zero_cost": {
+   "trades": 604,
+   "per_day": 0.452,
+   "wr": 25.3,
+   "avg_r": -0.035,
+   "net_r": -21.4,
+   "pips": 18.0,
+   "maxdd_r": 44.5,
+   "pf": 0.95,
+   "ci95": [
+    -0.174,
+    0.115
+   ],
+   "be_wr": 26.5,
+   "avg_risk_pips": 7.3,
+   "avg_reward_pips": 24.4
+  }
+ },
+ "sl_ref_zone_edge": {
+  "params": {
+   "sl_ref": "extreme_or_zone"
+  },
+  "n_candidates": 1266,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 596,
+    "per_day": 0.446,
+    "wr": 21.6,
+    "avg_r": -0.235,
+    "net_r": -140.3,
+    "pips": -1006.0,
+    "maxdd_r": 147.8,
+    "pf": 0.7,
+    "ci95": [
+     -0.36,
+     -0.108
+    ],
+    "be_wr": 28.4,
+    "avg_risk_pips": 8.3,
+    "avg_reward_pips": 28.2
+   },
+   "per_weekday": 0.624,
+   "first_half": {
+    "trades": 271,
+    "per_day": 0.405,
+    "wr": 24.4,
+    "avg_r": -0.162,
+    "net_r": -43.8,
+    "pips": -348.0,
+    "maxdd_r": 57.2,
+    "pf": 0.79,
+    "ci95": [
+     -0.345,
+     0.034
+    ],
+    "be_wr": 29.1,
+    "avg_risk_pips": 8.7,
+    "avg_reward_pips": 30.9
+   },
+   "second_half": {
+    "trades": 325,
+    "per_day": 0.486,
+    "wr": 19.4,
+    "avg_r": -0.297,
+    "net_r": -96.5,
+    "pips": -659.0,
+    "maxdd_r": 101.0,
+    "pf": 0.63,
+    "ci95": [
+     -0.471,
+     -0.116
+    ],
+    "be_wr": 27.7,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 25.9
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 123,
+     "per_day": 0.092,
+     "wr": 20.3,
+     "avg_r": -0.24,
+     "net_r": -29.6,
+     "pips": -270.0,
+     "maxdd_r": 35.1,
+     "pf": 0.7,
+     "ci95": [
+      -0.523,
+      0.08
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 31.2
+    },
+    "EURUSD": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 14.5,
+     "avg_r": -0.429,
+     "net_r": -23.6,
+     "pips": -144.0,
+     "maxdd_r": 29.0,
+     "pf": 0.49,
+     "ci95": [
+      -0.78,
+      -0.013
+     ],
+     "be_wr": 26.2,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 21.1
+    },
+    "GBPJPY": {
+     "trades": 144,
+     "per_day": 0.108,
+     "wr": 24.3,
+     "avg_r": -0.177,
+     "net_r": -25.5,
+     "pips": -255.0,
+     "maxdd_r": 28.9,
+     "pf": 0.77,
+     "ci95": [
+      -0.42,
+      0.088
+     ],
+     "be_wr": 29.6,
+     "avg_risk_pips": 11.1,
+     "avg_reward_pips": 34.3
+    },
+    "GBPUSD": {
+     "trades": 80,
+     "per_day": 0.06,
+     "wr": 23.8,
+     "avg_r": -0.151,
+     "net_r": -12.1,
+     "pips": -41.0,
+     "maxdd_r": 22.6,
+     "pf": 0.8,
+     "ci95": [
+      -0.48,
+      0.213
+     ],
+     "be_wr": 28.0,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 21.2
+    },
+    "NZDUSD": {
+     "trades": 30,
+     "per_day": 0.022,
+     "wr": 6.7,
+     "avg_r": -0.793,
+     "net_r": -23.8,
+     "pips": -115.0,
+     "maxdd_r": 23.8,
+     "pf": 0.13,
+     "ci95": [
+      -1.0,
+      -0.505
+     ],
+     "be_wr": 35.2,
+     "avg_risk_pips": 5.2,
+     "avg_reward_pips": 17.8
+    },
+    "USDCAD": {
+     "trades": 40,
+     "per_day": 0.03,
+     "wr": 15.0,
+     "avg_r": -0.41,
+     "net_r": -16.4,
+     "pips": -66.0,
+     "maxdd_r": 18.2,
+     "pf": 0.52,
+     "ci95": [
+      -0.83,
+      0.066
+     ],
+     "be_wr": 25.4,
+     "avg_risk_pips": 5.8,
+     "avg_reward_pips": 18.3
+    },
+    "USDJPY": {
+     "trades": 124,
+     "per_day": 0.093,
+     "wr": 27.4,
+     "avg_r": -0.076,
+     "net_r": -9.4,
+     "pips": -115.0,
+     "maxdd_r": 16.9,
+     "pf": 0.9,
+     "ci95": [
+      -0.358,
+      0.232
+     ],
+     "be_wr": 29.7,
+     "avg_risk_pips": 8.9,
+     "avg_reward_pips": 31.5
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 137,
+     "per_day": 0.102,
+     "wr": 24.1,
+     "avg_r": -0.186,
+     "net_r": -25.4,
+     "pips": -173.0,
+     "maxdd_r": 40.3,
+     "pf": 0.75,
+     "ci95": [
+      -0.422,
+      0.083
+     ],
+     "be_wr": 29.7,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 29.2
+    },
+    "2024": {
+     "trades": 154,
+     "per_day": 0.422,
+     "wr": 22.7,
+     "avg_r": -0.194,
+     "net_r": -29.9,
+     "pips": -262.0,
+     "maxdd_r": 35.3,
+     "pf": 0.75,
+     "ci95": [
+      -0.447,
+      0.074
+     ],
+     "be_wr": 28.2,
+     "avg_risk_pips": 9.6,
+     "avg_reward_pips": 33.2
+    },
+    "2025": {
+     "trades": 193,
+     "per_day": 0.529,
+     "wr": 21.2,
+     "avg_r": -0.239,
+     "net_r": -46.1,
+     "pips": -371.0,
+     "maxdd_r": 51.4,
+     "pf": 0.7,
+     "ci95": [
+      -0.459,
+      0.015
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 26.3
+    },
+    "2026": {
+     "trades": 112,
+     "per_day": 0.084,
+     "wr": 17.9,
+     "avg_r": -0.347,
+     "net_r": -38.9,
+     "pips": -201.0,
+     "maxdd_r": 43.4,
+     "pf": 0.58,
+     "ci95": [
+      -0.622,
+      -0.035
+     ],
+     "be_wr": 27.5,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 23.4
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 291,
+     "per_day": 0.218,
+     "wr": 21.6,
+     "avg_r": -0.253,
+     "net_r": -73.7,
+     "pips": -510.0,
+     "maxdd_r": 80.6,
+     "pf": 0.68,
+     "ci95": [
+      -0.428,
+      -0.062
+     ],
+     "be_wr": 29.1,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 29.4
+    },
+    "bullish engulfing": {
+     "trades": 297,
+     "per_day": 0.222,
+     "wr": 21.2,
+     "avg_r": -0.236,
+     "net_r": -70.1,
+     "pips": -527.0,
+     "maxdd_r": 74.3,
+     "pf": 0.7,
+     "ci95": [
+      -0.414,
+      -0.055
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 8.4,
+     "avg_reward_pips": 27.1
+    },
+    "double bottom (neckline break)": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 25.0,
+     "avg_r": -0.281,
+     "net_r": -1.1,
+     "pips": -1.0,
+     "maxdd_r": 1.5,
+     "pf": 0.54,
+     "ci95": [
+      -1.0,
+      0.747
+     ],
+     "be_wr": 42.9,
+     "avg_risk_pips": 9.2,
+     "avg_reward_pips": 22.9
+    },
+    "double top (neckline break)": {
+     "trades": 4,
+     "per_day": 0.003,
+     "wr": 50.0,
+     "avg_r": 1.164,
+     "net_r": 4.7,
+     "pips": 31.0,
+     "maxdd_r": 2.0,
+     "pf": 3.33,
+     "ci95": [
+      -1.0,
+      3.328
+     ],
+     "be_wr": 23.1,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 21.9
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 270,
+    "per_day": 0.202,
+    "wr": 24.1,
+    "avg_r": -0.154,
+    "net_r": -41.5,
+    "pips": -167.0,
+    "maxdd_r": 41.5,
+    "pf": 0.8,
+    "ci95": [
+     -0.341,
+     0.046
+    ],
+    "be_wr": 28.5,
+    "avg_risk_pips": 7.8,
+    "avg_reward_pips": 26.1
+   },
+   "per_weekday": 0.283,
+   "first_half": {
+    "trades": 130,
+    "per_day": 0.194,
+    "wr": 27.7,
+    "avg_r": -0.042,
+    "net_r": -5.5,
+    "pips": 14.0,
+    "maxdd_r": 19.1,
+    "pf": 0.94,
+    "ci95": [
+     -0.318,
+     0.243
+    ],
+    "be_wr": 29.0,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 27.8
+   },
+   "second_half": {
+    "trades": 140,
+    "per_day": 0.209,
+    "wr": 20.7,
+    "avg_r": -0.257,
+    "net_r": -36.0,
+    "pips": -181.0,
+    "maxdd_r": 36.4,
+    "pf": 0.67,
+    "ci95": [
+     -0.514,
+     0.018
+    ],
+    "be_wr": 28.0,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 24.6
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 24.5,
+     "avg_r": -0.174,
+     "net_r": -9.2,
+     "pips": -66.0,
+     "maxdd_r": 13.9,
+     "pf": 0.77,
+     "ci95": [
+      -0.58,
+      0.289
+     ],
+     "be_wr": 29.7,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 28.5
+    },
+    "EURUSD": {
+     "trades": 23,
+     "per_day": 0.017,
+     "wr": 17.4,
+     "avg_r": -0.38,
+     "net_r": -8.7,
+     "pips": -55.0,
+     "maxdd_r": 11.0,
+     "pf": 0.54,
+     "ci95": [
+      -0.947,
+      0.293
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 20.4
+    },
+    "GBPJPY": {
+     "trades": 57,
+     "per_day": 0.043,
+     "wr": 36.8,
+     "avg_r": 0.207,
+     "net_r": 11.8,
+     "pips": 181.0,
+     "maxdd_r": 10.6,
+     "pf": 1.33,
+     "ci95": [
+      -0.219,
+      0.632
+     ],
+     "be_wr": 30.7,
+     "avg_risk_pips": 10.9,
+     "avg_reward_pips": 32.5
+    },
+    "GBPUSD": {
+     "trades": 40,
+     "per_day": 0.03,
+     "wr": 25.0,
+     "avg_r": -0.064,
+     "net_r": -2.5,
+     "pips": -10.0,
+     "maxdd_r": 10.5,
+     "pf": 0.92,
+     "ci95": [
+      -0.569,
+      0.489
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 19.7
+    },
+    "NZDUSD": {
+     "trades": 26,
+     "per_day": 0.019,
+     "wr": 7.7,
+     "avg_r": -0.761,
+     "net_r": -19.8,
+     "pips": -92.0,
+     "maxdd_r": 19.8,
+     "pf": 0.16,
+     "ci95": [
+      -1.0,
+      -0.429
+     ],
+     "be_wr": 35.2,
+     "avg_risk_pips": 5.1,
+     "avg_reward_pips": 17.0
+    },
+    "USDCAD": {
+     "trades": 19,
+     "per_day": 0.014,
+     "wr": 21.1,
+     "avg_r": -0.149,
+     "net_r": -2.8,
+     "pips": 6.0,
+     "maxdd_r": 7.0,
+     "pf": 0.81,
+     "ci95": [
+      -0.853,
+      0.701
+     ],
+     "be_wr": 24.7,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 17.8
+    },
+    "USDJPY": {
+     "trades": 52,
+     "per_day": 0.039,
+     "wr": 21.2,
+     "avg_r": -0.194,
+     "net_r": -10.1,
+     "pips": -130.0,
+     "maxdd_r": 12.9,
+     "pf": 0.75,
+     "ci95": [
+      -0.622,
+      0.293
+     ],
+     "be_wr": 26.3,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 31.8
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 72,
+     "per_day": 0.054,
+     "wr": 26.4,
+     "avg_r": -0.164,
+     "net_r": -11.8,
+     "pips": -41.0,
+     "maxdd_r": 19.1,
+     "pf": 0.78,
+     "ci95": [
+      -0.47,
+      0.202
+     ],
+     "be_wr": 31.8,
+     "avg_risk_pips": 7.1,
+     "avg_reward_pips": 25.5
+    },
+    "2024": {
+     "trades": 66,
+     "per_day": 0.181,
+     "wr": 28.8,
+     "avg_r": 0.103,
+     "net_r": 6.8,
+     "pips": 90.0,
+     "maxdd_r": 10.2,
+     "pf": 1.14,
+     "ci95": [
+      -0.34,
+      0.553
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 9.0,
+     "avg_reward_pips": 30.6
+    },
+    "2025": {
+     "trades": 78,
+     "per_day": 0.214,
+     "wr": 25.6,
+     "avg_r": -0.116,
+     "net_r": -9.0,
+     "pips": -61.0,
+     "maxdd_r": 18.1,
+     "pf": 0.84,
+     "ci95": [
+      -0.459,
+      0.277
+     ],
+     "be_wr": 29.0,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.9
+    },
+    "2026": {
+     "trades": 54,
+     "per_day": 0.04,
+     "wr": 13.0,
+     "avg_r": -0.508,
+     "net_r": -27.4,
+     "pips": -156.0,
+     "maxdd_r": 30.2,
+     "pf": 0.41,
+     "ci95": [
+      -0.837,
+      -0.083
+     ],
+     "be_wr": 26.6,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 23.2
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 125,
+     "per_day": 0.093,
+     "wr": 24.8,
+     "avg_r": -0.134,
+     "net_r": -16.8,
+     "pips": -30.0,
+     "maxdd_r": 22.8,
+     "pf": 0.82,
+     "ci95": [
+      -0.411,
+      0.172
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 7.4,
+     "avg_reward_pips": 27.5
+    },
+    "bullish engulfing": {
+     "trades": 141,
+     "per_day": 0.105,
+     "wr": 23.4,
+     "avg_r": -0.179,
+     "net_r": -25.2,
+     "pips": -136.0,
+     "maxdd_r": 29.5,
+     "pf": 0.77,
+     "ci95": [
+      -0.44,
+      0.095
+     ],
+     "be_wr": 28.6,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.0
+    },
+    "double bottom (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 0.0,
+     "avg_r": -0.726,
+     "net_r": -1.5,
+     "pips": -11.0,
+     "maxdd_r": 1.5,
+     "pf": 0.0,
+     "ci95": [
+      -1.0,
+      -0.452
+     ],
+     "be_wr": null,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 23.8
+    },
+    "double top (neckline break)": {
+     "trades": 2,
+     "per_day": 0.001,
+     "wr": 50.0,
+     "avg_r": 1.008,
+     "net_r": 2.0,
+     "pips": 10.0,
+     "maxdd_r": 1.0,
+     "pf": 3.02,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 8.0,
+     "avg_reward_pips": 21.1
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 492,
+   "per_day": 0.368,
+   "wr": 19.1,
+   "avg_r": -0.333,
+   "net_r": -164.0,
+   "pips": -1365.0,
+   "maxdd_r": 166.7,
+   "pf": 0.59,
+   "ci95": [
+    -0.469,
+    -0.197
+   ],
+   "be_wr": 28.7,
+   "avg_risk_pips": 8.8,
+   "avg_reward_pips": 29.1
+  },
+  "raw_zero_cost": {
+   "trades": 637,
+   "per_day": 0.476,
+   "wr": 25.7,
+   "avg_r": -0.005,
+   "net_r": -3.4,
+   "pips": -54.0,
+   "maxdd_r": 60.6,
+   "pf": 0.99,
+   "ci95": [
+    -0.146,
+    0.14
+   ],
+   "be_wr": 25.9,
+   "avg_risk_pips": 7.9,
+   "avg_reward_pips": 28.2
+  }
+ },
+ "tp_max_atr_4": {
+  "params": {
+   "tp_max_atr": 4.0
+  },
+  "n_candidates": 1940,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 917,
+    "per_day": 0.686,
+    "wr": 19.1,
+    "avg_r": -0.308,
+    "net_r": -282.7,
+    "pips": -1996.0,
+    "maxdd_r": 300.0,
+    "pf": 0.62,
+    "ci95": [
+     -0.403,
+     -0.201
+    ],
+    "be_wr": 27.8,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 31.5
+   },
+   "per_weekday": 0.96,
+   "first_half": {
+    "trades": 428,
+    "per_day": 0.64,
+    "wr": 21.5,
+    "avg_r": -0.24,
+    "net_r": -102.8,
+    "pips": -862.0,
+    "maxdd_r": 130.2,
+    "pf": 0.69,
+    "ci95": [
+     -0.385,
+     -0.085
+    ],
+    "be_wr": 28.5,
+    "avg_risk_pips": 8.7,
+    "avg_reward_pips": 35.6
+   },
+   "second_half": {
+    "trades": 489,
+    "per_day": 0.731,
+    "wr": 17.0,
+    "avg_r": -0.368,
+    "net_r": -179.9,
+    "pips": -1134.0,
+    "maxdd_r": 183.3,
+    "pf": 0.55,
+    "ci95": [
+     -0.5,
+     -0.23
+    ],
+    "be_wr": 27.1,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 28.0
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 196,
+     "per_day": 0.147,
+     "wr": 18.4,
+     "avg_r": -0.293,
+     "net_r": -57.5,
+     "pips": -522.0,
+     "maxdd_r": 68.0,
+     "pf": 0.64,
+     "ci95": [
+      -0.51,
+      -0.057
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 34.7
+    },
+    "EURUSD": {
+     "trades": 88,
+     "per_day": 0.066,
+     "wr": 10.2,
+     "avg_r": -0.574,
+     "net_r": -50.5,
+     "pips": -303.0,
+     "maxdd_r": 57.9,
+     "pf": 0.35,
+     "ci95": [
+      -0.836,
+      -0.276
+     ],
+     "be_wr": 24.6,
+     "avg_risk_pips": 5.4,
+     "avg_reward_pips": 23.9
+    },
+    "GBPJPY": {
+     "trades": 205,
+     "per_day": 0.153,
+     "wr": 22.9,
+     "avg_r": -0.201,
+     "net_r": -41.2,
+     "pips": -390.0,
+     "maxdd_r": 53.7,
+     "pf": 0.74,
+     "ci95": [
+      -0.41,
+      0.031
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 10.5,
+     "avg_reward_pips": 38.6
+    },
+    "GBPUSD": {
+     "trades": 132,
+     "per_day": 0.099,
+     "wr": 21.2,
+     "avg_r": -0.207,
+     "net_r": -27.3,
+     "pips": -138.0,
+     "maxdd_r": 42.0,
+     "pf": 0.73,
+     "ci95": [
+      -0.469,
+      0.081
+     ],
+     "be_wr": 27.1,
+     "avg_risk_pips": 6.3,
+     "avg_reward_pips": 25.2
+    },
+    "NZDUSD": {
+     "trades": 39,
+     "per_day": 0.029,
+     "wr": 5.1,
+     "avg_r": -0.795,
+     "net_r": -31.0,
+     "pips": -145.0,
+     "maxdd_r": 32.5,
+     "pf": 0.15,
+     "ci95": [
+      -1.0,
+      -0.474
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 18.7
+    },
+    "USDCAD": {
+     "trades": 69,
+     "per_day": 0.052,
+     "wr": 13.0,
+     "avg_r": -0.524,
+     "net_r": -36.2,
+     "pips": -167.0,
+     "maxdd_r": 38.0,
+     "pf": 0.4,
+     "ci95": [
+      -0.803,
+      -0.218
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 19.6
+    },
+    "USDJPY": {
+     "trades": 188,
+     "per_day": 0.141,
+     "wr": 23.4,
+     "avg_r": -0.208,
+     "net_r": -39.1,
+     "pips": -331.0,
+     "maxdd_r": 43.9,
+     "pf": 0.73,
+     "ci95": [
+      -0.436,
+      0.032
+     ],
+     "be_wr": 29.8,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 35.7
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 205,
+     "per_day": 0.153,
+     "wr": 24.4,
+     "avg_r": -0.15,
+     "net_r": -30.8,
+     "pips": -221.0,
+     "maxdd_r": 58.7,
+     "pf": 0.8,
+     "ci95": [
+      -0.362,
+      0.091
+     ],
+     "be_wr": 28.9,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 33.0
+    },
+    "2024": {
+     "trades": 250,
+     "per_day": 0.685,
+     "wr": 17.6,
+     "avg_r": -0.36,
+     "net_r": -90.1,
+     "pips": -773.0,
+     "maxdd_r": 94.1,
+     "pf": 0.56,
+     "ci95": [
+      -0.54,
+      -0.174
+     ],
+     "be_wr": 27.7,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 38.0
+    },
+    "2025": {
+     "trades": 301,
+     "per_day": 0.825,
+     "wr": 18.6,
+     "avg_r": -0.344,
+     "net_r": -103.5,
+     "pips": -692.0,
+     "maxdd_r": 103.7,
+     "pf": 0.57,
+     "ci95": [
+      -0.506,
+      -0.164
+     ],
+     "be_wr": 28.7,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 28.5
+    },
+    "2026": {
+     "trades": 161,
+     "per_day": 0.12,
+     "wr": 15.5,
+     "avg_r": -0.362,
+     "net_r": -58.3,
+     "pips": -311.0,
+     "maxdd_r": 64.1,
+     "pf": 0.57,
+     "ci95": [
+      -0.603,
+      -0.097
+     ],
+     "be_wr": 24.4,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 25.4
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 435,
+     "per_day": 0.325,
+     "wr": 19.3,
+     "avg_r": -0.303,
+     "net_r": -131.7,
+     "pips": -915.0,
+     "maxdd_r": 140.5,
+     "pf": 0.62,
+     "ci95": [
+      -0.448,
+      -0.143
+     ],
+     "be_wr": 27.8,
+     "avg_risk_pips": 7.8,
+     "avg_reward_pips": 33.4
+    },
+    "bullish engulfing": {
+     "trades": 465,
+     "per_day": 0.348,
+     "wr": 18.3,
+     "avg_r": -0.328,
+     "net_r": -152.5,
+     "pips": -1107.0,
+     "maxdd_r": 166.3,
+     "pf": 0.6,
+     "ci95": [
+      -0.469,
+      -0.185
+     ],
+     "be_wr": 27.5,
+     "avg_risk_pips": 8.2,
+     "avg_reward_pips": 30.1
+    },
+    "double bottom (neckline break)": {
+     "trades": 10,
+     "per_day": 0.007,
+     "wr": 30.0,
+     "avg_r": -0.302,
+     "net_r": -3.0,
+     "pips": -15.0,
+     "maxdd_r": 4.0,
+     "pf": 0.51,
+     "ci95": [
+      -0.843,
+      0.345
+     ],
+     "be_wr": 48.4,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 23.2
+    },
+    "double top (neckline break)": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 42.9,
+     "avg_r": 0.644,
+     "net_r": 4.5,
+     "pips": 42.0,
+     "maxdd_r": 2.0,
+     "pf": 2.13,
+     "ci95": [
+      -0.592,
+      2.047
+     ],
+     "be_wr": 26.1,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 26.0
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 344,
+    "per_day": 0.257,
+    "wr": 18.9,
+    "avg_r": -0.3,
+    "net_r": -103.3,
+    "pips": -541.0,
+    "maxdd_r": 105.5,
+    "pf": 0.63,
+    "ci95": [
+     -0.456,
+     -0.123
+    ],
+    "be_wr": 27.2,
+    "avg_risk_pips": 7.6,
+    "avg_reward_pips": 28.7
+   },
+   "per_weekday": 0.36,
+   "first_half": {
+    "trades": 174,
+    "per_day": 0.26,
+    "wr": 23.0,
+    "avg_r": -0.199,
+    "net_r": -34.6,
+    "pips": -266.0,
+    "maxdd_r": 41.2,
+    "pf": 0.74,
+    "ci95": [
+     -0.436,
+     0.054
+    ],
+    "be_wr": 28.8,
+    "avg_risk_pips": 8.1,
+    "avg_reward_pips": 32.8
+   },
+   "second_half": {
+    "trades": 170,
+    "per_day": 0.254,
+    "wr": 14.7,
+    "avg_r": -0.404,
+    "net_r": -68.7,
+    "pips": -275.0,
+    "maxdd_r": 69.7,
+    "pf": 0.52,
+    "ci95": [
+     -0.621,
+     -0.156
+    ],
+    "be_wr": 25.0,
+    "avg_risk_pips": 7.1,
+    "avg_reward_pips": 24.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 71,
+     "per_day": 0.053,
+     "wr": 15.5,
+     "avg_r": -0.437,
+     "net_r": -31.1,
+     "pips": -247.0,
+     "maxdd_r": 34.6,
+     "pf": 0.48,
+     "ci95": [
+      -0.755,
+      -0.042
+     ],
+     "be_wr": 27.5,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 30.9
+    },
+    "EURUSD": {
+     "trades": 28,
+     "per_day": 0.021,
+     "wr": 10.7,
+     "avg_r": -0.675,
+     "net_r": -18.9,
+     "pips": -115.0,
+     "maxdd_r": 20.0,
+     "pf": 0.24,
+     "ci95": [
+      -1.0,
+      -0.208
+     ],
+     "be_wr": 33.0,
+     "avg_risk_pips": 5.6,
+     "avg_reward_pips": 22.3
+    },
+    "GBPJPY": {
+     "trades": 61,
+     "per_day": 0.046,
+     "wr": 32.8,
+     "avg_r": 0.198,
+     "net_r": 12.1,
+     "pips": 175.0,
+     "maxdd_r": 14.5,
+     "pf": 1.29,
+     "ci95": [
+      -0.254,
+      0.704
+     ],
+     "be_wr": 27.4,
+     "avg_risk_pips": 10.2,
+     "avg_reward_pips": 36.0
+    },
+    "GBPUSD": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 17.0,
+     "avg_r": -0.278,
+     "net_r": -14.7,
+     "pips": -67.0,
+     "maxdd_r": 23.6,
+     "pf": 0.66,
+     "ci95": [
+      -0.703,
+      0.212
+     ],
+     "be_wr": 24.3,
+     "avg_risk_pips": 6.1,
+     "avg_reward_pips": 20.9
+    },
+    "NZDUSD": {
+     "trades": 32,
+     "per_day": 0.024,
+     "wr": 6.2,
+     "avg_r": -0.75,
+     "net_r": -24.0,
+     "pips": -109.0,
+     "maxdd_r": 25.5,
+     "pf": 0.19,
+     "ci95": [
+      -1.0,
+      -0.376
+     ],
+     "be_wr": 26.8,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 18.1
+    },
+    "USDCAD": {
+     "trades": 33,
+     "per_day": 0.025,
+     "wr": 18.2,
+     "avg_r": -0.318,
+     "net_r": -10.5,
+     "pips": -21.0,
+     "maxdd_r": 12.0,
+     "pf": 0.61,
+     "ci95": [
+      -0.808,
+      0.229
+     ],
+     "be_wr": 26.7,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 18.7
+    },
+    "USDJPY": {
+     "trades": 66,
+     "per_day": 0.049,
+     "wr": 21.2,
+     "avg_r": -0.245,
+     "net_r": -16.2,
+     "pips": -157.0,
+     "maxdd_r": 20.9,
+     "pf": 0.69,
+     "ci95": [
+      -0.627,
+      0.165
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 38.7
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 92,
+     "per_day": 0.069,
+     "wr": 27.2,
+     "avg_r": -0.121,
+     "net_r": -11.1,
+     "pips": -29.0,
+     "maxdd_r": 20.6,
+     "pf": 0.83,
+     "ci95": [
+      -0.427,
+      0.215
+     ],
+     "be_wr": 31.1,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 30.5
+    },
+    "2024": {
+     "trades": 90,
+     "per_day": 0.247,
+     "wr": 18.9,
+     "avg_r": -0.25,
+     "net_r": -22.5,
+     "pips": -201.0,
+     "maxdd_r": 28.5,
+     "pf": 0.69,
+     "ci95": [
+      -0.574,
+      0.121
+     ],
+     "be_wr": 25.2,
+     "avg_risk_pips": 8.8,
+     "avg_reward_pips": 34.9
+    },
+    "2025": {
+     "trades": 98,
+     "per_day": 0.268,
+     "wr": 16.3,
+     "avg_r": -0.407,
+     "net_r": -39.8,
+     "pips": -181.0,
+     "maxdd_r": 39.8,
+     "pf": 0.51,
+     "ci95": [
+      -0.661,
+      -0.12
+     ],
+     "be_wr": 28.1,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 24.7
+    },
+    "2026": {
+     "trades": 64,
+     "per_day": 0.048,
+     "wr": 10.9,
+     "avg_r": -0.467,
+     "net_r": -29.9,
+     "pips": -131.0,
+     "maxdd_r": 29.9,
+     "pf": 0.48,
+     "ci95": [
+      -0.853,
+      -0.024
+     ],
+     "be_wr": 20.5,
+     "avg_risk_pips": 6.4,
+     "avg_reward_pips": 23.5
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 156,
+     "per_day": 0.117,
+     "wr": 16.7,
+     "avg_r": -0.415,
+     "net_r": -64.7,
+     "pips": -417.0,
+     "maxdd_r": 64.7,
+     "pf": 0.5,
+     "ci95": [
+      -0.631,
+      -0.2
+     ],
+     "be_wr": 28.5,
+     "avg_risk_pips": 7.5,
+     "avg_reward_pips": 31.7
+    },
+    "bullish engulfing": {
+     "trades": 182,
+     "per_day": 0.136,
+     "wr": 20.3,
+     "avg_r": -0.218,
+     "net_r": -39.6,
+     "pips": -126.0,
+     "maxdd_r": 47.4,
+     "pf": 0.72,
+     "ci95": [
+      -0.451,
+      0.046
+     ],
+     "be_wr": 26.2,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 26.2
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.002,
+     "net_r": 0.0,
+     "pips": 4.0,
+     "maxdd_r": 1.0,
+     "pf": 1.0,
+     "ci95": [
+      -1.0,
+      1.458
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 20.9
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.339,
+     "net_r": 1.0,
+     "pips": -2.0,
+     "maxdd_r": 1.0,
+     "pf": 1.51,
+     "ci95": [
+      -1.0,
+      3.016
+     ],
+     "be_wr": 24.9,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 30.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 771,
+   "per_day": 0.577,
+   "wr": 16.6,
+   "avg_r": -0.428,
+   "net_r": -329.7,
+   "pips": -2631.0,
+   "maxdd_r": 335.8,
+   "pf": 0.49,
+   "ci95": [
+    -0.527,
+    -0.326
+   ],
+   "be_wr": 29.2,
+   "avg_risk_pips": 8.6,
+   "avg_reward_pips": 32.6
+  },
+  "raw_zero_cost": {
+   "trades": 969,
+   "per_day": 0.725,
+   "wr": 23.4,
+   "avg_r": -0.062,
+   "net_r": -60.3,
+   "pips": -529.0,
+   "maxdd_r": 89.4,
+   "pf": 0.92,
+   "ci95": [
+    -0.176,
+    0.063
+   ],
+   "be_wr": 25.1,
+   "avg_risk_pips": 7.5,
+   "avg_reward_pips": 31.1
+  }
+ },
+ "tp1_10p_half": {
+  "params": {
+   "tp1_pips": 10.0
+  },
+  "n_candidates": 1781,
+  "raw": {
+   "label": "raw",
+   "all": {
+    "trades": 845,
+    "per_day": 0.632,
+    "wr": 28.4,
+    "avg_r": -0.255,
+    "net_r": -215.8,
+    "pips": -1416.0,
+    "maxdd_r": 228.8,
+    "pf": 0.62,
+    "ci95": [
+     -0.339,
+     -0.168
+    ],
+    "be_wr": 40.5,
+    "avg_risk_pips": 8.0,
+    "avg_reward_pips": 26.6
+   },
+   "per_weekday": 0.885,
+   "first_half": {
+    "trades": 392,
+    "per_day": 0.586,
+    "wr": 30.9,
+    "avg_r": -0.176,
+    "net_r": -69.1,
+    "pips": -492.0,
+    "maxdd_r": 89.0,
+    "pf": 0.72,
+    "ci95": [
+     -0.3,
+     -0.049
+    ],
+    "be_wr": 40.2,
+    "avg_risk_pips": 8.5,
+    "avg_reward_pips": 29.2
+   },
+   "second_half": {
+    "trades": 453,
+    "per_day": 0.678,
+    "wr": 26.3,
+    "avg_r": -0.324,
+    "net_r": -146.7,
+    "pips": -924.0,
+    "maxdd_r": 150.4,
+    "pf": 0.54,
+    "ci95": [
+     -0.436,
+     -0.21
+    ],
+    "be_wr": 40.8,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.5
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 184,
+     "per_day": 0.138,
+     "wr": 30.4,
+     "avg_r": -0.234,
+     "net_r": -43.0,
+     "pips": -357.0,
+     "maxdd_r": 48.5,
+     "pf": 0.64,
+     "ci95": [
+      -0.403,
+      -0.043
+     ],
+     "be_wr": 42.0,
+     "avg_risk_pips": 8.5,
+     "avg_reward_pips": 29.7
+    },
+    "EURUSD": {
+     "trades": 78,
+     "per_day": 0.058,
+     "wr": 19.2,
+     "avg_r": -0.489,
+     "net_r": -38.2,
+     "pips": -225.0,
+     "maxdd_r": 42.7,
+     "pf": 0.39,
+     "ci95": [
+      -0.725,
+      -0.197
+     ],
+     "be_wr": 38.5,
+     "avg_risk_pips": 5.3,
+     "avg_reward_pips": 19.3
+    },
+    "GBPJPY": {
+     "trades": 192,
+     "per_day": 0.144,
+     "wr": 30.7,
+     "avg_r": -0.201,
+     "net_r": -38.5,
+     "pips": -341.0,
+     "maxdd_r": 45.1,
+     "pf": 0.68,
+     "ci95": [
+      -0.358,
+      -0.032
+     ],
+     "be_wr": 42.1,
+     "avg_risk_pips": 10.3,
+     "avg_reward_pips": 32.7
+    },
+    "GBPUSD": {
+     "trades": 120,
+     "per_day": 0.09,
+     "wr": 31.7,
+     "avg_r": -0.144,
+     "net_r": -17.2,
+     "pips": -63.0,
+     "maxdd_r": 31.3,
+     "pf": 0.78,
+     "ci95": [
+      -0.386,
+      0.112
+     ],
+     "be_wr": 37.8,
+     "avg_risk_pips": 6.2,
+     "avg_reward_pips": 20.6
+    },
+    "NZDUSD": {
+     "trades": 36,
+     "per_day": 0.027,
+     "wr": 16.7,
+     "avg_r": -0.629,
+     "net_r": -22.7,
+     "pips": -109.0,
+     "maxdd_r": 24.3,
+     "pf": 0.23,
+     "ci95": [
+      -0.886,
+      -0.337
+     ],
+     "be_wr": 46.9,
+     "avg_risk_pips": 5.0,
+     "avg_reward_pips": 17.8
+    },
+    "USDCAD": {
+     "trades": 63,
+     "per_day": 0.047,
+     "wr": 17.5,
+     "avg_r": -0.495,
+     "net_r": -31.2,
+     "pips": -151.0,
+     "maxdd_r": 32.3,
+     "pf": 0.39,
+     "ci95": [
+      -0.736,
+      -0.214
+     ],
+     "be_wr": 35.7,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 17.3
+    },
+    "USDJPY": {
+     "trades": 172,
+     "per_day": 0.129,
+     "wr": 32.0,
+     "avg_r": -0.146,
+     "net_r": -25.0,
+     "pips": -170.0,
+     "maxdd_r": 28.2,
+     "pf": 0.76,
+     "ci95": [
+      -0.336,
+      0.054
+     ],
+     "be_wr": 40.4,
+     "avg_risk_pips": 8.7,
+     "avg_reward_pips": 29.4
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 188,
+     "per_day": 0.141,
+     "wr": 32.4,
+     "avg_r": -0.119,
+     "net_r": -22.3,
+     "pips": -115.0,
+     "maxdd_r": 49.5,
+     "pf": 0.81,
+     "ci95": [
+      -0.295,
+      0.085
+     ],
+     "be_wr": 38.9,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 27.9
+    },
+    "2024": {
+     "trades": 230,
+     "per_day": 0.63,
+     "wr": 28.3,
+     "avg_r": -0.261,
+     "net_r": -60.1,
+     "pips": -468.0,
+     "maxdd_r": 62.7,
+     "pf": 0.6,
+     "ci95": [
+      -0.413,
+      -0.111
+     ],
+     "be_wr": 42.1,
+     "avg_risk_pips": 9.1,
+     "avg_reward_pips": 31.0
+    },
+    "2025": {
+     "trades": 278,
+     "per_day": 0.762,
+     "wr": 27.7,
+     "avg_r": -0.289,
+     "net_r": -80.4,
+     "pips": -522.0,
+     "maxdd_r": 80.4,
+     "pf": 0.58,
+     "ci95": [
+      -0.436,
+      -0.15
+     ],
+     "be_wr": 41.3,
+     "avg_risk_pips": 7.9,
+     "avg_reward_pips": 24.6
+    },
+    "2026": {
+     "trades": 149,
+     "per_day": 0.111,
+     "wr": 24.8,
+     "avg_r": -0.355,
+     "net_r": -53.0,
+     "pips": -311.0,
+     "maxdd_r": 57.7,
+     "pf": 0.52,
+     "ci95": [
+      -0.557,
+      -0.14
+     ],
+     "be_wr": 38.9,
+     "avg_risk_pips": 6.6,
+     "avg_reward_pips": 22.2
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 398,
+     "per_day": 0.298,
+     "wr": 29.4,
+     "avg_r": -0.23,
+     "net_r": -91.6,
+     "pips": -532.0,
+     "maxdd_r": 96.9,
+     "pf": 0.65,
+     "ci95": [
+      -0.357,
+      -0.108
+     ],
+     "be_wr": 40.6,
+     "avg_risk_pips": 7.7,
+     "avg_reward_pips": 27.8
+    },
+    "bullish engulfing": {
+     "trades": 431,
+     "per_day": 0.322,
+     "wr": 26.9,
+     "avg_r": -0.291,
+     "net_r": -125.3,
+     "pips": -902.0,
+     "maxdd_r": 134.4,
+     "pf": 0.58,
+     "ci95": [
+      -0.405,
+      -0.174
+     ],
+     "be_wr": 40.3,
+     "avg_risk_pips": 8.1,
+     "avg_reward_pips": 25.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 9,
+     "per_day": 0.007,
+     "wr": 33.3,
+     "avg_r": -0.253,
+     "net_r": -2.3,
+     "pips": -10.0,
+     "maxdd_r": 3.0,
+     "pf": 0.56,
+     "ci95": [
+      -0.772,
+      0.362
+     ],
+     "be_wr": 50.5,
+     "avg_risk_pips": 9.4,
+     "avg_reward_pips": 17.7
+    },
+    "double top (neckline break)": {
+     "trades": 7,
+     "per_day": 0.005,
+     "wr": 57.1,
+     "avg_r": 0.491,
+     "net_r": 3.4,
+     "pips": 28.0,
+     "maxdd_r": 2.0,
+     "pf": 2.15,
+     "ci95": [
+      -0.53,
+      1.555
+     ],
+     "be_wr": 38.3,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 26.0
+    }
+   }
+  },
+  "gated": {
+   "label": "gated",
+   "all": {
+    "trades": 330,
+    "per_day": 0.247,
+    "wr": 24.5,
+    "avg_r": -0.325,
+    "net_r": -107.2,
+    "pips": -559.0,
+    "maxdd_r": 109.4,
+    "pf": 0.55,
+    "ci95": [
+     -0.453,
+     -0.195
+    ],
+    "be_wr": 38.5,
+    "avg_risk_pips": 7.5,
+    "avg_reward_pips": 24.9
+   },
+   "per_weekday": 0.346,
+   "first_half": {
+    "trades": 163,
+    "per_day": 0.244,
+    "wr": 29.4,
+    "avg_r": -0.171,
+    "net_r": -27.8,
+    "pips": -146.0,
+    "maxdd_r": 37.0,
+    "pf": 0.74,
+    "ci95": [
+     -0.364,
+     0.039
+    ],
+    "be_wr": 37.9,
+    "avg_risk_pips": 7.7,
+    "avg_reward_pips": 26.2
+   },
+   "second_half": {
+    "trades": 167,
+    "per_day": 0.25,
+    "wr": 19.8,
+    "avg_r": -0.475,
+    "net_r": -79.4,
+    "pips": -413.0,
+    "maxdd_r": 79.4,
+    "pf": 0.39,
+    "ci95": [
+     -0.634,
+     -0.303
+    ],
+    "be_wr": 39.4,
+    "avg_risk_pips": 7.2,
+    "avg_reward_pips": 23.6
+   },
+   "per_pair": {
+    "EURJPY": {
+     "trades": 69,
+     "per_day": 0.052,
+     "wr": 24.6,
+     "avg_r": -0.384,
+     "net_r": -26.5,
+     "pips": -205.0,
+     "maxdd_r": 27.0,
+     "pf": 0.47,
+     "ci95": [
+      -0.629,
+      -0.093
+     ],
+     "be_wr": 41.9,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 27.6
+    },
+    "EURUSD": {
+     "trades": 27,
+     "per_day": 0.02,
+     "wr": 14.8,
+     "avg_r": -0.698,
+     "net_r": -18.8,
+     "pips": -114.0,
+     "maxdd_r": 18.8,
+     "pf": 0.18,
+     "ci95": [
+      -0.959,
+      -0.31
+     ],
+     "be_wr": 49.1,
+     "avg_risk_pips": 5.7,
+     "avg_reward_pips": 19.0
+    },
+    "GBPJPY": {
+     "trades": 55,
+     "per_day": 0.041,
+     "wr": 40.0,
+     "avg_r": 0.072,
+     "net_r": 4.0,
+     "pips": 87.0,
+     "maxdd_r": 11.1,
+     "pf": 1.13,
+     "ci95": [
+      -0.265,
+      0.411
+     ],
+     "be_wr": 39.5,
+     "avg_risk_pips": 10.1,
+     "avg_reward_pips": 31.1
+    },
+    "GBPUSD": {
+     "trades": 53,
+     "per_day": 0.04,
+     "wr": 20.8,
+     "avg_r": -0.365,
+     "net_r": -19.3,
+     "pips": -93.0,
+     "maxdd_r": 26.0,
+     "pf": 0.53,
+     "ci95": [
+      -0.7,
+      0.02
+     ],
+     "be_wr": 34.0,
+     "avg_risk_pips": 6.1,
+     "avg_reward_pips": 19.0
+    },
+    "NZDUSD": {
+     "trades": 30,
+     "per_day": 0.022,
+     "wr": 13.3,
+     "avg_r": -0.647,
+     "net_r": -19.4,
+     "pips": -93.0,
+     "maxdd_r": 21.1,
+     "pf": 0.24,
+     "ci95": [
+      -0.924,
+      -0.307
+     ],
+     "be_wr": 39.8,
+     "avg_risk_pips": 4.9,
+     "avg_reward_pips": 17.2
+    },
+    "USDCAD": {
+     "trades": 31,
+     "per_day": 0.023,
+     "wr": 22.6,
+     "avg_r": -0.339,
+     "net_r": -10.5,
+     "pips": -35.0,
+     "maxdd_r": 11.0,
+     "pf": 0.56,
+     "ci95": [
+      -0.752,
+      0.122
+     ],
+     "be_wr": 34.2,
+     "avg_risk_pips": 5.5,
+     "avg_reward_pips": 16.6
+    },
+    "USDJPY": {
+     "trades": 65,
+     "per_day": 0.049,
+     "wr": 24.6,
+     "avg_r": -0.255,
+     "net_r": -16.5,
+     "pips": -105.0,
+     "maxdd_r": 20.9,
+     "pf": 0.62,
+     "ci95": [
+      -0.552,
+      0.069
+     ],
+     "be_wr": 37.1,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 31.3
+    }
+   },
+   "per_year": {
+    "2023": {
+     "trades": 85,
+     "per_day": 0.064,
+     "wr": 31.8,
+     "avg_r": -0.151,
+     "net_r": -12.8,
+     "pips": -31.0,
+     "maxdd_r": 20.3,
+     "pf": 0.77,
+     "ci95": [
+      -0.421,
+      0.136
+     ],
+     "be_wr": 38.6,
+     "avg_risk_pips": 7.2,
+     "avg_reward_pips": 25.3
+    },
+    "2024": {
+     "trades": 86,
+     "per_day": 0.236,
+     "wr": 26.7,
+     "avg_r": -0.182,
+     "net_r": -15.6,
+     "pips": -95.0,
+     "maxdd_r": 22.0,
+     "pf": 0.72,
+     "ci95": [
+      -0.451,
+      0.105
+     ],
+     "be_wr": 36.4,
+     "avg_risk_pips": 8.3,
+     "avg_reward_pips": 27.6
+    },
+    "2025": {
+     "trades": 99,
+     "per_day": 0.271,
+     "wr": 21.2,
+     "avg_r": -0.449,
+     "net_r": -44.5,
+     "pips": -242.0,
+     "maxdd_r": 44.5,
+     "pf": 0.41,
+     "ci95": [
+      -0.65,
+      -0.22
+     ],
+     "be_wr": 40.7,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 24.2
+    },
+    "2026": {
+     "trades": 60,
+     "per_day": 0.045,
+     "wr": 16.7,
+     "avg_r": -0.571,
+     "net_r": -34.3,
+     "pips": -191.0,
+     "maxdd_r": 34.3,
+     "pf": 0.31,
+     "ci95": [
+      -0.835,
+      -0.278
+     ],
+     "be_wr": 38.9,
+     "avg_risk_pips": 6.5,
+     "avg_reward_pips": 21.5
+    }
+   },
+   "by_pattern": {
+    "bearish engulfing": {
+     "trades": 148,
+     "per_day": 0.111,
+     "wr": 22.3,
+     "avg_r": -0.397,
+     "net_r": -58.7,
+     "pips": -303.0,
+     "maxdd_r": 58.7,
+     "pf": 0.46,
+     "ci95": [
+      -0.58,
+      -0.196
+     ],
+     "be_wr": 39.7,
+     "avg_risk_pips": 7.3,
+     "avg_reward_pips": 26.1
+    },
+    "bullish engulfing": {
+     "trades": 176,
+     "per_day": 0.132,
+     "wr": 26.1,
+     "avg_r": -0.276,
+     "net_r": -48.5,
+     "pips": -251.0,
+     "maxdd_r": 53.7,
+     "pf": 0.61,
+     "ci95": [
+      -0.46,
+      -0.077
+     ],
+     "be_wr": 37.8,
+     "avg_risk_pips": 7.6,
+     "avg_reward_pips": 23.8
+    },
+    "double bottom (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": -0.081,
+     "net_r": -0.2,
+     "pips": 2.0,
+     "maxdd_r": 1.0,
+     "pf": 0.83,
+     "ci95": [
+      -1.0,
+      1.21
+     ],
+     "be_wr": 45.3,
+     "avg_risk_pips": 8.6,
+     "avg_reward_pips": 20.9
+    },
+    "double top (neckline break)": {
+     "trades": 3,
+     "per_day": 0.002,
+     "wr": 33.3,
+     "avg_r": 0.096,
+     "net_r": 0.3,
+     "pips": -7.0,
+     "maxdd_r": 1.0,
+     "pf": 1.14,
+     "ci95": [
+      -1.0,
+      2.289
+     ],
+     "be_wr": 30.4,
+     "avg_risk_pips": 9.3,
+     "avg_reward_pips": 30.7
+    }
+   }
+  },
+  "raw_spread_x2": {
+   "trades": 701,
+   "per_day": 0.524,
+   "wr": 24.0,
+   "avg_r": -0.377,
+   "net_r": -264.6,
+   "pips": -2044.0,
+   "maxdd_r": 267.8,
+   "pf": 0.47,
+   "ci95": [
+    -0.459,
+    -0.29
+   ],
+   "be_wr": 41.4,
+   "avg_risk_pips": 8.6,
+   "avg_reward_pips": 27.2
+  },
+  "raw_zero_cost": {
+   "trades": 893,
+   "per_day": 0.668,
+   "wr": 35.4,
+   "avg_r": -0.021,
+   "net_r": -18.4,
+   "pips": -90.0,
+   "maxdd_r": 68.4,
+   "pf": 0.97,
+   "ci95": [
+    -0.114,
+    0.073
+   ],
+   "be_wr": 37.8,
+   "avg_risk_pips": 7.5,
+   "avg_reward_pips": 26.5
+  }
+ }
+}
