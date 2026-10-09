@@ -173,6 +173,9 @@ def validate_and_reprice(c, snap: Snapshot, cfg: dict, now: pd.Timestamp):
     tp_mode = ex.get("tp_on_reprice", "keep_rr")
     tp_rr = float(risk_cfg.get("tp_rr", 2.5))
     min_rr = float(risk_cfg.get("min_rr", 2.5))
+    cmeta = getattr(c, "meta", None) or {}
+    tp_mode = cmeta.get("tp_on_reprice", tp_mode)      # setup may pin its structural target
+    min_rr = float(cmeta.get("min_rr", min_rr))
 
     if not snap.ok:
         return False, f"price check failed: {snap.reason}"
@@ -225,6 +228,8 @@ def validate_and_reprice(c, snap: Snapshot, cfg: dict, now: pd.Timestamp):
     risk = (entry - sl0) * d
     if risk <= 0:
         return False, "no risk room after reprice"
+    if risk < float(cmeta.get("min_risk", 0)) or risk > float(cmeta.get("max_risk", float("inf"))):
+        return False, f"risk after reprice {risk:.5g} outside setup limits"
     if tp_mode == "keep_target":
         tp = tp0
     else:
