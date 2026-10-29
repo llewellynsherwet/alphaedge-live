@@ -1,6 +1,7 @@
 """3-target ladder (TP1/TP2/TP3) shared by the setup, live repricing, outcome tracking and backtest.
 
-Config (setups.pip_builder.ladder):
+Works for any number of targets (len(tps)); split is normalised to that length.
+Config (setup meta "ladder"):
   tp1_pips: 6      first target, fixed pips (JPY pairs: same pips, 0.01 each)
   tp2_r: 1.0       TP2 = 1R  (R = entry→SL distance)
   tp3_r: 2.0       TP3 = 2R
@@ -49,7 +50,8 @@ def walk(side: str, fill: float, sl: float, tps: list[float], highs, lows, lad: 
     lo = np.asarray(lows, float) + (shift if d == -1 else 0.0)
     risk = abs(fill - sl)
     split = lad["split"]
-    stage, hit_idx, r_done, be, both = 0, [None, None, None], 0.0, False, False
+    ntp = len(tps)
+    stage, hit_idx, r_done, be, both = 0, [None] * ntp, 0.0, False, False
 
     def leg(px):
         return (px - fill) * d / risk if risk > 0 else 0.0
@@ -71,9 +73,9 @@ def walk(side: str, fill: float, sl: float, tps: list[float], highs, lows, lad: 
             r_done += split[stage] * leg(tps[stage])
             hit_idx[stage] = i
             stage += 1
-            if stage == 3:
-                return {"tp_hit": 3, "status": "TP", "r": r_done, "exit_idx": i, "hit_idx": hit_idx,
-                        "be": False, "both_in_bar": False, "done": True, "stopped_at": "TP3"}
+            if stage == ntp:
+                return {"tp_hit": ntp, "status": "TP", "r": r_done, "exit_idx": i, "hit_idx": hit_idx,
+                        "be": False, "both_in_bar": False, "done": True, "stopped_at": f"TP{ntp}"}
     out = {"tp_hit": stage, "status": "OPEN", "r": None, "exit_idx": None, "hit_idx": hit_idx,
            "be": stage > 0 and lad["be_after_tp1"], "both_in_bar": False, "done": False, "stopped_at": None}
     if expire and last_close is not None:

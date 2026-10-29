@@ -176,6 +176,7 @@ def validate_and_reprice(c, snap: Snapshot, cfg: dict, now: pd.Timestamp):
     cmeta = getattr(c, "meta", None) or {}
     tp_mode = cmeta.get("tp_on_reprice", tp_mode)      # setup may pin its structural target
     min_rr = float(cmeta.get("min_rr", min_rr))
+    mode = cmeta.get("entry_mode", mode)              # setup may post a limit level (Moon Wolf)
 
     if not snap.ok:
         return False, f"price check failed: {snap.reason}"
@@ -234,7 +235,11 @@ def validate_and_reprice(c, snap: Snapshot, cfg: dict, now: pd.Timestamp):
         tp = tp0
     else:
         tp = entry + d * tp_rr * risk
-    if cmeta.get("ladder"):
+    if cmeta.get("tps_fixed"):                        # structural targets (Moon Wolf TP1/TP2)
+        tps = [float(x) for x in cmeta["tps_fixed"]]
+        tp = tps[-1]
+        c.meta["tps"] = [x - snap.basis for x in tps]
+    elif cmeta.get("ladder"):
         from . import ladder as _lad
         tps = _lad.build(entry, sl0, c.side, float(cmeta["pip"]), cmeta["ladder"])
         tp = tps[-1]

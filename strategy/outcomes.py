@@ -200,7 +200,8 @@ def _detect_ladder(trade, bars, now, sent, max_open_hours, interval_min, allow_e
         hit_ts = deadline
     status = res["status"]
     side = 1 if trade["side"] == "BUY" else -1
-    px = {"SL": float(trade["sl"]), "BE": float(trade["entry"]), "TP3": float(trade["tps"][2])}.get(res["stopped_at"], last)
+    px = {"SL": float(trade["sl"]), "BE": float(trade["entry"]),
+          f"TP{len(trade['tps'])}": float(trade["tps"][-1])}.get(res["stopped_at"], last)
     return {"status": status, "exit": px, "hit_ts": _ts(hit_ts).isoformat(), "r": round(res["r"], 2),
             "points": None if px is None else (px - float(trade["entry"])) * side,
             "both_in_bar": res["both_in_bar"], "interval_min": int(interval_min),
@@ -444,8 +445,8 @@ def _format_ladder_final(rec, esc, sent, hit):
         head = "⌛ <b>EXPIRED</b>"
     elif n == 0:
         head = "❌ <b>SL HIT</b>"
-    elif n == 3:
-        head = "✅ <b>ALL 3 TARGETS HIT</b>"
+    elif n == len(rec["tps"]):
+        head = f"✅ <b>ALL {n} TARGETS HIT</b>"
     else:
         stop = "breakeven" if rec.get("stopped_at") == "BE" else "SL"
         head = f"🟢 <b>TP{n} HIT</b> — rest stopped at {stop}"
@@ -456,7 +457,7 @@ def _format_ladder_final(rec, esc, sent, hit):
         f"🧩 <b>Setup:</b> {esc(rec.get('setup_label') or rec.get('setup', ''))}\n"
         f"💰 <b>Entry:</b> {fmt_price(entry, entry)} · 🛑 SL {fmt_price(rec['sl'], entry)}\n"
         f"🎯 {tps}\n"
-        f"📐 <b>Result:</b> {fmt_r(rec.get('r'))} blended · {n}/3 targets\n"
+        f"📐 <b>Result:</b> {fmt_r(rec.get('r'))} blended · {n}/{len(rec['tps'])} targets\n"
         f"⏱ <b>Open:</b> {fmt_duration((hit - sent).total_seconds())} (alert {sent:%H:%M} → {hit:%H:%M UTC %d/%m})\n"
         f"🏦 <b>Price:</b> {esc(rec.get('quote_label', ''))}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"

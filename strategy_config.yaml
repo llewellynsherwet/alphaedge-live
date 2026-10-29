@@ -1,14 +1,12 @@
 # ════════════════════════════════════════════════════════════════════════════
-# AlphaEdge — Confluence Day Template (2026-10-08 tune: "more signals")
-# Reloaded every monitor loop (~5 min). Edit and the next scan picks it up.
-#
-# 51-day replay (2026-08-18 → 2026-10-08, 13 symbols, same gates as live):
-#   previous config (all 6 SMC items required, 2.0R, cap 4)  → 0.49/day, 24% WR, −7.0R
-#   THIS config (SMC: PD required, HTF + kill-zone score-only;
-#                1.5R; cap 6 / 2 per symbol)                → 1.59/day (2.16 per weekday),
-#                                                              42% WR, +0.05R avg, +4.0R net, max DD 10.5R
-# Edge is thin (≈ breakeven) — see docs/STRATEGY_TUNE_2026-10-08.md.
-# ema_vwap_kz / orb_open stay disabled (negative in the same replay).
+# AlphaEdge — 🐺 Moon Wolf hourly signals (2026-10-29, owner request)
+# Replaces the Confluence Day Template (smc_sweep / vwap_pullback / ...) and the
+# Pip Builder. Logic is a port of Moon Wolf's a.py: Daily+4H swing trend, 1H/4H
+# supply & demand zones, 15m double top/bottom or engulfing confirmation,
+# SL = extreme ± 0.3×ATR, TP1 = max(1R, 10 pips), TP2 = opposite zone, R:R ≥ 1.5.
+# Scans run on the `schedule` below (hourly at :58, Mon–Fri 05:58–18:58 SAST);
+# TP/SL outcome tracking keeps running every ~5 min.
+# Reloaded every monitor loop. Moon Wolf notes recent results are MIXED.
 # ════════════════════════════════════════════════════════════════════════════
 
 session:
@@ -32,186 +30,73 @@ session:
     - {name: "NY KZ",     start: "12:30", end: "16:00"}
 
 symbols:
-  # yf = signal feed (futures have volume). quote = what users trade (cash / CFD /
-  # spot). Entry/SL/TP in alerts are converted into the quote price by removing
-  # the live futures basis, so US30 alerts match a broker US30, not YM futures.
-  - {name: "US 30",      yf: "YM=F",     priority: 1, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
-     quote: {source: yf, ticker: "^DJI", label: "US30 cash (^DJI)"}}
-  - {name: "NASDAQ 100", yf: "NQ=F",     priority: 2, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
-     quote: {source: yf, ticker: "^NDX", label: "NAS100 cash (^NDX)"}}
-  - {name: "S&P 500",    yf: "ES=F",     priority: 3, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
-     quote: {source: yf, ticker: "^GSPC", label: "SPX500 cash (^GSPC)"}}
-  - {name: "GOLD",       yf: "GC=F",     priority: 4, setups: [smc_sweep, ema_vwap_kz, vwap_pullback],
+  # yf = signal feed. quote = what the user trades. pip = "pip" size used for the
+  # 10-pip TP1 minimum and the pip counts in alerts (gold $0.10, US30 1 point).
+  # lot = lot size shown in the alert (owner: FX 0.02, gold 0.01, US30 0.10).
+  - {name: "EUR/USD", yf: "EURUSD=X", priority: 1, setups: [moon_wolf], pip: 0.0001, lot: 0.02}
+  - {name: "GBP/USD", yf: "GBPUSD=X", priority: 2, setups: [moon_wolf], pip: 0.0001, lot: 0.02}
+  - {name: "USD/JPY", yf: "JPY=X",    priority: 3, setups: [moon_wolf], pip: 0.01,   lot: 0.02}
+  - {name: "GBP/JPY", yf: "GBPJPY=X", priority: 4, setups: [moon_wolf], pip: 0.01,   lot: 0.02}
+  - {name: "EUR/JPY", yf: "EURJPY=X", priority: 5, setups: [moon_wolf], pip: 0.01,   lot: 0.02}
+  - {name: "USD/CAD", yf: "CAD=X",    priority: 6, setups: [moon_wolf], pip: 0.0001, lot: 0.02}
+  - {name: "GOLD",    yf: "GC=F",     priority: 7, setups: [moon_wolf], pip: 0.1,    lot: 0.01,
      quote: {source: gold_api, ticker: "XAU", label: "XAUUSD spot"}}
-  - {name: "EUR/USD",    yf: "EURUSD=X", priority: 5, setups: [smc_sweep, pip_builder]}
-  - {name: "GBP/USD",    yf: "GBPUSD=X", priority: 6, setups: [smc_sweep, pip_builder]}
-  - {name: "USD/JPY",    yf: "USDJPY=X", priority: 7, setups: [smc_sweep, pip_builder]}
-  - {name: "AUD/USD",    yf: "AUDUSD=X", priority: 8, setups: [smc_sweep]}
-  - {name: "GBP/JPY",    yf: "GBPJPY=X", priority: 9, setups: [smc_sweep, pip_builder]}
-  - {name: "EUR/JPY",    yf: "EURJPY=X", priority: 10, setups: [smc_sweep, pip_builder]}
-  - {name: "CAD/JPY",    yf: "CADJPY=X", priority: 11, setups: [smc_sweep]}
-  - {name: "USD/CAD",    yf: "CAD=X",    priority: 12, setups: [smc_sweep, pip_builder]}
-  # NZD/USD is only watched by the experimental pip_builder setup (disabled → never fetched).
-  - {name: "NZD/USD",    yf: "NZDUSD=X", priority: 14, setups: [pip_builder]}
-  - {name: "USD/CHF",    yf: "CHF=X",    priority: 13, setups: [smc_sweep]}
+  - {name: "US 30",   yf: "YM=F",     priority: 8, setups: [moon_wolf], pip: 1.0,    lot: 0.10, pip_label: "pts",
+     quote: {source: yf, ticker: "^DJI", label: "US30 cash (^DJI)"}}
+
+# Moon Wolf scan schedule (Africa/Johannesburg). The 24/7 worker checks every loop and
+# runs ONE scan per slot, from HH:58 until HH+1:20 (catch-up if a loop was late).
+schedule:
+  enabled: true
+  timezone: "Africa/Johannesburg"
+  weekdays_only: true
+  minute: 58
+  first_hour: 5        # 05:58
+  last_hour: 18        # 18:58
+  grace_minutes: 22
 
 risk:
   min_rr: 1.5
-  tp_rr: 1.5                  # 1.5R — beat 2.0R on every variant in the 51d replay (2026-10-08)
-  daily_max_signals: 6        # ceiling, not a target (replay: ~2/weekday, max 5 in a day)
+  tp_rr: 1.5
+  daily_max_signals: 8        # ceiling
   per_symbol_max: 2
-  per_setup_max: {pip_builder: 3}   # pip_builder can't use more than 3 of the 6 daily alerts
-  cooldown_minutes: 40
+  max_open_trades: 2          # Moon Wolf: at most two signals open at once
+  cooldown_minutes: 0         # hourly scans already pace alerts; 0 = several per scan allowed
   symbol_cooldown_minutes: 120
-  max_signal_age_minutes: 20
+  max_signal_age_minutes: 140 # a.py accepts a confirmation within the last 8 × 15m bars
 
 execution:
   enabled: true
-  entry_mode: market
+  entry_mode: market          # Moon Wolf candidates override to "limit" (entry = neckline / engulf close)
   tp_on_reprice: keep_rr
-  max_data_age_minutes: 15
+  max_data_age_minutes: 20
   max_price_age_minutes: 10
-  max_drift_atr: 0.3
-  max_drift_tp_frac: 0.25
+  max_drift_atr: 0.6
+  max_drift_tp_frac: 0.4
   reject_if_tp_sl_hit: true
   max_basis_age_hours: 96
 
 correlation_groups:
-  - name: us_indices
-    members: {"US 30": 1, "NASDAQ 100": 1, "S&P 500": 1}
-  - name: eur_gbp
-    members: {"EUR/USD": 1, "GBP/USD": 1}
-  # JPY crosses share JPY risk: BUY any = short JPY.
   - name: jpy_crosses
-    members: {"USD/JPY": 1, "GBP/JPY": 1, "EUR/JPY": 1, "CAD/JPY": 1}
-  # Dollar basket: +1 = short USD on BUY (xxx/USD); -1 = long USD on BUY (USD/xxx).
+    members: {"USD/JPY": 1, "GBP/JPY": 1, "EUR/JPY": 1}
   - name: usd_pairs
-    members: {"EUR/USD": 1, "GBP/USD": 1, "AUD/USD": 1, "USD/CAD": -1, "USD/CHF": -1, "USD/JPY": -1}
-
-confluence:
-  min_score: 4
+    members: {"EUR/USD": 1, "GBP/USD": 1, "USD/CAD": -1, "USD/JPY": -1}
 
 setups:
-  smc_sweep:
+  moon_wolf:
     enabled: true
-    label: "Liquidity Sweep + BOS"
-    entry_tf: "15m"
-    min_score: 4              # core 3 + premium/discount; HTF + kill zone add score only
-    swing_strength: 2
-    sweep_lookback_bars: 28
-    displacement_atr: 0.6
-    min_fvg_atr: 0.08
-    max_risk_atr: 3.5
-    min_risk_atr: 0.3
-    sl_buffer_atr: 0.15
-    checklist:
-      htf_bias:         {weight: 1, required: false}  # score-only (2026-10-08): requiring it cut alerts with no WR gain
-      premium_discount: {weight: 1, required: true}   # the one context filter that helped sweeps in replay
-      liquidity_sweep:  {weight: 1, required: true}
-      mss_bos:          {weight: 1, required: true}
-      pd_array:         {weight: 1, required: true}
-      kill_zone:        {weight: 1, required: false}  # score-only: bot is 24/7 now
+    label: "🐺 Moon Wolf hourly (S/D zones + 15m)"
+    zone_atr_mult: 1.5        # next 1–3 candles move > 1.5 × ATR(14) away from the base
+    tol_atr: 0.2              # zone tolerance for the 15m confirmation (× 1H ATR)
+    sl_buffer_atr: 0.3
+    min_tp1_pips: 10          # TP1 = max(1R, 10 pips) — pip size per symbol above
+    min_rr: 1.5               # to TP2
+    near_tp1_frac: 0.8        # skip if price already ran 80% of the way to TP1
+    look_15m: 32
+    recent_15m: 8
+    h1_zone_days: 30
+    daily_period: "6mo"
 
-  orb_open:
-    enabled: false
-    label: "NY Opening Range Breakout"
-    entry_tf: "5m"
-    min_score: 5
-    open_time_ny: "09:30"
-    range_minutes: 15
-    entry_until_ny: "10:30"
-    sl_mode: "opposite"
-    min_body_ratio: 0.55
-    volume_mult: 1.3
-    max_range_atr: 3.5
-    checklist:
-      htf_bias:       {weight: 1, required: true}
-      breakout_close: {weight: 1, required: true}
-      strong_candle:  {weight: 1, required: true}
-      volume_confirm: {weight: 1, required: false}
-      vwap_side:      {weight: 1, required: true}
-      gap_align:      {weight: 1, required: false}
-
-  vwap_pullback:
-    enabled: true
-    label: "Session VWAP Pullback (morning)"
-    entry_tf: "5m"
-    min_score: 5
-    anchor_ny: "09:30"
-    trend_bars: 16
-    trend_min_frac: 0.75
-    min_separation_atr: 1.0
-    touch_atr: 0.2
-    # Skip lunch dead-zone entirely; research: morning window carries the edge.
-    avoid_ny: ["11:30", "16:00"]
-    sl_buffer_atr: 0.25
-    max_risk_atr: 2.2
-    checklist:
-      htf_bias:         {weight: 1, required: true}
-      vwap_trend:       {weight: 1, required: true}
-      pullback_touch:   {weight: 1, required: true}
-      confirm_close:    {weight: 1, required: true}
-      volume_signature: {weight: 1, required: false}
-      active_hours:     {weight: 1, required: true}
-
-  ema_vwap_kz:
-    enabled: false            # researched & coded; 0% WR on loose 30d isolate — re-enable after live review
-    label: "Morning EMA+VWAP Confluence"
-    entry_tf: "5m"
-    min_score: 5
-    anchor_ny: "09:30"
-    window_ny: ["09:45", "11:30"]
-    trend_bars: 16
-    trend_min_frac: 0.70
-    min_separation_atr: 0.8
-    touch_atr: 0.25
-    slope_bars: 6
-    min_slope_atr: 0.05
-    sl_buffer_atr: 0.2
-    max_risk_atr: 2.0
-    checklist:
-      htf_bias:         {weight: 1, required: true}
-      vwap_trend:       {weight: 1, required: true}
-      ema_bone:         {weight: 1, required: true}
-      vwap_slope:       {weight: 1, required: true}
-      confirm_close:    {weight: 1, required: true}
-      volume_signature: {weight: 1, required: false}
-      morning_kz:       {weight: 1, required: true}
-
-  pip_builder:
-    # ── "1000 Pip Builder" — EXPERIMENTAL, DISABLED. Research backtest + caveats:
-    #    docs/STRATEGY_1000PIP_BUILDER.md. Parameters marked (assumed) are guesses.
-    enabled: true                # LIVE (2026-10-09, owner-approved) as a 2nd strategy beside smc_sweep.
-                                 # Backtest was NEGATIVE — see docs/STRATEGY_1000PIP_BUILDER.md. Set false to stop.
-    label: "🅱 Pip Builder (SL 20–30p · 3 TPs)"
-    trigger_tfs: ["5m", "15m"]   # double top/bottom or engulfing trigger charts
-    zone_width_atr: 0.3          # (assumed) S/R zone width × 1H ATR(14)
-    min_touches: 2               # swing points needed to form a zone
-    sl_buffer_pips: 1.5          # (assumed) 1–2 pips beyond the pattern extreme
-    sl_max_atr: 0.5              # legacy ATR rule — ignored while sl_min_pips/sl_max_pips are set
-    min_tp_pips: 10
-    sl_min_pips: 20              # SL window (owner rule): widen tidy to 20 pips, reject if structure needs > 30
-    sl_max_pips: 30
-    ladder:                      # 3 targets: TP1 = 6 pips, TP2 = 1R, TP3 = 2R; ⅓ off at each
-      tp1_pips: 6
-      tp2_r: 1.0
-      tp3_r: 2.0
-      split: [1, 1, 1]
-      be_after_tp1: true         # SL → breakeven once TP1 is hit
-    min_rr: 1.0                  # TP3 is 2R, so this only guards degenerate cases
-    tp_max_atr: null             # ATR sanity check dropped: the 20–30 pip SL / 2R ladder is wider than 1H ATR by design
-    tp1_pips: null               # optional partial target, e.g. 10
-    active_hours_utc: null       # e.g. ["07:00", "20:00"]
-    checklist:
-      trend_agree:     {weight: 1, required: true}
-      at_zone_or_band: {weight: 1, required: true}
-      trigger_pattern: {weight: 1, required: true}
-      sl_within_atr:   {weight: 1, required: true}
-      tp_min_rr:       {weight: 1, required: true}
-      news_clear:      {weight: 1, required: true}
-
-# High-impact-news blackout for pip_builder. No free historical calendar exists, so a STATIC
-# RULE is used (US NFP = first Friday 08:30 New York) + optional extra events + optional live feed.
 news:
   enabled: true
   window_minutes: 30

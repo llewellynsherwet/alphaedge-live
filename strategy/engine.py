@@ -1,4 +1,4 @@
-"""Confluence Day Template engine: scan → rank → gate (caps / cooldown / dedupe).
+"""Signal engine (Moon Wolf hourly): scan → rank → gate (caps / cooldown / dedupe).
 
 `scan_once` is used by the monitor and by the Streamlit UI.
 State is date-keyed so a wiped monitor_state.json (Render free disk is
@@ -85,6 +85,54 @@ def next_session(now: pd.Timestamp | None = None, cfg: dict | None = None):
 
 
 # ── state I/O (date-keyed, restart-safe) ──────────────────────────────────────
+
+def scan_slot(now: pd.Timestamp, cfg: dict, state: dict | None = None) -> str | None:
+    """Moon Wolf schedule: return the slot key (e.g. '2026-10-29T09:58+SAST') when a scan
+    is due now and has not run yet, else None. With no `schedule` block (or disabled)
+    every loop scans, as before."""
+    sch = (cfg or {}).get("schedule") or {}
+    if not sch.get("enabled"):
+        return "every-loop"
+    from zoneinfo import ZoneInfo
+    tz = ZoneInfo(sch.get("timezone", "Africa/Johannesburg"))
+    loc = (now.tz_localize("UTC") if now.tzinfo is None else now).tz_convert(tz)
+    minute, grace = int(sch.get("minute", 58)), int(sch.get("grace_minutes", 22))
+    first, last = int(sch.get("first_hour", 5)), int(sch.get("last_hour", 18))
+    for back in (0, 1):  # slot may have started in the previous hour (HH:58 → HH+1:20)
+        start = (loc - pd.Timedelta(hours=back)).replace(minute=minute, second=0, microsecond=0)
+        if not (start <= loc < start + pd.Timedelta(minutes=grace)):
+            continue
+        if not (first <= start.hour <= last):
+            continue
+        if sch.get("weekdays_only", True) and start.weekday() >= 5:
+            continue
+        key = start.strftime("%Y-%m-%dT%H:%M") + "+" + str(tz)
+        if state is not None and key in (state.get("scan_slots_done") or []):
+            return None
+        return key
+    return None
+
+
+def seconds_to_next_slot(now: pd.Timestamp, cfg: dict) -> float | None:
+    """Seconds until the next HH:<minute> boundary (any hour), so the loop wakes on time."""
+    sch = (cfg or {}).get("schedule") or {}
+    if not sch.get("enabled"):
+        return None
+    minute = int(sch.get("minute", 58))
+    t = (now.tz_localize("UTC") if now.tzinfo is None else now)
+    nxt = t.replace(minute=minute, second=5, microsecond=0)
+    if nxt <= t:
+        nxt += pd.Timedelta(hours=1)
+    return (nxt - t).total_seconds()
+
+
+def mark_slot_done(state: dict, key: str) -> dict:
+    done = list(state.get("scan_slots_done") or [])
+    if key and key != "every-loop" and key not in done:
+        done.append(key)
+    state["scan_slots_done"] = done[-48:]
+    return state
+
 
 def _empty_day(day: str) -> dict:
     return {
@@ -177,6 +225,8 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
     per_setup = risk.get("per_setup_max") or {}
     max_age = int(risk.get("max_signal_age_minutes", 25))
     groups = cfg.get("correlation_groups", [])
+    max_open = risk.get("max_open_trades")
+    open_now = len(((state.get("trades") or {}).get("open")) or [])
 
     emitted = list(state.get("emitted", []))
     accepted = []
@@ -210,6 +260,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
             continue
         if c.zone_key in zone_seen:
             reasons.append(f"{tag}: dedupe zone already emitted")
+            continue
+        if max_open is not None and open_now + len(accepted) >= int(max_open):
+            reasons.append(f"{tag}: {open_now + len(accepted)} trades already open (max {max_open})")
             continue
         if len(emitted) + len(accepted) >= daily_max:
             reasons.append(f"{tag}: daily cap {daily_max} reached")
@@ -451,7 +504,8 @@ def _tp_lines(c: Candidate) -> str:
     if not tps:
         return f"🎯 <b>TP:</b>     {fmt_price(c.tp, c.entry)}\n"
     pip = float((c.meta or {}).get("pip") or 0.0001)
-    return "".join(f"🎯 <b>TP{i + 1}:</b>    {fmt_price(x, c.entry)} (+{abs(x - c.entry) / pip:.0f} pips)\n"
+    unit = (c.meta or {}).get("pip_label") or "pips"
+    return "".join(f"🎯 <b>TP{i + 1}:</b>    {fmt_price(x, c.entry)} (+{abs(x - c.entry) / pip:.0f} {unit})\n"
                    for i, x in enumerate(tps))
 
 
@@ -461,11 +515,14 @@ def _sizing_lines(c: Candidate) -> str:
     if m.get("tp1") and not m.get("tps"):
         out += f"🎯 <b>TP1:</b>    {fmt_price(m['tp1'], c.entry)} (partial)\n"
     if m.get("tps"):
-        out += "ℹ️ <i>Take ⅓ at each target; SL → breakeven after TP1</i>\n" if (m.get("ladder") or {}).get("be_after_tp1", True) \
-            else "ℹ️ <i>Take ⅓ at each target</i>\n"
+        part = {2: "½", 3: "⅓"}.get(len(m["tps"]), "a share")
+        out += f"ℹ️ <i>Take {part} at each target; SL → breakeven after TP1</i>\n" if (m.get("ladder") or {}).get("be_after_tp1", True) \
+            else f"ℹ️ <i>Take {part} at each target</i>\n"
+    if m.get("lot"):
+        out += f"💼 <b>Lot size:</b> {float(m['lot']):.2f}\n"
     sz = m.get("sizing")
     if m.get("sl_pips") and not sz:
-        out += f"📏 <b>SL:</b> {m['sl_pips']} pips\n" if m.get("tps") else f"📏 <b>SL / TP:</b> {m['sl_pips']} / {m['tp_pips']} pips\n"
+        out += f"📏 <b>SL:</b> {m['sl_pips']} {m.get('pip_label') or 'pips'}\n" if m.get("tps") else f"📏 <b>SL / TP:</b> {m['sl_pips']} / {m['tp_pips']} pips\n"
     if sz:
         out += (f"📏 <b>SL:</b> {sz['sl_pips']} pips · 💼 <b>Size:</b> {sz['lots']:.2f} lots "
                 f"(risk {sz['risk_pct']:g}% of {sz['account']:,.0f} {sz['ccy']} ≈ {sz['actual_risk']:.2f})\n")
@@ -490,7 +547,7 @@ def format_trade_message(c: Candidate, session_name: str) -> str:
         f"{' (LIMIT)' if c.meta.get('entry_mode') == 'limit' else ' (market @ live)' if c.meta else ''}\n"
         f"{_tp_lines(c)}"
         f"🛑 <b>SL:</b>     {fmt_price(c.sl, c.entry)}\n"
-        f"📐 <b>R:R:</b>    1 : {c.rr:.1f}{' (to TP3)' if (c.meta or {}).get('tps') else ''}\n"
+        f"📐 <b>R:R:</b>    1 : {c.rr:.1f}{f' (to TP{len(c.meta["tps"])})' if (c.meta or {}).get('tps') else ''}\n"
         f"{_sizing_lines(c)}"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🕒 {escape(_data_line(c))}\n"

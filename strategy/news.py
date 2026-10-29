@@ -1,4 +1,4 @@
-"""High-impact news blackout for the 1000 Pip Builder setup.
+"""High-impact news blackout (Moon Wolf setup).
 
 No free *historical* economic calendar exists, so the backtest and the live
 fallback use a STATIC RULE: US Non-Farm Payrolls = first Friday of the month at

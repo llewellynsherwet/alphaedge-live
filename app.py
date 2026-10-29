@@ -14,7 +14,7 @@ import base64
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-# Confluence Day Template engine (config-driven; shared with monitor_worker)
+# 🐺 Moon Wolf hourly engine (config-driven; shared with monitor_worker)
 from strategy.engine import (
     session_info as _engine_session_info,
     next_session as _engine_next_session,
@@ -26,6 +26,9 @@ from strategy.engine import (
     format_daily_summary as _engine_format_summary,
     record_emits as _engine_record_emits,
     load_config as _engine_load_config,
+    scan_slot as _engine_scan_slot,
+    seconds_to_next_slot as _engine_secs_to_slot,
+    mark_slot_done as _engine_mark_slot,
 )
 from strategy.config_loader import load_config as _load_strategy_config
 from strategy import outcomes as _outcomes
@@ -688,7 +691,7 @@ def _smc_4h_strategy(display_name, ticker_symbol):
 
 
 def _signal_engine(display_name):
-    """UI + monitor entry point. Runs the Confluence Day Template for one symbol.
+    """UI + monitor entry point. Runs the Moon Wolf hourly strategy for one symbol.
     Returns (sig, entry, tp, sl, reason) — same 5-tuple the rest of the app expects.
     """
     try:
@@ -875,7 +878,7 @@ def get_scalp_signal(ticker_symbol):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BACKGROUND TELEGRAM MONITOR — Confluence Day Template
+# BACKGROUND TELEGRAM MONITOR — Moon Wolf hourly (S/D zones + 15m)
 # Scans the allowlist in strategy_config.yaml every 5 min during Mon–Fri
 # 07:00–17:00 UTC. Emits at most daily_max_signals trade alerts (default 6),
 # with sticky zone-key dedupe, cooldowns, and correlation filters.
@@ -987,7 +990,7 @@ def _monitor_loop():
                         f"🟢 <b>SESSION OPEN — {_tg_escape(session_name)}</b>\n"
                         f"━━━━━━━━━━━━━━━━━━━━\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                        f"📡 Confluence Day Template armed\n"
+                        f"📡 Moon Wolf hourly signals armed\n"
                         f"🎯 Daily budget: {cfg.get('risk', {}).get('daily_max_signals', 6)} alerts\n"
                         f"━━━━━━━━━━━━━━━━━━━━\n"
                         f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
@@ -1027,8 +1030,10 @@ def _monitor_loop():
                     state["summary_sent"] = True
                     _write_state_raw(state)
 
-            # Signal scan
-            if in_kz:
+            # Signal scan — Moon Wolf schedule: once per slot (hourly :58, Mon–Fri 05:58–18:58 SAST)
+            _slot = _engine_scan_slot(now, cfg, state) if in_kz else None
+            if in_kz and _slot:
+                print(f"[monitor] scan slot {_slot}", flush=True)
                 result = _engine_scan_once(now=now, cfg=cfg, state=state)
                 # data errors — at most once per symbol/interval/day
                 if tg.get("data_errors", True):
@@ -1064,6 +1069,9 @@ def _monitor_loop():
                             except Exception as e:
                                 print(f"[signal_log] write failed: {e!r}", flush=True)
 
+                for _r in result.get("reject_reasons", [])[:20]:
+                    print(f"[monitor] reject {_r}", flush=True)
+                state = _engine_mark_slot(state, _slot)
                 state["scan_count"] = int(state.get("scan_count", 0)) + 1
                 state["in_session"] = True
                 _write_state_raw(state)
@@ -1082,7 +1090,14 @@ def _monitor_loop():
         except Exception as e:
             print(f"[monitor] loop error: {e!r}", flush=True)
         # 5-minute cadence measured from loop start (scan time no longer adds drift)
-        time.sleep(max(30.0, 300.0 - (time.time() - loop_t0)))
+        _wait = max(30.0, 300.0 - (time.time() - loop_t0))
+        try:   # wake right at the next :58 slot instead of up to 5 min late
+            _to_slot = _engine_secs_to_slot(pd.Timestamp.now(tz="UTC"), _load_strategy_config())
+            if _to_slot is not None and _to_slot < _wait:
+                _wait = max(5.0, _to_slot)
+        except Exception:
+            pass
+        time.sleep(_wait)
 
 
 def start_monitor():
@@ -1111,9 +1126,9 @@ if os.environ.get("MONITOR_MODE", "app") != "off" and not os.path.exists(_STARTU
         f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-        f"✅ Confluence Day Template loaded\n"
-        f"✅ Allowlist: {_nsym} symbols · daily cap {_cap}\n"
-        f"✅ Sessions: Mon–Fri 07–17 UTC\n"
+        f"✅ 🐺 Moon Wolf hourly signals loaded\n"
+        f"✅ Watchlist: {_nsym} symbols · daily cap {_cap} · max 2 open\n"
+        f"✅ Scans: Mon–Fri hourly at :58, 05:58–18:58 SAST\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"<i>Trade alerts only — no scan spam</i>"
     )
@@ -1343,7 +1358,7 @@ with tab_dash:
         st.markdown(f"""
         <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
             <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">Confluence Day Template • Sweep+BOS (+ PD) / morning VWAP • 24/7 global scan • daily cap {_cap_hdr} • {_rr_hdr:g}R • Pro gated</p>
+            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">🐺 Moon Wolf hourly • S/D zones + 15m confirm • Mon–Fri :58 scans (SAST) • daily cap {_cap_hdr} • {_rr_hdr:g}R • Pro gated</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1383,7 +1398,7 @@ with tab_dash:
             st.markdown(f'<div class="{box_class}"><p style="margin:0 0 6px 0;font-weight:bold;color:#ccc;font-size:12px;">📋 WHY THIS TRADE:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
         else:
             c2.metric("⚡ LIVE ENTRY", "Searching...")
-            c3.metric("🎯 TARGETS",    "Awaiting Confluence")
+            c3.metric("🎯 TARGETS",    "Awaiting Moon Wolf")
             if reason:
                 reason_lines = reason.replace("\n", "<br>")
                 st.markdown(f'<div style="background:#0a0a0f;border:1px solid #333;border-left:3px solid #888;border-radius:4px;padding:10px 14px;margin-top:10px;font-size:12px;color:#666;"><p style="margin:0 0 4px 0;color:#888;font-weight:bold;">⏳ WAITING — CONDITIONS NOT YET MET:</p><p style="margin:0;">{reason_lines}</p></div>', unsafe_allow_html=True)
