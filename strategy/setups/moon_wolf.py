@@ -1,4 +1,4 @@
-"""🐺 Moon Wolf hourly — supply/demand zones + 15m confirmation.
+"""🐺 Moon Wolf (15m scan) — supply/demand zones + 15m confirmation.
 
 Ported from Moon Wolf's /workspace/fx/a.py (logic kept 1:1 where possible):
   * Trend: swing highs/lows (w=3) on the Daily (6 months) and 4H (1H resampled) charts.
@@ -22,7 +22,7 @@ import pandas as pd
 from ..common import Candidate
 from ..news import blackout
 
-DEFAULTS = {"label": "🐺 Moon Wolf hourly (S/D zones + 15m)", "zone_atr_mult": 1.5, "tol_atr": 0.2,
+DEFAULTS = {"label": "🐺 Moon Wolf (15m scan)", "zone_atr_mult": 1.5, "tol_atr": 0.2,
             "sl_buffer_atr": 0.3, "min_tp1_pips": 10.0, "min_rr": 1.5, "look_15m": 32, "recent_15m": 8,
             "near_tp1_frac": 0.8, "h1_zone_days": 30, "daily_period": "6mo"}
 

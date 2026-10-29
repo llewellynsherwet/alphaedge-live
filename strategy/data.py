@@ -77,13 +77,36 @@ def build_frames(df5, df1h, now: pd.Timestamp | None = None):
     return frames
 
 
+_H1_CACHE: dict = {}   # yf_symbol -> (df1h, fetched_at_utc)
+
+
+def _cached_1h(yf_symbol: str, now: pd.Timestamp):
+    """1H/60d history only changes when an hourly bar closes: refetch at most once per
+    hour (after HH:02 UTC), so 15-minute scans don't re-download 60 days each time."""
+    now = now.tz_localize("UTC") if now.tzinfo is None else now
+    hit = _H1_CACHE.get(yf_symbol)
+    boundary = now.floor("h") + pd.Timedelta(minutes=2)     # last HH:02 at or before now
+    if boundary > now:
+        boundary -= pd.Timedelta(hours=1)
+    if hit is not None and hit[1] >= boundary:
+        return hit[0], None
+    df, err = fetch(yf_symbol, "1h", "60d")
+    if df is not None:
+        _H1_CACHE[yf_symbol] = (df, now)
+    elif hit is not None:
+        return hit[0], None          # keep last good copy on a transient failure
+    return df, err
+
+
 def live_frames(yf_symbol: str, now: pd.Timestamp):
-    """Fetch live data for one symbol. Returns (frames|None, [errors])."""
+    """Fetch live data for one symbol. Returns (frames|None, [errors]).
+    5m is fetched every scan; 1H is cached hourly (see _cached_1h); Daily is cached
+    per day inside the Moon Wolf setup."""
     errs = []
     df5, e1 = fetch(yf_symbol, "5m", "5d")
     if e1:
         errs.append(("5m", e1))
-    df1h, e2 = fetch(yf_symbol, "1h", "60d")
+    df1h, e2 = _cached_1h(yf_symbol, now)
     if e2:
         errs.append(("1h", e2))
     if df5 is None or df1h is None:

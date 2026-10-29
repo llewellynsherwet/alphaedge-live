@@ -92,19 +92,8 @@ def frames_at(h1, m15, d1, now):
 
 def past_slots(now: pd.Timestamp, cfg: dict, hours: float = HOLD_HOURS):
     """(slot_key, slot_utc) for every schedule slot that STARTED in the last `hours`, oldest first."""
-    from zoneinfo import ZoneInfo
-    sch = cfg.get("schedule") or {}
-    tz = ZoneInfo(sch.get("timezone", "Africa/Johannesburg"))
-    minute, first, last = int(sch.get("minute", 58)), int(sch.get("first_hour", 5)), int(sch.get("last_hour", 18))
-    loc = now.tz_convert(tz)
-    t = (loc - pd.Timedelta(hours=hours)).replace(minute=minute, second=0, microsecond=0)
-    out = []
-    while t <= loc:
-        if first <= t.hour <= last and not (sch.get("weekdays_only", True) and t.weekday() >= 5) \
-                and t > loc - pd.Timedelta(hours=hours):
-            out.append((t.strftime("%Y-%m-%dT%H:%M") + "+" + str(tz), t.tz_convert("UTC")))
-        t += pd.Timedelta(hours=1)
-    return out
+    from .engine import slot_starts, slot_key
+    return [(slot_key(t), t.tz_convert("UTC")) for t in slot_starts(now - pd.Timedelta(hours=hours), now, cfg)]
 
 
 def rebuild(state: dict, cfg: dict, now: pd.Timestamp, fetch=None, hours: float = HOLD_HOURS,
@@ -122,10 +111,10 @@ def rebuild(state: dict, cfg: dict, now: pd.Timestamp, fetch=None, hours: float 
     # every slot already started is treated as done (the current one is re-checked by the caller)
     done = list(state.get("scan_slots_done") or [])
     for key, start in slots:
-        if now - start >= pd.Timedelta(minutes=int((cfg.get("schedule") or {}).get("grace_minutes", 22))) \
+        if now - start >= pd.Timedelta(minutes=int((cfg.get("schedule") or {}).get("grace_minutes", 10))) \
                 and key not in done:
             done.append(key)
-    state["scan_slots_done"] = done[-48:]
+    state["scan_slots_done"] = done[-200:]
     for i, sym in enumerate(cfg.get("symbols", [])):
         try:
             h1, e1 = fetch(sym["yf"], "1h", "90d")

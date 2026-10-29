@@ -1,4 +1,4 @@
-"""Signal engine (Moon Wolf hourly): scan → rank → gate (caps / cooldown / dedupe).
+"""Signal engine (Moon Wolf, 15m scan): scan → rank → gate (caps / cooldown / dedupe).
 
 `scan_once` is used by the monitor and by the Streamlit UI.
 State is date-keyed so a wiped monitor_state.json (Render free disk is
@@ -87,51 +87,88 @@ def next_session(now: pd.Timestamp | None = None, cfg: dict | None = None):
 
 # ── state I/O (date-keyed, restart-safe) ──────────────────────────────────────
 
+def _sched(cfg):
+    """Normalised schedule: (tz, minutes[], first_min_of_day, last_min_of_day, grace, weekdays_only)."""
+    from zoneinfo import ZoneInfo
+    sch = (cfg or {}).get("schedule") or {}
+    tz = ZoneInfo(sch.get("timezone", "Africa/Johannesburg"))
+    mins = sorted({int(m) % 60 for m in (sch.get("minutes") or [sch.get("minute", 58)])})
+
+    def _hm(v, default):
+        if v is None:
+            return default
+        h, m = str(v).split(":")
+        return int(h) * 60 + int(m)
+    fm = mins[-1] if mins else 58
+    first = _hm(sch.get("first"), int(sch.get("first_hour", 5)) * 60 + fm)
+    last = _hm(sch.get("last"), int(sch.get("last_hour", 18)) * 60 + fm)
+    return tz, mins, first, last, int(sch.get("grace_minutes", 10)), bool(sch.get("weekdays_only", True))
+
+
+def slot_starts(t_from: pd.Timestamp, t_to: pd.Timestamp, cfg: dict):
+    """Every schedule slot start (local tz) with t_from < start <= t_to, oldest first."""
+    tz, mins, first, last, _g, wk = _sched(cfg)
+    loc = t_from.tz_convert(tz).floor("min")
+    end = t_to.tz_convert(tz)
+    t = loc.replace(second=0, microsecond=0) - pd.Timedelta(hours=1)
+    t = t.replace(minute=0)
+    out = []
+    while t <= end:
+        for m in mins:
+            st_ = t.replace(minute=m)
+            if not (t_from.tz_convert(tz) < st_ <= end):
+                continue
+            mod = st_.hour * 60 + st_.minute
+            if not (first <= mod <= last) or (wk and st_.weekday() >= 5):
+                continue
+            out.append(st_)
+        t += pd.Timedelta(hours=1)
+    return out
+
+
+def slot_key(start) -> str:
+    return start.strftime("%Y-%m-%dT%H:%M") + "+" + str(start.tzinfo)
+
+
 def scan_slot(now: pd.Timestamp, cfg: dict, state: dict | None = None) -> str | None:
-    """Moon Wolf schedule: return the slot key (e.g. '2026-10-29T09:58+SAST') when a scan
-    is due now and has not run yet, else None. With no `schedule` block (or disabled)
-    every loop scans, as before."""
+    """Moon Wolf schedule: return the slot key (e.g. '2026-10-29T09:58+Africa/Johannesburg')
+    when a scan is due now (slot started < grace minutes ago) and has not run yet, else None.
+    With no `schedule` block (or disabled) every loop scans, as before."""
     sch = (cfg or {}).get("schedule") or {}
     if not sch.get("enabled"):
         return "every-loop"
-    from zoneinfo import ZoneInfo
-    tz = ZoneInfo(sch.get("timezone", "Africa/Johannesburg"))
-    loc = (now.tz_localize("UTC") if now.tzinfo is None else now).tz_convert(tz)
-    minute, grace = int(sch.get("minute", 58)), int(sch.get("grace_minutes", 22))
-    first, last = int(sch.get("first_hour", 5)), int(sch.get("last_hour", 18))
-    for back in (0, 1):  # slot may have started in the previous hour (HH:58 → HH+1:20)
-        start = (loc - pd.Timedelta(hours=back)).replace(minute=minute, second=0, microsecond=0)
-        if not (start <= loc < start + pd.Timedelta(minutes=grace)):
-            continue
-        if not (first <= start.hour <= last):
-            continue
-        if sch.get("weekdays_only", True) and start.weekday() >= 5:
-            continue
-        key = start.strftime("%Y-%m-%dT%H:%M") + "+" + str(tz)
-        if state is not None and key in (state.get("scan_slots_done") or []):
-            return None
-        return key
-    return None
+    now = now.tz_localize("UTC") if now.tzinfo is None else now
+    grace = _sched(cfg)[4]
+    starts = slot_starts(now - pd.Timedelta(minutes=grace), now, cfg)
+    if not starts:
+        return None
+    key = slot_key(starts[-1])
+    if state is not None and key in (state.get("scan_slots_done") or []):
+        return None
+    return key
 
 
 def seconds_to_next_slot(now: pd.Timestamp, cfg: dict) -> float | None:
-    """Seconds until the next HH:<minute> boundary (any hour), so the loop wakes on time."""
+    """Seconds until the next slot minute (any hour), so the loop wakes on time."""
     sch = (cfg or {}).get("schedule") or {}
     if not sch.get("enabled"):
         return None
-    minute = int(sch.get("minute", 58))
     t = (now.tz_localize("UTC") if now.tzinfo is None else now)
-    nxt = t.replace(minute=minute, second=5, microsecond=0)
-    if nxt <= t:
-        nxt += pd.Timedelta(hours=1)
-    return (nxt - t).total_seconds()
+    _tz, mins, *_ = _sched(cfg)
+    best = None
+    for m in mins:
+        nxt = t.replace(minute=m, second=5, microsecond=0)
+        if nxt <= t:
+            nxt += pd.Timedelta(hours=1)
+        best = nxt if best is None or nxt < best else best
+    return (best - t).total_seconds()
 
 
 def mark_slot_done(state: dict, key: str) -> dict:
     done = list(state.get("scan_slots_done") or [])
     if key and key != "every-loop" and key not in done:
         done.append(key)
-    state["scan_slots_done"] = done[-48:]
+    state["scan_slots_done"] = done[-200:]
     return state
 
 

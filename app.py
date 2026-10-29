@@ -13,7 +13,7 @@ import base64
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-# 🐺 Moon Wolf hourly engine (config-driven; shared with monitor_worker)
+# 🐺 Moon Wolf (15m scan) engine (config-driven; shared with monitor_worker)
 from strategy.engine import (
     session_info as _engine_session_info,
     next_session as _engine_next_session,
@@ -690,7 +690,7 @@ def _smc_4h_strategy(display_name, ticker_symbol):
 
 
 def _signal_engine(display_name):
-    """UI + monitor entry point. Runs the Moon Wolf hourly strategy for one symbol.
+    """UI + monitor entry point. Runs the Moon Wolf (15m scan) strategy for one symbol.
     Returns (sig, entry, tp, sl, reason) — same 5-tuple the rest of the app expects.
     """
     try:
@@ -877,7 +877,7 @@ def get_scalp_signal(ticker_symbol):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BACKGROUND TELEGRAM MONITOR — Moon Wolf hourly (S/D zones + 15m)
+# BACKGROUND TELEGRAM MONITOR — Moon Wolf (15m scan) (S/D zones + 15m)
 # Scans the allowlist in strategy_config.yaml every 5 min during Mon–Fri
 # 07:00–17:00 UTC. Emits at most daily_max_signals trade alerts (default 6),
 # with sticky zone-key dedupe, cooldowns, and correlation filters.
@@ -1001,7 +1001,7 @@ def _monitor_loop():
                         f"🟢 <b>SESSION OPEN — {_tg_escape(session_name)}</b>\n"
                         f"━━━━━━━━━━━━━━━━━━━━\n"
                         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-                        f"📡 Moon Wolf hourly signals armed\n"
+                        f"📡 Moon Wolf signals armed (15m scan)\n"
                         f"🎯 Daily budget: {cfg.get('risk', {}).get('daily_max_signals', 6)} alerts\n"
                         f"━━━━━━━━━━━━━━━━━━━━\n"
                         f"⚠️ <i>Not financial advice. Trade responsibly.</i>"
@@ -1041,7 +1041,7 @@ def _monitor_loop():
                     state["summary_sent"] = True
                     _write_state_raw(state)
 
-            # Signal scan — Moon Wolf schedule: once per slot (hourly :58, Mon–Fri 05:58–18:58 SAST)
+            # Signal scan — Moon Wolf schedule: once per slot (every 15 min :13/:28/:43/:58, Mon–Fri 05:58–18:58 SAST)
             _slot = _engine_scan_slot(now, cfg, state) if in_kz else None
             if in_kz and _slot:
                 print(f"[monitor] scan slot {_slot}", flush=True)
@@ -1137,9 +1137,9 @@ if os.environ.get("MONITOR_MODE", "app") != "off" and not os.path.exists(_STARTU
         f"🚀 <b>ALPHAEDGE BOT ONLINE</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
-        f"✅ 🐺 Moon Wolf hourly signals loaded\n"
+        f"✅ 🐺 Moon Wolf signals loaded (15m scan)\n"
         f"✅ Watchlist: {_nsym} symbols · daily cap {_cap} · max 2 open\n"
-        f"✅ Scans: Mon–Fri hourly at :58, 05:58–18:58 SAST\n"
+        f"✅ Scans: Mon–Fri every 15 min (:13/:28/:43/:58), 05:58–18:58 SAST\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"<i>Trade alerts only — no scan spam</i>"
     )
@@ -1341,7 +1341,7 @@ with tab_dash:
         st.markdown(f"""
         <div style="background:linear-gradient(90deg,#0a0a0a,#111);border:1px solid #D4AF37;border-left:4px solid #D4AF37;border-radius:6px;padding:14px 18px;margin-bottom:10px;">
             <h3 style="margin:0;color:#D4AF37;font-size:18px;letter-spacing:2px;">📊 ALPHAEDGE LIVE SIGNALS</h3>
-            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">🐺 Moon Wolf hourly • S/D zones + 15m confirm • Mon–Fri :58 scans (SAST) • daily cap {_cap_hdr} • {_rr_hdr:g}R • Pro gated</p>
+            <p style="margin:6px 0 0 0;color:#aaa;font-size:12px;">🐺 Moon Wolf (15m scan) • S/D zones + 15m confirm • Mon–Fri scans every 15 min (SAST) • daily cap {_cap_hdr} • {_rr_hdr:g}R • Pro gated</p>
         </div>
         """, unsafe_allow_html=True)
 

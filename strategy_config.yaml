@@ -1,10 +1,10 @@
 # ════════════════════════════════════════════════════════════════════════════
-# AlphaEdge — 🐺 Moon Wolf hourly signals (2026-10-29, owner request)
+# AlphaEdge — 🐺 Moon Wolf signals (15m scan) (2026-10-29, owner request)
 # Replaces the Confluence Day Template (smc_sweep / vwap_pullback / ...) and the
 # Pip Builder. Logic is a port of Moon Wolf's a.py: Daily+4H swing trend, 1H/4H
 # supply & demand zones, 15m double top/bottom or engulfing confirmation,
 # SL = extreme ± 0.3×ATR, TP1 = max(1R, 10 pips), TP2 = opposite zone, R:R ≥ 1.5.
-# Scans run on the `schedule` below (hourly at :58, Mon–Fri 05:58–18:58 SAST);
+# Scans run on the `schedule` below (every 15 min at :13/:28/:43/:58, Mon–Fri 05:58–18:58 SAST);
 # TP/SL outcome tracking keeps running every ~5 min.
 # Reloaded every monitor loop. Moon Wolf notes recent results are MIXED.
 # ════════════════════════════════════════════════════════════════════════════
@@ -50,10 +50,10 @@ schedule:
   enabled: true
   timezone: "Africa/Johannesburg"
   weekdays_only: true
-  minute: 58
-  first_hour: 5        # 05:58
-  last_hour: 18        # 18:58
-  grace_minutes: 22
+  minutes: [13, 28, 43, 58]   # every 15 min (Moon Wolf's own :58 + 3 in between)
+  first: "05:58"             # first slot (SAST)
+  last: "18:58"              # last slot (SAST)
+  grace_minutes: 10          # a missed slot can still run up to 10 min late (fits a 15-min slot)
 
 risk:
   min_rr: 1.5
@@ -62,7 +62,7 @@ risk:
   daily_max_signals: 8        # ceiling
   per_symbol_max: 2
   max_open_trades: 2          # Moon Wolf: at most two signals open at once
-  cooldown_minutes: 0         # hourly scans already pace alerts; 0 = several per scan allowed
+  cooldown_minutes: 0         # zone dedupe + symbol gap pace alerts; 0 = several per scan allowed
   symbol_cooldown_minutes: 120
   max_signal_age_minutes: 140 # a.py accepts a confirmation within the last 8 × 15m bars
 
@@ -86,7 +86,7 @@ correlation_groups:
 setups:
   moon_wolf:
     enabled: true
-    label: "🐺 Moon Wolf hourly (S/D zones + 15m)"
+    label: "🐺 Moon Wolf (15m scan)"
     zone_atr_mult: 1.5        # next 1–3 candles move > 1.5 × ATR(14) away from the base
     tol_atr: 0.2              # zone tolerance for the 15m confirmation (× 1H ATR)
     sl_buffer_atr: 0.3
