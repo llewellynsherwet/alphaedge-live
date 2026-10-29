@@ -218,7 +218,7 @@ def render_paywall(user: dict | None):
             padding:18px 20px;margin:12px 0 18px 0;">
   <div style="color:#D4AF37;font-weight:800;font-size:18px;letter-spacing:1px;">UNLOCK ALPHAEDGE PRO</div>
   <div style="color:#bbb;font-size:13px;margin-top:8px;line-height:1.55;">
-    Full live signals, immersive chart, COT, sentiment &amp; community tools.
+    Full live signals, immersive chart, COT &amp; sentiment tools.
     Teaser stays free. Paid seats capped at <b style="color:#D4AF37">{SEAT_CAP}</b>
     ({rem} remaining) · ~R5/day · Paystack (ZA).
   </div>

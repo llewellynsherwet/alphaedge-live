@@ -4,7 +4,6 @@ import os
 import json
 import html
 import re
-import sqlite3
 import threading
 import requests
 import pandas as pd
@@ -1175,34 +1174,6 @@ def show_popup_chart(ticker):
         if os.path.exists("static/tv_promo_2.mp4"): st.caption("📺 Advanced Charting"); st.video("static/tv_promo_2.mp4", start_time=0)
 
 
-# --- CHAT DB ---
-DB_FILE  = "chat.db"
-_db_lock = threading.Lock()
-
-def init_db():
-    with _db_lock:
-        conn = sqlite3.connect(DB_FILE)
-        conn.execute("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, ts REAL NOT NULL)")
-        conn.commit(); conn.close()
-
-init_db()
-
-def load_chat(limit=100):
-    with _db_lock:
-        conn = sqlite3.connect(DB_FILE)
-        rows = conn.execute("SELECT text, ts FROM messages ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
-        conn.close()
-    return [{"text": r[0], "ts": r[1]} for r in reversed(rows)]
-
-def save_message(text: str):
-    clean = html.escape(text.strip())
-    if not clean: return
-    with _db_lock:
-        conn = sqlite3.connect(DB_FILE)
-        conn.execute("INSERT INTO messages (text, ts) VALUES (?, ?)", (clean, time.time()))
-        conn.commit(); conn.close()
-
-
 # ================= 3. SIDEBAR =================
 with st.sidebar:
     logo_file = "logo.gif" if os.path.exists("logo.gif") else "logo.png" if os.path.exists("logo.png") else None
@@ -1281,10 +1252,10 @@ with st.sidebar:
 in_kz, session_name = get_session_info()
 now_utc = datetime.now(timezone.utc).strftime("%H:%M UTC")
 
-tab_dash, tab_cot, tab_sent, tab_ind, tab_fx, tab_news, tab_cal, tab_chat = st.tabs([
+tab_dash, tab_cot, tab_sent, tab_ind, tab_fx, tab_news, tab_cal = st.tabs([
     "  📊 DASHBOARD  ", "  📊 COT DATA  ", "  📈 SENTIMENT  ",
     "  🏙️ INDICES  ", "  💱 CURRENCY MATRIX  ", "  📰 LIVE NEWS  ",
-    "  📅 CALENDAR  ", "  💬 COMMUNITY  "
+    "  📅 CALENDAR  "
 ])
 
 
@@ -1747,49 +1718,20 @@ with tab_cal:
         st.iframe('<iframe src="https://www.tradingview-widget.com/embed-widget/events/?theme=dark&importance=high" height="800" width="100%"></iframe>', height=820)
 
 
-    # ================= TAB 8: COMMUNITY CHAT =================
-with tab_chat:
-    if _pro_only_tab('💬 TRADERS LOUNGE'):
-        pass
-    else:
-        st.title("💬 TRADERS LOUNGE")
-        st.write("Share setups, ideas, and market news with the AlphaEdge community.")
-        col_info, col_btn = st.columns([3, 1])
-        with col_info:
-            st.info("🔄 **Note:** Click refresh to see the latest messages from other traders.")
-        with col_btn:
-            if st.button("🔄 REFRESH CHAT", width="stretch"):
-                st.rerun()
-        st.markdown("---")
-        chat_history   = load_chat()
-        chat_container = st.container(height=500)
-        with chat_container:
-            if not chat_history:
-                st.info("Welcome to the AlphaEdge Traders Lounge. Be the first to drop a setup!")
-            else:
-                for msg in chat_history:
-                    with st.chat_message("user"):
-                        ts = datetime.fromtimestamp(msg['ts']).strftime("%H:%M")
-                        st.markdown(f"**Anonymous Trader** · *{ts}*")
-                        st.write(msg['text'])
-        if prompt := st.chat_input("Drop a trading idea or setup..."):
-            save_message(prompt)
-            st.rerun()
+# ================= FIXED FOOTER =================
+_footer_url = (
+    "https://www.tradingview-widget.com/embed-widget/ticker-tape/?theme=dark"
+    "#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3ASPXUSD%22%2C%22title%22%3A%22S%26P%20500%22%7D"
+    "%2C%7B%22proName%22%3A%22FOREXCOM%3ANSXUSD%22%2C%22title%22%3A%22Nasdaq%20100%22%7D"
+    "%2C%7B%22proName%22%3A%22FX_IDC%3AEURUSD%22%2C%22title%22%3A%22EUR%2FUSD%22%7D"
+    "%2C%7B%22proName%22%3A%22OANDA%3AXAUUSD%22%2C%22title%22%3A%22GOLD%22%7D%5D"
+    "%2C%22showSymbolLogo%22%3Atrue%2C%22colorTheme%22%3A%22dark%22"
+    "%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22locale%22%3A%22en%22%7D"
+)
+st.markdown(
+    f'<div class="ticker-footer"><iframe src="{_footer_url}" width="100%" height="40" frameborder="0" scrolling="no" style="margin-top:-10px;"></iframe></div>',
+    unsafe_allow_html=True
+)
 
-
-    # ================= FIXED FOOTER =================
-    _footer_url = (
-        "https://www.tradingview-widget.com/embed-widget/ticker-tape/?theme=dark"
-        "#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3ASPXUSD%22%2C%22title%22%3A%22S%26P%20500%22%7D"
-        "%2C%7B%22proName%22%3A%22FOREXCOM%3ANSXUSD%22%2C%22title%22%3A%22Nasdaq%20100%22%7D"
-        "%2C%7B%22proName%22%3A%22FX_IDC%3AEURUSD%22%2C%22title%22%3A%22EUR%2FUSD%22%7D"
-        "%2C%7B%22proName%22%3A%22OANDA%3AXAUUSD%22%2C%22title%22%3A%22GOLD%22%7D%5D"
-        "%2C%22showSymbolLogo%22%3Atrue%2C%22colorTheme%22%3A%22dark%22"
-        "%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22locale%22%3A%22en%22%7D"
-    )
-    st.markdown(
-        f'<div class="ticker-footer"><iframe src="{_footer_url}" width="100%" height="40" frameborder="0" scrolling="no" style="margin-top:-10px;"></iframe></div>',
-        unsafe_allow_html=True
-    )
 
 render_disclaimer()
