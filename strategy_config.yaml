@@ -4,7 +4,7 @@
 # Pip Builder. Logic is a port of Moon Wolf's a.py: Daily+4H swing trend, 1H/4H
 # supply & demand zones, 15m double top/bottom or engulfing confirmation,
 # SL = extreme ± 0.3×ATR, TP1 = max(1R, 10 pips), TP2 = opposite zone, R:R ≥ 1.5.
-# Scans run on the `schedule` below (every 15 min at :13/:28/:43/:58, Mon–Fri 05:58–18:58 SAST);
+# Scans run on the `schedule` below (every 15 min at :02/:17/:32/:47, Mon–Fri 06:02–18:47 SAST);
 # TP/SL outcome tracking keeps running every ~5 min.
 # Reloaded every monitor loop. Moon Wolf notes recent results are MIXED.
 # ════════════════════════════════════════════════════════════════════════════
@@ -45,14 +45,14 @@ symbols:
      quote: {source: yf, ticker: "^DJI", label: "US30 cash (^DJI)"}}
 
 # Moon Wolf scan schedule (Africa/Johannesburg). The 24/7 worker checks every loop and
-# runs ONE scan per slot, from HH:58 until HH+1:20 (catch-up if a loop was late).
+# runs ONE scan per slot, 2 min after each 15m close (:02/:17/:32/:47), up to 10 min late.
 schedule:
   enabled: true
   timezone: "Africa/Johannesburg"
   weekdays_only: true
-  minutes: [13, 28, 43, 58]   # every 15 min (Moon Wolf's own :58 + 3 in between)
-  first: "05:58"             # first slot (SAST)
-  last: "18:58"              # last slot (SAST)
+  minutes: [2, 17, 32, 47]   # 2 min after each 15m candle close (:00/:15/:30/:45)
+  first: "06:02"             # first slot (SAST)
+  last: "18:47"              # last slot (SAST)
   grace_minutes: 10          # a missed slot can still run up to 10 min late (fits a 15-min slot)
 
 risk:

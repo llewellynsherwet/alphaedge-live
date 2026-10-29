@@ -131,7 +131,7 @@ def slot_key(start) -> str:
 
 
 def scan_slot(now: pd.Timestamp, cfg: dict, state: dict | None = None) -> str | None:
-    """Moon Wolf schedule: return the slot key (e.g. '2026-10-29T09:58+Africa/Johannesburg')
+    """Moon Wolf schedule: return the slot key (e.g. '2026-10-29T09:02+Africa/Johannesburg')
     when a scan is due now (slot started < grace minutes ago) and has not run yet, else None.
     With no `schedule` block (or disabled) every loop scans, as before."""
     sch = (cfg or {}).get("schedule") or {}

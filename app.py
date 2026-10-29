@@ -962,7 +962,7 @@ def _monitor_loop():
     (state["trades"]) is carried across days."""
     import pandas as pd
     # Boot: Render's free disk loses monitor_state.json on restart. Re-derive the
-    # zone dedupe book by replaying the last 24h of :58 slots (deterministic, no
+    # zone dedupe book by replaying the last 24h of schedule slots (deterministic, no
     # new secret); past slots are marked done so they are never rescanned.
     try:
         from strategy import zone_book as _zone_book
@@ -1041,7 +1041,7 @@ def _monitor_loop():
                     state["summary_sent"] = True
                     _write_state_raw(state)
 
-            # Signal scan — Moon Wolf schedule: once per slot (every 15 min :13/:28/:43/:58, Mon–Fri 05:58–18:58 SAST)
+            # Signal scan — Moon Wolf schedule: once per slot (every 15 min :02/:17/:32/:47, Mon–Fri 06:02–18:47 SAST)
             _slot = _engine_scan_slot(now, cfg, state) if in_kz else None
             if in_kz and _slot:
                 print(f"[monitor] scan slot {_slot}", flush=True)
@@ -1102,7 +1102,7 @@ def _monitor_loop():
             print(f"[monitor] loop error: {e!r}", flush=True)
         # 5-minute cadence measured from loop start (scan time no longer adds drift)
         _wait = max(30.0, 300.0 - (time.time() - loop_t0))
-        try:   # wake right at the next :58 slot instead of up to 5 min late
+        try:   # wake right at the next slot instead of up to 5 min late
             _to_slot = _engine_secs_to_slot(pd.Timestamp.now(tz="UTC"), _load_strategy_config())
             if _to_slot is not None and _to_slot < _wait:
                 _wait = max(5.0, _to_slot)
@@ -1139,7 +1139,7 @@ if os.environ.get("MONITOR_MODE", "app") != "off" and not os.path.exists(_STARTU
         f"⏰ {datetime.now(timezone.utc).strftime('%H:%M UTC')}\n"
         f"✅ 🐺 Moon Wolf signals loaded (15m scan)\n"
         f"✅ Watchlist: {_nsym} symbols · daily cap {_cap} · max 2 open\n"
-        f"✅ Scans: Mon–Fri every 15 min (:13/:28/:43/:58), 05:58–18:58 SAST\n"
+        f"✅ Scans: Mon–Fri every 15 min (:02/:17/:32/:47), 06:02–18:47 SAST\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"<i>Trade alerts only — no scan spam</i>"
     )
