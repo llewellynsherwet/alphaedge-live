@@ -962,6 +962,18 @@ def _monitor_loop():
     and never re-fires yesterday's alerts. The trade-outcome book
     (state["trades"]) is carried across days."""
     import pandas as pd
+    # Boot: Render's free disk loses monitor_state.json on restart. Re-derive the
+    # zone dedupe book by replaying the last 24h of :58 slots (deterministic, no
+    # new secret); past slots are marked done so they are never rescanned.
+    try:
+        from strategy import zone_book as _zone_book
+        _bst = _read_state()
+        _rep = _zone_book.rebuild(_bst, _load_strategy_config(), pd.Timestamp.now(tz="UTC"))
+        _write_state_raw(_bst)
+        print(f"[monitor] boot dedupe rebuild: {_rep['slots']} slots, {_rep['zones']} zones blocked, "
+              f"{len(_rep['errors'])} errors", flush=True)
+    except Exception as e:
+        print(f"[monitor] boot dedupe rebuild failed: {e!r}", flush=True)
     while True:
         loop_t0 = time.time()
         try:

@@ -41,6 +41,9 @@ class Candidate:
 
     @property
     def zone_key(self) -> str:
+        zid = (self.meta or {}).get("zone_id")
+        if zid:
+            return zid
         bucket = max(self.atr * 0.5, abs(self.entry) * 1e-6, 1e-9)
         return f"{self.symbol}|{self.side}|{self.setup}|{int(round(self.zone / bucket))}"
 

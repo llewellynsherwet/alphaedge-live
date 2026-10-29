@@ -58,6 +58,7 @@ schedule:
 risk:
   min_rr: 1.5
   tp_rr: 1.5
+  zone_hold_hours: 24         # same symbol+side+zone blocked until its trade closes (SL/TP2) or this many hours
   daily_max_signals: 8        # ceiling
   per_symbol_max: 2
   max_open_trades: 2          # Moon Wolf: at most two signals open at once

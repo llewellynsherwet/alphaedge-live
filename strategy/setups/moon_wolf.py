@@ -167,6 +167,13 @@ def analyse(symbol: str, frames: dict, cfg: dict, scfg: dict, now, sym_cfg: dict
                 trades=[c for c in conf if c["status"] == "CONFIRMED" and c["with_bias"]])
 
 
+def zone_id(symbol, side, lo, hi, pip):
+    """Deterministic zone identity: symbol|side|lo|hi rounded to 5 pips, so the same
+    1H zone keeps the same id hour-to-hour (and across restarts)."""
+    q = 5 * float(pip or 0.0001)
+    return f"{symbol}|{side}|{round(lo / q) * q:.6g}|{round(hi / q) * q:.6g}"
+
+
 def evaluate(symbol, frames, cfg, scfg, now, priority=99):
     s = dict(DEFAULTS); s.update(scfg or {})
     sym_cfg = next((x for x in cfg.get("symbols", []) if x.get("name") == symbol), {}) or {}
@@ -212,5 +219,6 @@ def evaluate(symbol, frames, cfg, scfg, now, priority=99):
         notes=[f"🐺 {p['kind']} at {z['tf']} {'demand' if sg == 1 else 'supply'} — risk {t['risk']:.1f} {unit}"],
         meta={"tps_fixed": [float(t["tp1"]), float(t["tp2"])], "ladder": {"split": [1, 1], "be_after_tp1": False},
               "pip": pip, "pip_label": unit, "lot": lot, "entry_mode": "limit", "tp_on_reprice": "keep_target",
-              "min_rr": float(s["min_rr"]), "pattern": p["kind"], "sl_pips": round(t["risk"], 1)},
+              "min_rr": float(s["min_rr"]), "pattern": p["kind"], "sl_pips": round(t["risk"], 1),
+              "zone_id": zone_id(symbol, side, z["lo"], z["hi"], pip)},
     )

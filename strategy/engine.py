@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from . import zone_book as _zb
 from . import data as mdata
 from .checklist import score as score_checklist  # noqa: F401  (re-export useful)
 from .common import Candidate, fmt_price, in_window, minutes_of, parse_hhmm, hhmm_to_minutes
@@ -161,6 +162,9 @@ def load_state(path: str | os.PathLike | None = None, now: pd.Timestamp | None =
             fresh = _empty_day(day)
             if isinstance(st.get("trades"), dict):
                 fresh["trades"] = st["trades"]
+            for _k in ("zone_book", "scan_slots_done"):   # not daily
+                if st.get(_k):
+                    fresh[_k] = st[_k]
             return fresh
         st.setdefault("emitted", [])
         st.setdefault("symbol_last_ts", {})
@@ -240,7 +244,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
 
     last_trade = _parse_ts(state.get("last_trade_ts"))
     sym_last = {k: _parse_ts(v) for k, v in state.get("symbol_last_ts", {}).items()}
-    zone_seen = {e["zone_key"] for e in emitted}
+    # zone_book-managed zones (Moon Wolf) are released on close/24h, not by the daily list
+    zone_seen = {e["zone_key"] for e in emitted if not e.get("zb")}
+    hold_h = float(risk.get("zone_hold_hours", _zb.HOLD_HOURS))
     setup_counts = {}
     for e in emitted:
         setup_counts[e.get("setup")] = setup_counts.get(e.get("setup"), 0) + 1
@@ -260,6 +266,9 @@ def gate_candidates(cands: list[Candidate], state: dict, cfg: dict, now: pd.Time
             continue
         if c.zone_key in zone_seen:
             reasons.append(f"{tag}: dedupe zone already emitted")
+            continue
+        if _zb.is_blocked(state, c.zone_key, now, hold_h):
+            reasons.append(f"{tag}: zone {c.zone_key} signalled <{hold_h:g}h ago and trade still open")
             continue
         if max_open is not None and open_now + len(accepted) >= int(max_open):
             reasons.append(f"{tag}: {open_now + len(accepted)} trades already open (max {max_open})")
@@ -310,6 +319,7 @@ def record_emits(state: dict, accepted: list[Candidate], now: pd.Timestamp) -> d
     for c in accepted:
         emitted.append({
             "zone_key": c.zone_key,
+            "zb": bool((c.meta or {}).get("zone_id")),
             "symbol": c.symbol,
             "side": c.side,
             "setup": c.setup,
@@ -318,6 +328,7 @@ def record_emits(state: dict, accepted: list[Candidate], now: pd.Timestamp) -> d
             "score": c.score, "rr": round(c.rr, 2),
         })
         sym_last[c.symbol] = now.isoformat()
+        _zb.add(st, c, now)
     st["emitted"] = emitted
     st["symbol_last_ts"] = sym_last
     if accepted:
@@ -378,6 +389,7 @@ def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
     if now.tzinfo is None:
         now = now.tz_localize("UTC")
     state = state if state is not None else load_state(now=now)
+    _zb.prune(state, now, float((cfg.get("risk") or {}).get("zone_hold_hours", _zb.HOLD_HOURS)))
     in_sess, sess_name = session_info(now, cfg)
 
     result = {
@@ -398,6 +410,8 @@ def scan_once(now: pd.Timestamp | None = None, cfg: dict | None = None,
             result["data_errors"].append((sym["name"], interval, reason))
         if not frames:
             continue
+        if frames.get("15m") is not None:
+            _zb.update_closed(state, sym["name"], frames["15m"], now)
         cands = evaluate_symbol(sym, frames, cfg, now)
         if cands and cfg.get("execution", {}).get("enabled", True) and snapshot_fn is not False:
             snap = (snapshot_fn or pricing.snapshot)(sym, cfg, now)
